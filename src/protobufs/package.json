@@ -1,0 +1,7 @@
+{
+  "name": "@repo/protobufs",
+  "scripts": {
+    "generate-protobuf": "protoc -I=. --go_out=. tigerbeetle-service.proto",
+    "install": "go mod tidy"
+  }
+}

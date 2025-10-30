@@ -1,0 +1,10 @@
+{
+  "name": "@repo/tigerbeetle-service",
+  "scripts": {
+    "dev": "go run src/main.go",
+    "install": "go mod tidy"
+  },
+  "dependencies": {
+    "@repo/protobufs": "workspace:*"
+  }
+}

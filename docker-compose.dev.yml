@@ -1,0 +1,9 @@
+services:
+  tigerbeetle_0:
+    image: ghcr.io/tigerbeetle/tigerbeetle
+    command: "start --addresses=0.0.0.0:3001 /data/0_0.tigerbeetle"
+    network_mode: host
+    volumes:
+      - ./docker-data/tigerbeetle:/data
+    security_opt:
+      - "seccomp=unconfined"

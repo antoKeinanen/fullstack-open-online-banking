@@ -1,0 +1,17 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  src/protobufs: {}
+
+  src/services/tigerbeetle-service:
+    dependencies:
+      '@repo/protobufs':
+        specifier: workspace:*
+        version: link:../../protobufs

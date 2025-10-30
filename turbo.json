@@ -1,0 +1,19 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "generate-protobuf": {
+      "outputs": [
+        "generated/**"
+      ],
+      "inputs": [
+        "**/*.proto"
+      ]
+    },
+    "dev": {
+      "dependsOn": [
+        "^generate-protobuf"
+      ]
+    }
+  }
+}
