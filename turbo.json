@@ -4,7 +4,7 @@
   "tasks": {
     "generate-protobuf": {
       "outputs": [
-        "*.go"
+        "generated/**"
       ],
       "inputs": [
         "**/*.proto"
@@ -13,7 +13,9 @@
     "dev": {
       "dependsOn": [
         "^generate-protobuf"
-      ]
+      ],
+      "env": ["TB_ADDRESS"],
+      "cache": false
     }
   }
 }

@@ -3,25 +3,23 @@ package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
 service TigerbeetleService {
-  rpc CreateAccount(Account) returns (Account) {}
-  rpc LookupAccount(Uint128) returns (Account) {}
+  rpc CreateAccount(Account) returns (AccountId) {}
+  rpc LookupAccount(AccountId) returns (Account) {}
 }
 
-message Uint128 {
-  uint64 upper = 1;
-  uint64 lower = 2;
-}
+message AccountId { string AccountId = 1; }
 
 message Account {
-  Uint128 accountId = 1;
-  Uint128 debitsPending = 2;
-  Uint128 debitsPosted = 3;
-  Uint128 creditsPending = 4;
-  Uint128 creditsPosted = 5;
+  string accountId = 1;
+  string debitsPending = 2;
+  string debitsPosted = 3;
+  string creditsPending = 4;
+  string creditsPosted = 5;
   uint32 code = 6;
-  uint32 flags = 8;
   uint64 timestamp = 7;
-  optional Uint128 userData128 = 9;
-  optional int64 userData64 = 10;
-  optional int32 userData32 = 11;
+  uint32 flags = 8;
+  uint32 ledger = 9;
+  optional string userData128 = 10;
+  optional uint64 userData64 = 11;
+  optional uint32 userData32 = 12;
 }

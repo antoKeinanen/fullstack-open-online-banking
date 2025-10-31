@@ -2,7 +2,10 @@ module tigerbeetle-service
 
 go 1.24.9
 
-require google.golang.org/grpc v1.76.0
+require (
+	github.com/tigerbeetle/tigerbeetle-go v0.16.62
+	google.golang.org/grpc v1.76.0
+)
 
 require (
 	golang.org/x/net v0.42.0 // indirect

@@ -27,8 +27,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TigerbeetleServiceClient interface {
-	CreateAccount(ctx context.Context, in *Account, opts ...grpc.CallOption) (*Account, error)
-	LookupAccount(ctx context.Context, in *Uint128, opts ...grpc.CallOption) (*Account, error)
+	CreateAccount(ctx context.Context, in *Account, opts ...grpc.CallOption) (*AccountId, error)
+	LookupAccount(ctx context.Context, in *AccountId, opts ...grpc.CallOption) (*Account, error)
 }
 
 type tigerbeetleServiceClient struct {
@@ -39,9 +39,9 @@ func NewTigerbeetleServiceClient(cc grpc.ClientConnInterface) TigerbeetleService
 	return &tigerbeetleServiceClient{cc}
 }
 
-func (c *tigerbeetleServiceClient) CreateAccount(ctx context.Context, in *Account, opts ...grpc.CallOption) (*Account, error) {
+func (c *tigerbeetleServiceClient) CreateAccount(ctx context.Context, in *Account, opts ...grpc.CallOption) (*AccountId, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Account)
+	out := new(AccountId)
 	err := c.cc.Invoke(ctx, TigerbeetleService_CreateAccount_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (c *tigerbeetleServiceClient) CreateAccount(ctx context.Context, in *Accoun
 	return out, nil
 }
 
-func (c *tigerbeetleServiceClient) LookupAccount(ctx context.Context, in *Uint128, opts ...grpc.CallOption) (*Account, error) {
+func (c *tigerbeetleServiceClient) LookupAccount(ctx context.Context, in *AccountId, opts ...grpc.CallOption) (*Account, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Account)
 	err := c.cc.Invoke(ctx, TigerbeetleService_LookupAccount_FullMethodName, in, out, cOpts...)
@@ -63,8 +63,8 @@ func (c *tigerbeetleServiceClient) LookupAccount(ctx context.Context, in *Uint12
 // All implementations must embed UnimplementedTigerbeetleServiceServer
 // for forward compatibility
 type TigerbeetleServiceServer interface {
-	CreateAccount(context.Context, *Account) (*Account, error)
-	LookupAccount(context.Context, *Uint128) (*Account, error)
+	CreateAccount(context.Context, *Account) (*AccountId, error)
+	LookupAccount(context.Context, *AccountId) (*Account, error)
 	mustEmbedUnimplementedTigerbeetleServiceServer()
 }
 
@@ -72,10 +72,10 @@ type TigerbeetleServiceServer interface {
 type UnimplementedTigerbeetleServiceServer struct {
 }
 
-func (UnimplementedTigerbeetleServiceServer) CreateAccount(context.Context, *Account) (*Account, error) {
+func (UnimplementedTigerbeetleServiceServer) CreateAccount(context.Context, *Account) (*AccountId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
 }
-func (UnimplementedTigerbeetleServiceServer) LookupAccount(context.Context, *Uint128) (*Account, error) {
+func (UnimplementedTigerbeetleServiceServer) LookupAccount(context.Context, *AccountId) (*Account, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LookupAccount not implemented")
 }
 func (UnimplementedTigerbeetleServiceServer) mustEmbedUnimplementedTigerbeetleServiceServer() {}
@@ -110,7 +110,7 @@ func _TigerbeetleService_CreateAccount_Handler(srv interface{}, ctx context.Cont
 }
 
 func _TigerbeetleService_LookupAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Uint128)
+	in := new(AccountId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func _TigerbeetleService_LookupAccount_Handler(srv interface{}, ctx context.Cont
 		FullMethod: TigerbeetleService_LookupAccount_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigerbeetleServiceServer).LookupAccount(ctx, req.(*Uint128))
+		return srv.(TigerbeetleServiceServer).LookupAccount(ctx, req.(*AccountId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

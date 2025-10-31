@@ -1,15 +1,18 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	pb "protobufs/generated/go"
 
 	"google.golang.org/grpc"
+
+	tb "github.com/tigerbeetle/tigerbeetle-go"
+	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
 
 var (
@@ -18,39 +21,22 @@ var (
 
 type tigerbeetleServiceServer struct {
 	pb.UnimplementedTigerbeetleServiceServer
-}
-
-func CreateEmptyInt128(upper uint64, lower uint64) pb.Uint128 {
-	return pb.Uint128{
-		Upper: upper,
-		Lower: lower,
-	}
-}
-
-func (s *tigerbeetleServiceServer) LookupAccount(_ context.Context, account_id *pb.Uint128) (*pb.Account, error) {
-	one := CreateEmptyInt128(0, 1)
-	return &pb.Account{
-		AccountId:      account_id,
-		DebitsPending:  &one,
-		DebitsPosted:   &one,
-		CreditsPending: &one,
-		CreditsPosted:  &one,
-	}, nil
-}
-
-func (s *tigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Account) (*pb.Account, error) {
-	one := CreateEmptyInt128(0, 1)
-	return &pb.Account{
-		AccountId:      &one,
-		DebitsPending:  &one,
-		DebitsPosted:   &one,
-		CreditsPending: &one,
-		CreditsPosted:  &one,
-	}, nil
+	tbClient tb.Client
 }
 
 func newServer() *tigerbeetleServiceServer {
 	s := &tigerbeetleServiceServer{}
+
+	tbAddress := os.Getenv("TB_ADDRESS")
+	if len(tbAddress) == 0 {
+		tbAddress = "3001"
+	}
+	client, err := tb.NewClient(tbt.ToUint128(0), []string{tbAddress})
+	if err != nil {
+		log.Panicf("Error creating client: %s", err)
+	}
+	s.tbClient = client
+
 	return s
 }
 
@@ -62,6 +48,9 @@ func main() {
 	}
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterTigerbeetleServiceServer(grpcServer, newServer())
+	server := newServer()
+	defer server.tbClient.Close()
+
+	pb.RegisterTigerbeetleServiceServer(grpcServer, server)
 	grpcServer.Serve(lis)
 }
