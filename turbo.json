@@ -4,7 +4,7 @@
   "tasks": {
     "generate-protobuf": {
       "outputs": [
-        "generated/**"
+        "*.go"
       ],
       "inputs": [
         "**/*.proto"

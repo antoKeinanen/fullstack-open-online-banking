@@ -2,26 +2,26 @@ syntax = "proto3";
 package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
-service BeetleService {
-  rpc create_account(Account) returns (Account) {}
-  rpc lookup_account(Bit128Value) returns (Account) {}
+service TigerbeetleService {
+  rpc CreateAccount(Account) returns (Account) {}
+  rpc LookupAccount(Uint128) returns (Account) {}
 }
 
-message Bit128Value {
+message Uint128 {
   uint64 upper = 1;
   uint64 lower = 2;
 }
 
 message Account {
-  Bit128Value accountId = 1;
-  Bit128Value debitsPending = 2;
-  Bit128Value debitsPosted = 3;
-  Bit128Value creditsPending = 4;
-  Bit128Value creditsPosted = 5;
+  Uint128 accountId = 1;
+  Uint128 debitsPending = 2;
+  Uint128 debitsPosted = 3;
+  Uint128 creditsPending = 4;
+  Uint128 creditsPosted = 5;
   uint32 code = 6;
   uint32 flags = 8;
   uint64 timestamp = 7;
-  optional Bit128Value userData128 = 9;
+  optional Uint128 userData128 = 9;
   optional int64 userData64 = 10;
   optional int32 userData32 = 11;
 }
