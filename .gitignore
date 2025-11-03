@@ -1,3 +1,4 @@
 docker-data/
 .turbo
 node_modules
+generated/

@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 
-	pb "protobufs/generated/go"
+	pb "protobufs/generated/go/tigerbeetle"
 
 	"google.golang.org/grpc"
 
@@ -19,13 +19,13 @@ var (
 	port = flag.Int("port", 50051, "The server port")
 )
 
-type tigerbeetleServiceServer struct {
+type TigerbeetleServiceServer struct {
 	pb.UnimplementedTigerbeetleServiceServer
 	tbClient tb.Client
 }
 
-func newServer() *tigerbeetleServiceServer {
-	s := &tigerbeetleServiceServer{}
+func newServer() *TigerbeetleServiceServer {
+	s := &TigerbeetleServiceServer{}
 
 	tbAddress := os.Getenv("TB_ADDRESS")
 	if len(tbAddress) == 0 {

@@ -1,0 +1,47 @@
+syntax = "proto3";
+package service.user;
+option go_package = "generated/user-protobuf";
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (User);
+  rpc RefreshToken(Session) returns (Session);
+  rpc RequestAuthentication(RequestAuthenticationRequest) returns (Empty);
+  rpc AuthenticateWithOTP(OTPAuthenticationRequest) returns (Session);
+}
+
+message Empty {}
+
+message Result {
+  bool success = 1;
+  optional string error = 2;
+}
+
+message RequestAuthenticationRequest { string phoneNumber = 1; }
+
+message RefreshTokenRequest { string refreshToken = 1; }
+
+message OTPAuthenticationRequest {
+  string phoneNumber = 1;
+  string code = 2;
+}
+
+message CreateUserRequest {
+  string phoneNumber = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string address = 4;
+}
+
+message User {
+  string userId = 1;
+  string phoneNumber = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string address = 5;
+  uint64 createdAt = 6;
+}
+
+message Session {
+  string accessToken = 1;
+  string refreshToken = 2;
+}

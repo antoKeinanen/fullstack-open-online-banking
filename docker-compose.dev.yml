@@ -7,3 +7,12 @@ services:
       - ./docker-data/tigerbeetle:/data
     security_opt:
       - "seccomp=unconfined"
+  cockroach_0:
+    image: cockroachdb/cockroach:latest-v25.3
+    network_mode: host
+    volumes:
+      - ./docker-data/cockroach:/cockroach/cockroach-data
+    environment:
+    - COCKROACH_DATABASE=banking
+    - COCKROACH_USER=admin_development
+    command: start-single-node --http-addr=0.0.0.0:8080 --insecure

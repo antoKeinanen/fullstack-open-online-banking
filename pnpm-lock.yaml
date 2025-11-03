@@ -15,3 +15,9 @@ importers:
       '@repo/protobufs':
         specifier: workspace:*
         version: link:../../protobufs
+
+  src/services/user-service:
+    dependencies:
+      '@repo/protobufs':
+        specifier: workspace:*
+        version: link:../../protobufs

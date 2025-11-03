@@ -5,12 +5,12 @@ import (
 	"errors"
 	"log"
 
-	pb "protobufs/generated/go"
+	pb "protobufs/generated/go/tigerbeetle"
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
 
-func (s *tigerbeetleServiceServer) LookupAccount(_ context.Context, accountId *pb.AccountId) (*pb.Account, error) {
+func (s *TigerbeetleServiceServer) LookupAccount(_ context.Context, accountId *pb.AccountId) (*pb.Account, error) {
 	accountIdUint128, err := tbt.HexStringToUint128(accountId.AccountId)
 	if err != nil {
 		log.Printf("Failed to lookup account: %v", err)
@@ -32,7 +32,7 @@ func (s *tigerbeetleServiceServer) LookupAccount(_ context.Context, accountId *p
 	return ToPbAccount(accounts[0]), nil
 }
 
-func (s *tigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Account) (*pb.AccountId, error) {
+func (s *TigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Account) (*pb.AccountId, error) {
 	accountId := tbt.ID()
 
 	account := tbt.Account{

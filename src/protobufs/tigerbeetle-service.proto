@@ -3,8 +3,8 @@ package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
 service TigerbeetleService {
-  rpc CreateAccount(Account) returns (AccountId) {}
-  rpc LookupAccount(AccountId) returns (Account) {}
+  rpc CreateAccount(Account) returns (AccountId);
+  rpc LookupAccount(AccountId) returns (Account);
 }
 
 message AccountId { string AccountId = 1; }

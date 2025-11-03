@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	pb "protobufs/generated/go"
+	pb "protobufs/generated/go/tigerbeetle"
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )

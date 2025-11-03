@@ -2,4 +2,6 @@ go 1.24.9
 
 use src/services/tigerbeetle-service/
 
+use src/services/user-service/
+
 use src/protobufs
