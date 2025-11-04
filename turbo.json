@@ -11,10 +11,17 @@
       ]
     },
     "dev": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env"
+      ],
       "dependsOn": [
         "^generate-protobuf"
       ],
-      "env": ["TB_ADDRESS"],
+      "env": [
+        "TIGERBEETLE_SERVICE_PORT",
+        "TIGERBEETLE_ADDRESS"
+      ],
       "cache": false
     }
   }

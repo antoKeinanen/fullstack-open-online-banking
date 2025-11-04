@@ -2,10 +2,32 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	pb "protobufs/generated/go/tigerbeetle"
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
+
+type Configuration struct {
+	TigerbeetleServicePort string
+	TigerbeetleAddress     string
+}
+
+func GetEnv(envName string) string {
+	variable := os.Getenv(envName)
+	if len(variable) == 0 {
+		log.Fatalf("Missing env variable %s", envName)
+	}
+	return variable
+}
+
+func ParseConfiguration() *Configuration {
+	return &Configuration{
+		TigerbeetleServicePort: GetEnv("TIGERBEETLE_SERVICE_PORT"),
+		TigerbeetleAddress:     GetEnv("TIGERBEETLE_ADDRESS"),
+	}
+}
 
 func Uint128ToHexString(number tbt.Uint128) string {
 	bytes := number.Bytes()

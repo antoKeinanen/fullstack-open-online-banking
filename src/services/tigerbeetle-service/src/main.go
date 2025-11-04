@@ -1,11 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
-	"os"
 
 	pb "protobufs/generated/go/tigerbeetle"
 
@@ -15,23 +13,15 @@ import (
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
 
-var (
-	port = flag.Int("port", 50051, "The server port")
-)
-
 type TigerbeetleServiceServer struct {
 	pb.UnimplementedTigerbeetleServiceServer
 	tbClient tb.Client
 }
 
-func newServer() *TigerbeetleServiceServer {
+func newServer(configuration *Configuration) *TigerbeetleServiceServer {
 	s := &TigerbeetleServiceServer{}
 
-	tbAddress := os.Getenv("TB_ADDRESS")
-	if len(tbAddress) == 0 {
-		tbAddress = "3001"
-	}
-	client, err := tb.NewClient(tbt.ToUint128(0), []string{tbAddress})
+	client, err := tb.NewClient(tbt.ToUint128(0), []string{configuration.TigerbeetleAddress})
 	if err != nil {
 		log.Panicf("Error creating client: %s", err)
 	}
@@ -41,14 +31,15 @@ func newServer() *TigerbeetleServiceServer {
 }
 
 func main() {
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	configuration := ParseConfiguration()
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", configuration.TigerbeetleServicePort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	server := newServer()
+	server := newServer(configuration)
 	defer server.tbClient.Close()
 
 	pb.RegisterTigerbeetleServiceServer(grpcServer, server)

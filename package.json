@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.15.0",
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "dotenv -- turbo run dev",
     "generate-protobuf": "turbo run generate-protobuf && go work sync"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }
