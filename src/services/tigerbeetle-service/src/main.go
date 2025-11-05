@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "protobufs/generated/go/tigerbeetle"
+	pb "protobufs/gen/go/tigerbeetle-service"
 
 	"google.golang.org/grpc"
 

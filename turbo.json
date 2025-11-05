@@ -8,7 +8,8 @@
       ],
       "inputs": [
         "**/*.proto"
-      ]
+      ],
+      "cache": false
     },
     "dev": {
       "inputs": [

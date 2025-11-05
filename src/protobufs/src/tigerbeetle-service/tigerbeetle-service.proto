@@ -2,6 +2,7 @@ syntax = "proto3";
 package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
+
 service TigerbeetleService {
   rpc CreateAccount(Account) returns (AccountId);
   rpc LookupAccount(AccountId) returns (Account);

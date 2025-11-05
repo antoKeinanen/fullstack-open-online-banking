@@ -6,9 +6,10 @@
     }
   },
   "scripts": {
-    "generate-protobuf": "mkdir -p ./generated/go/{tigerbeetle,user} && pnpm run \"/generate-protobuf:.*/\"",
-    "generate-protobuf:tigerbeetle": "protoc --go_out=generated/go/tigerbeetle --go_opt=paths=source_relative --go-grpc_out=generated/go/tigerbeetle --go-grpc_opt=paths=source_relative tigerbeetle-service.proto",
-    "generate-protobuf:user": "protoc --go_out=generated/go/user --go_opt=paths=source_relative --go-grpc_out=generated/go/user --go-grpc_opt=paths=source_relative user-service.proto",
+    "generate-protobuf": "buf generate",
     "install": "go mod tidy"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.59.0"
   }
 }

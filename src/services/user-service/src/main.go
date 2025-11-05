@@ -11,7 +11,7 @@ import (
 	"math/big"
 	"net"
 	"os"
-	pb "protobufs/generated/go/user"
+	pb "protobufs/gen/go/user-service"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"

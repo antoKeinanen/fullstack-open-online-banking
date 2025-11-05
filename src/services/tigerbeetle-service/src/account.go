@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	pb "protobufs/generated/go/tigerbeetle"
+	pb "protobufs/gen/go/tigerbeetle-service"
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
