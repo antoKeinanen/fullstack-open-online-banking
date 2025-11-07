@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
+	"database/sql"
 	"errors"
 	"flag"
 	"fmt"
@@ -32,11 +33,12 @@ type UserServiceServer struct {
 }
 
 type User struct {
-	UserId      string `db:"user_id"`
-	PhoneNumber string `db:"phone_number"`
-	FirstName   string `db:"first_name"`
-	LastName    string `db:"last_name"`
-	Address     string `db:"address"`
+	UserId      string    `db:"user_id"`
+	PhoneNumber string    `db:"phone_number"`
+	FirstName   string    `db:"first_name"`
+	LastName    string    `db:"last_name"`
+	Address     string    `db:"address"`
+	CreatedAt   time.Time `db:"created_at"`
 }
 
 type OTPCode struct {
@@ -50,6 +52,7 @@ func DbUserToPbUser(dbUser User) *pb.User {
 		FirstName:   dbUser.FirstName,
 		LastName:    dbUser.LastName,
 		Address:     dbUser.Address,
+		CreatedAt:   dbUser.CreatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -71,7 +74,7 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 	)
 	if err != nil {
 		log.Printf("Error: Failed to insert user to the database: %v", err)
-		return nil, errors.New("create_failure")
+		return nil, errors.New("database_insert_failed")
 	}
 
 	//TODO: also create an account in tigerbeetle and cancel on failure
@@ -107,7 +110,7 @@ func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.Req
 
 	user := User{}
 	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address
+		select user_id, phone_number, first_name, last_name, address, created_at
 		from banking.users
 		where phone_number = $1`,
 		req.PhoneNumber,
@@ -172,7 +175,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 
 	user := User{}
 	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address
+		select user_id, phone_number, first_name, last_name, address, created_at
 		from banking.users
 		where phone_number = $1`,
 		req.PhoneNumber,
@@ -258,6 +261,55 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.Session)
 	}
 
 	return &pb.Session{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+}
+
+func (s *UserServiceServer) GetUserById(_ context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
+	user := User{}
+	err := s.db.Get(&user, `
+		select user_id, phone_number, first_name, last_name, address, created_at
+		from banking.users
+		where user_id = $1`,
+		req.UserId,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("Error: User not found: %v", err)
+			return nil, errors.New("user_not_found")
+		}
+
+		log.Printf("Error: Failed to get user from the database: %v", err)
+		return nil, errors.New("database_error")
+	}
+
+	return DbUserToPbUser(user), nil
+}
+
+func (s *UserServiceServer) GetUsersPaginated(_ context.Context, req *pb.GetUsersPaginatedRequest) (*pb.GetUsersPaginatedResponse, error) {
+	rows, err := s.db.Queryx(`
+		select user_id, phone_number, first_name, last_name, address, created_at
+		from banking.users
+		order by user_id
+		offset $1
+		limit $2
+	`, req.Offset, req.Take)
+	if err != nil {
+		log.Printf("Error: Failed to get users from the database: %v", err)
+		return nil, errors.New("database_error")
+	}
+	var users []*pb.User
+	for rows.Next() {
+		user := User{}
+		if err := rows.StructScan(&user); err != nil {
+			log.Printf("Error: Failed to get users from the database: %v", err)
+			return nil, errors.New("database_error")
+		}
+		users = append(users, DbUserToPbUser(user))
+	}
+
+	return &pb.GetUsersPaginatedResponse{
+		Users: users,
+		Count: 0,
+	}, nil
 }
 
 func newServer() *UserServiceServer {
