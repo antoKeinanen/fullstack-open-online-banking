@@ -1,0 +1,16 @@
+{
+  "name": "admin-bff",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "@grpc/grpc-js": "^1.14.0",
+    "@repo/protobufs": "workspace:*",
+    "hono": "^4.10.4",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

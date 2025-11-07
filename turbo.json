@@ -4,12 +4,13 @@
   "tasks": {
     "generate-protobuf": {
       "outputs": [
-        "generated/**"
+        "gen/**"
       ],
       "inputs": [
-        "**/*.proto"
-      ],
-      "cache": false
+        "**/*.proto",
+        "buf.yaml",
+        "buf.gen.yaml"
+      ]
     },
     "dev": {
       "inputs": [

@@ -1,2 +1,6 @@
 packages:
   - src/**
+
+onlyBuiltDependencies:
+  - '@bufbuild/buf'
+  - '@nestjs/core'
