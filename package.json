@@ -4,9 +4,12 @@
   "packageManager": "pnpm@10.15.0",
   "scripts": {
     "dev": "dotenv -- turbo run dev",
-    "generate-protobuf": "turbo run generate-protobuf && go work sync"
+    "generate-protobuf": "turbo run generate-protobuf && go work sync",
+    "build": "turbo run build",
+    "install": "go work sync"
   },
   "devDependencies": {
-    "dotenv-cli": "^11.0.0"
+    "dotenv-cli": "^11.0.0",
+    "turbo": "^2.6.0"
   }
 }

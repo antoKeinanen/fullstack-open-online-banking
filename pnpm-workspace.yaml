@@ -2,5 +2,9 @@ packages:
   - src/**
 
 onlyBuiltDependencies:
-  - '@bufbuild/buf'
-  - '@nestjs/core'
+  - "@bufbuild/buf"
+  - "@nestjs/core"
+
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true

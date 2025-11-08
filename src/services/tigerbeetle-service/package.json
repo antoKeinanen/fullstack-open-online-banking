@@ -2,7 +2,7 @@
   "name": "@repo/tigerbeetle-service",
   "scripts": {
     "dev": "go run ./src/",
-    "install": "go mod tidy"
+    "build": "go build -o ./build/app ./src"
   },
   "dependencies": {
     "@repo/protobufs": "workspace:*"

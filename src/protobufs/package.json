@@ -9,7 +9,7 @@
   },
   "scripts": {
     "generate-protobuf": "buf generate",
-    "install": "go mod tidy"
+    "build": "buf generate"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.59.0",

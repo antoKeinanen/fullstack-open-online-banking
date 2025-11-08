@@ -25,6 +25,9 @@
         "TIGERBEETLE_ADDRESS"
       ],
       "cache": false
+    },
+    "build": {
+      "cache": false
     }
   }
 }

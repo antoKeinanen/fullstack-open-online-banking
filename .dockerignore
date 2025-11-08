@@ -1,0 +1,30 @@
+# Dependencies
+**/node_modules
+node_modules
+docker-data
+
+# Build output
+**/dist
+**/build
+**/.next
+**/.turbo
+**/out
+**/gen
+
+# Development
+**/.env
+**/.env.local
+**/tmp
+
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

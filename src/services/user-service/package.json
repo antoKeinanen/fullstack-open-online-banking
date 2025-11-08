@@ -2,7 +2,7 @@
   "name": "@repo/user-service",
   "scripts": {
     "dev": "go run src/main.go",
-    "install": "go mod tidy"
+    "build": "go build -o ./build/app ./src"
   },
   "dependencies": {
     "@repo/protobufs": "workspace:*"
