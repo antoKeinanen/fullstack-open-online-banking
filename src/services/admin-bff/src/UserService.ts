@@ -1,14 +1,15 @@
-import {
+import type {
   CreateUserRequest,
   GetUserByIdRequest,
   GetUsersPaginatedRequest,
   GetUsersPaginatedResponse,
   User,
-  UserServiceClient,
 } from "@repo/protobufs/user-service";
+import { UserServiceClient } from "@repo/protobufs/user-service";
 import * as grpc from "@grpc/grpc-js";
 import { promisify } from "util";
-import { Result, tryCatch } from "./try-catch";
+import type { Result } from "./try-catch";
+import { tryCatch } from "./try-catch";
 
 export class UserService {
   private client: UserServiceClient;
@@ -16,7 +17,7 @@ export class UserService {
   constructor(address: string) {
     this.client = new UserServiceClient(
       address,
-      grpc.credentials.createInsecure()
+      grpc.credentials.createInsecure(),
     );
 
     console.log("Connecting to user service grpc");
@@ -32,7 +33,7 @@ export class UserService {
   }
 
   async createUser(
-    request: CreateUserRequest
+    request: CreateUserRequest,
   ): Promise<Result<User, grpc.ServiceError>> {
     const createUser = promisify(this.client.createUser.bind(this.client));
     return tryCatch(createUser(request)) as Promise<
@@ -41,7 +42,7 @@ export class UserService {
   }
 
   async getUserById(
-    request: GetUserByIdRequest
+    request: GetUserByIdRequest,
   ): Promise<Result<User, grpc.ServiceError>> {
     const getUserById = promisify(this.client.getUserById.bind(this.client));
     return tryCatch(getUserById(request)) as Promise<
@@ -50,10 +51,10 @@ export class UserService {
   }
 
   async getUserPaginated(
-    request: GetUsersPaginatedRequest
+    request: GetUsersPaginatedRequest,
   ): Promise<Result<GetUsersPaginatedResponse, grpc.ServiceError>> {
     const getUsersPaginated = promisify(
-      this.client.getUsersPaginated.bind(this.client)
+      this.client.getUsersPaginated.bind(this.client),
     );
 
     return tryCatch(getUsersPaginated(request)) as Promise<

@@ -6,7 +6,9 @@
     "build": "bun build ./src/index.ts --outfile ./build/index.js --target bun",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "format": "prettier --check . --ignore-path ../../../.gitignore",
+    "format:fix": "prettier --write . --ignore-path ../../../.gitignore",
     "lint": "eslint .",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {

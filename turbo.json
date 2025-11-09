@@ -32,7 +32,13 @@
     "format": {
       "cache": false
     },
+    "format:fix": {
+      "cache": false
+    },
     "lint": {
+      "cache": false
+    },
+    "lint:fix": {
       "cache": false
     },
     "typecheck": {

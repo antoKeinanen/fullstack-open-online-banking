@@ -8,7 +8,9 @@
     "build": "turbo run build",
     "install": "go work sync",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "lint:fix": "turbo run lint:fix",
+    "format:fix": "turbo run format:fix"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

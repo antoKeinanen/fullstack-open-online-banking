@@ -9,7 +9,6 @@ import {
   validator,
 } from "hono-openapi";
 import { logger } from "hono/logger";
-import * as grpc from "@grpc/grpc-js";
 
 const userService = new UserService("localhost:50052");
 
@@ -67,8 +66,8 @@ app.get(
     if (users.error != null) {
       console.log("Failed to get paginated users:", users.error.details);
       return c.text("Unknown error", 500);
-    return c.json(users.data);
-  }
+      return c.json(users.data);
+    }
     return c.json(users);
   }
 );
