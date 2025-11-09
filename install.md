@@ -1,2 +1,5 @@
-protoc-gen-go-grpc
-protoc-gen-go
+golangci-lint
+bun
+pnpm
+node
+go

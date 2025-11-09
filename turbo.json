@@ -28,6 +28,20 @@
     },
     "build": {
       "cache": false
+    },
+    "format": {
+      "cache": false
+    },
+    "lint": {
+      "cache": false
+    },
+    "typecheck": {
+      "outputs": [
+        ".cache/tsbuildinfo.json"
+      ]
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

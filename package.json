@@ -6,10 +6,13 @@
     "dev": "dotenv -- turbo run dev",
     "generate-protobuf": "turbo run generate-protobuf && go work sync",
     "build": "turbo run build",
-    "install": "go work sync"
+    "install": "go work sync",
+    "lint": "turbo run lint",
+    "format": "turbo run format"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",
+    "jiti": "^2.6.1",
     "turbo": "^2.6.0"
   }
 }
