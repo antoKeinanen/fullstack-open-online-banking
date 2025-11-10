@@ -77,8 +77,6 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		return nil, errors.New("database_insert_failed")
 	}
 
-	//TODO: also create an account in tigerbeetle and cancel on failure
-
 	err = tx.Commit()
 	if err != nil {
 		log.Printf("Error: Failed to commit new user to the database: %v", err)
