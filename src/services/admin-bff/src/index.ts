@@ -1,7 +1,12 @@
-import { Hono } from "hono";
 import { faker } from "@faker-js/faker";
-import { UserService } from "./UserService";
-import z from "zod";
+import {
+  createUserRequestSchema,
+  createUserResponseSchema,
+  getAllUsersRequestSchema,
+  getAllUsersResponseSchema,
+  userSchema,
+} from "@repo/validators/user";
+import { Hono } from "hono";
 import {
   describeRoute,
   openAPIRouteHandler,
@@ -10,9 +15,11 @@ import {
 } from "hono-openapi";
 import { logger } from "hono/logger";
 
+import { UserService } from "./UserService";
+
 const userService = new UserService("localhost:50052");
 
-const app = new Hono();
+const app = new Hono().basePath("/api");
 app.use(logger());
 
 app.get("/create_user", async (c) => {
@@ -26,24 +33,40 @@ app.get("/create_user", async (c) => {
   return c.json(user);
 });
 
-const userSchema = z.object({
-  userId: z.string(),
-  phoneNumber: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  address: z.string(),
-  createdAt: z.iso.time(),
-});
+app.post(
+  "/users",
+  describeRoute({
+    description: "Creates a new user",
+    responses: {
+      201: {
+        description: "Successfully created",
+        content: {
+          "application/json": { schema: resolver(createUserResponseSchema) },
+        },
+      },
+      500: {
+        description:
+          "Something has gone wrong, retry and backoff if error persists",
+        content: {
+          "text/plain": {
+            example: "Unknown error",
+          },
+        },
+      },
+    },
+  }),
+  validator("json", createUserRequestSchema),
+  async (c) => {
+    const payload = c.req.valid("json");
+    const { data: userData, error: userError } =
+      await userService.createUser(payload);
+    if (userError != null) {
+      return c.text("Unknown error", 500);
+    }
 
-const getAllUsersRequestSchema = z.object({
-  offset: z.coerce.number().default(0),
-  take: z.coerce.number().default(100),
-});
-
-const getAllUsersResponseSchema = z.object({
-  users: z.array(userSchema),
-  count: z.number(),
-});
+    return c.json(userData, 201);
+  },
+);
 
 app.get(
   "/users",
@@ -56,20 +79,29 @@ app.get(
           "application/json": { schema: resolver(getAllUsersResponseSchema) },
         },
       },
+      500: {
+        description:
+          "Something has gone wrong, retry and backoff if error persists",
+        content: {
+          "text/plain": {
+            example: "Unknown error",
+          },
+        },
+      },
     },
   }),
   validator("query", getAllUsersRequestSchema),
   async (c) => {
     const query = c.req.valid("query");
 
-    const users = await userService.getUserPaginated(query);
-    if (users.error != null) {
-      console.log("Failed to get paginated users:", users.error.details);
+    const { data: users, error: usersError } =
+      await userService.getUserPaginated(query);
+    if (usersError != null) {
+      console.log("Failed to get paginated users:", usersError.details);
       return c.text("Unknown error", 500);
-      return c.json(users.data);
     }
     return c.json(users);
-  }
+  },
 );
 
 app.get(
@@ -83,21 +115,40 @@ app.get(
           "application/json": { schema: resolver(userSchema) },
         },
       },
+      500: {
+        description:
+          "Something has gone wrong, retry and backoff if error persists",
+        content: {
+          "text/plain": {
+            example: "Unknown error",
+          },
+        },
+      },
+      404: {
+        description: "User you have request was not found",
+        content: {
+          "text/plain": {
+            example: "Not found",
+          },
+        },
+      },
     },
   }),
   async (c) => {
     const userId = c.req.param("userId");
-    const user = await userService.getUserById({ userId });
-    if (user.error != null) {
-      if (user.error.details == "user_not_found") {
+    const { data: user, error: userError } = await userService.getUserById({
+      userId,
+    });
+    if (userError != null) {
+      if (userError.details == "user_not_found") {
         return c.text("Not found", 404);
       }
-      console.log("Failed to get user by id:", user.error.details);
+      console.log(userError.cause, userError.message);
       return c.text("Unknown error", 500);
     }
 
-    return c.json(user.data);
-  }
+    return c.json(user);
+  },
 );
 
 if (Bun.env.NODE_ENV != "production") {
@@ -112,7 +163,7 @@ if (Bun.env.NODE_ENV != "production") {
         },
         servers: [],
       },
-    })
+    }),
   );
 }
 

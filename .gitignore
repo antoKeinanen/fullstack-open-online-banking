@@ -179,3 +179,4 @@ go.work.sum
 # .vscode/
 
 build
+routeTree.gen.ts

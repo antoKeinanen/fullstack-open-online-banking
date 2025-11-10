@@ -24,7 +24,9 @@
         "TIGERBEETLE_SERVICE_PORT",
         "TIGERBEETLE_ADDRESS"
       ],
-      "cache": false
+      "cache": false,
+      "persistent": true,
+      "outputs": []
     },
     "build": {
       "cache": false

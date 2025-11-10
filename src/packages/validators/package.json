@@ -1,9 +1,10 @@
 {
-  "name": "@repo/admin-bff",
+  "name": "@repo/validators",
   "type": "module",
+  "exports": {
+    "./user": "./src/user.ts"
+  },
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
-    "build": "bun build ./src/index.ts --outfile ./build/index.js --target bun",
     "clean": "git clean -xdf .cache .turbo build node_modules",
     "format": "prettier --check . --ignore-path ../../../.gitignore",
     "format:fix": "prettier --write . --ignore-path ../../../.gitignore",
@@ -12,17 +13,9 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.1.0",
-    "@grpc/grpc-js": "^1.14.0",
-    "@hono/standard-validator": "^0.1.5",
-    "@repo/protobufs": "workspace:*",
-    "hono": "^4.10.4",
-    "hono-openapi": "^1.1.1",
-    "zod": "catalog:",
-    "@repo/validators": "workspace:*"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",

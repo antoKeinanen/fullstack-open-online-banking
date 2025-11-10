@@ -1,6 +1,7 @@
 {
   "name": "@repo/tigerbeetle-service",
   "scripts": {
+    "clean": "git clean -xdf .cache .turbo node_modules build",
     "dev": "go run ./src/",
     "build": "go build -o ./build/app ./src",
     "install": "go mod tidy",

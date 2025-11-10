@@ -10,7 +10,8 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "lint:fix": "turbo run lint:fix",
-    "format:fix": "turbo run format:fix"
+    "format:fix": "turbo run format:fix",
+    "clean": "turbo run clean"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

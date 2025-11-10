@@ -9,7 +9,8 @@
   },
   "scripts": {
     "generate-protobuf": "buf generate",
-    "build": "buf generate"
+    "build": "buf generate",
+    "clean": "git clean -xdf .cache .turbo node_modules gen"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.59.0",
