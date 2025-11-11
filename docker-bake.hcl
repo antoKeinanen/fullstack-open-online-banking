@@ -1,5 +1,5 @@
 group "all" {
-  targets = ["user-service", "tigerbeetle-service", "admin-bff"]
+  targets = ["user-service", "tigerbeetle-service", "admin-bff", "admin-client"]
 }
 
 target "base" {
@@ -27,6 +27,14 @@ target "tigerbeetle-service" {
 target "admin-bff" {
   dockerfile = "src/services/admin-bff/Dockerfile"
   tags = [ "admin-bff" ]
+  contexts = {
+    base = "target:base"
+  }
+}
+
+target "admin-client" {
+  dockerfile = "src/clients/admin-client/Dockerfile"
+  tags = [ "admin-client" ]
   contexts = {
     base = "target:base"
   }

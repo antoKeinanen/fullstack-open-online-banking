@@ -3,6 +3,8 @@
 node_modules
 docker-data
 
+**/Dockerfile
+
 # Build output
 **/dist
 **/build

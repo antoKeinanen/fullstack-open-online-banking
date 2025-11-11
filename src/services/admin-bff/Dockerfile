@@ -9,3 +9,4 @@ COPY --from=builder /app/src/services/admin-bff/build/index.js .
 EXPOSE 3000
 
 ENTRYPOINT [ "bun", "index.js" ]
+

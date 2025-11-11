@@ -1,4 +1,4 @@
-FROM golang:1.25-trixie AS base
+FROM golang:1.25.4-trixie AS base
 
 
 RUN apt-get update
@@ -12,7 +12,8 @@ COPY . /app/
 WORKDIR /app
 
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
+RUN go work sync
 RUN pnpm run generate-protobuf
 
 

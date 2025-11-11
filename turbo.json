@@ -29,6 +29,10 @@
       "outputs": []
     },
     "build": {
+      "dependsOn": [
+        "^generate-protobuf",
+        "^build"
+      ],
       "cache": false
     },
     "format": {
