@@ -26,7 +26,7 @@ async function getCertificates(
     },
   });
 
-  if (response.status != 201) {
+  if (response.status !== 201) {
     throw new Error(
       "Failed to generate certificates: Status was not 201 " +
         response.statusText,
@@ -59,7 +59,7 @@ async function main(): Promise<void> {
     JSON.stringify(privateJwks),
     { createPath: true },
   );
-  console.assert(certFileLen > 0, "Failed to write file, %s");
+  console.assert(certFileLen > 0, `Failed to write file: ${env.OP_KEYGEN_PRIVATE_JWKS_PATH}`);
   console.log(`Wrote JWKS to '${env.OP_KEYGEN_PRIVATE_JWKS_PATH}'`);
 }
 
