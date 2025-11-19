@@ -11,7 +11,8 @@
     "format": "turbo run format",
     "lint:fix": "turbo run lint:fix",
     "format:fix": "turbo run format:fix",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "generate-keys": "dotenv -- turbo run generate-keys"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

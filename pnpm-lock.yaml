@@ -89,7 +89,7 @@ importers:
         version: 9.39.1
       '@repo/eslint-config':
         specifier: workspace:*
-        version: file:src/tooling/eslint(@typescript-eslint/parser@8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
+        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
       '@repo/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier
@@ -144,7 +144,7 @@ importers:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
-        version: link:../../tooling/eslint
+        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
       '@repo/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier
@@ -221,7 +221,7 @@ importers:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
-        version: link:../../tooling/eslint
+        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
       '@repo/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier
@@ -240,6 +240,12 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+
+  src/services/payment-service:
+    dependencies:
+      '@repo/protobufs':
+        specifier: workspace:*
+        version: link:../../protobufs
 
   src/services/tigerbeetle-service:
     dependencies:
@@ -320,6 +326,43 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  src/tooling/psd2-keygen:
+    dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.12)
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
+      jose:
+        specifier: ^6.1.2
+        version: 6.1.2
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.12
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
+      '@repo/prettier-config':
+        specifier: workspace:*
+        version: link:../prettier
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../typescript
+      '@types/bun':
+        specifier: latest
+        version: 1.3.2(@types/react@19.2.2)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.1(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1021,6 +1064,23 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@t3-oss/env-core@0.13.8':
+    resolution: {integrity: sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw==}
+    peerDependencies:
+      arktype: ^2.1.0
+      typescript: '>=5.0.0'
+      valibot: ^1.0.0-beta.7 || ^1.0.0
+      zod: ^3.24.0 || ^4.0.0-beta.0
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+      typescript:
+        optional: true
+      valibot:
+        optional: true
+      zod:
+        optional: true
 
   '@tailwindcss/node@4.1.17':
     resolution: {integrity: sha512-csIkHIgLb3JisEFQ0vxr2Y57GUNYh447C8xzwj89U/8fdW8LhProdxvnVH6U8M2Y73QKiTIH+LWbK3V2BBZsAg==}
@@ -2130,6 +2190,9 @@ packages:
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
+
+  jose@6.1.2:
+    resolution: {integrity: sha512-MpcPtHLE5EmztuFIqB0vzHAWJPpmN1E6L4oo+kze56LIs3MyXIj9ZHMDxqOvkP38gBR7K1v3jqd4WU2+nrfONQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3398,7 +3461,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@repo/eslint-config@file:src/tooling/eslint(@typescript-eslint/parser@8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)':
+  '@repo/eslint-config@file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)':
     dependencies:
       '@eslint/compat': 1.4.1(eslint@9.39.1(jiti@2.6.1))
       '@eslint/js': 9.39.1
@@ -3505,6 +3568,11 @@ snapshots:
       zod: 4.1.12
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@t3-oss/env-core@0.13.8(typescript@5.9.3)(zod@4.1.12)':
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.1.12
 
   '@tailwindcss/node@4.1.17':
     dependencies:
@@ -4886,6 +4954,8 @@ snapshots:
       set-function-name: 2.0.2
 
   jiti@2.6.1: {}
+
+  jose@6.1.2: {}
 
   js-tokens@4.0.0: {}
 

@@ -54,6 +54,17 @@
     },
     "clean": {
       "cache": false
+    },
+    "generate-keys": {
+      "cache": false,
+      "env": [
+        "OP_KEYGEN_CERTIFICATE_API_URL",
+        "OP_KEYGEN_COMMON_NAME",
+        "OP_KEYGEN_API_KEY",
+        "OP_KEYGEN_COUNTRY",
+        "OP_KEYGEN_ROLES",
+        "OP_KEYGEN_PRIVATE_JWKS_PATH"
+      ]
     }
   }
 }

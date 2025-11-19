@@ -12,6 +12,7 @@ docker-data
 **/.turbo
 **/out
 **/gen
+**/keys
 
 # Development
 **/.env
