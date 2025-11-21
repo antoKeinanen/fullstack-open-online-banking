@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	pb "protobufs/gen/go/tigerbeetle-service"
@@ -30,8 +29,7 @@ func ParseConfiguration() *Configuration {
 }
 
 func Uint128ToHexString(number tbt.Uint128) string {
-	bytes := number.Bytes()
-	return fmt.Sprintf("%x", bytes)
+	return number.String()
 }
 
 func ToPbAccount(account tbt.Account) *pb.Account {
@@ -50,5 +48,14 @@ func ToPbAccount(account tbt.Account) *pb.Account {
 		UserData128:    &userData128,
 		UserData64:     &account.UserData64,
 		UserData32:     &account.UserData32,
+	}
+}
+
+func ToPbTransfer(transfer tbt.Transfer) *pb.Transfer {
+	return &pb.Transfer{
+		TransferId:      Uint128ToHexString(transfer.ID),
+		DebitAccountId:  Uint128ToHexString(transfer.DebitAccountID),
+		CreditAccountId: Uint128ToHexString(transfer.CreditAccountID),
+		Amount:          Uint128ToHexString(transfer.Amount),
 	}
 }

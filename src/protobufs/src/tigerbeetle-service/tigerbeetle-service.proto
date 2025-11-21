@@ -2,11 +2,50 @@ syntax = "proto3";
 package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
-
 service TigerbeetleService {
   rpc CreateAccount(Account) returns (AccountId);
   rpc LookupAccount(AccountId) returns (Account);
+  rpc CreatePendingTransfer(CreatePendingRequest) returns (TransferId);
+  rpc PostPendingTransfer(PostPendingTransferRequest) returns (TransferId);
+  rpc VoidPendingTransfer(VoidPendingTransferRequest) returns (TransferId);
+  rpc LookupTransfer(TransferId) returns (Transfer);
 }
+
+message Transfer {
+  reserved 5, 6, 7;
+  string transferId = 1;
+  string debitAccountId = 2;
+  string creditAccountId = 3;
+  string amount = 4;
+  // optional string userData128 = 5;
+  // optional uint64 userData64 = 6;
+  // optional uint32 userData32 = 7;
+}
+
+message PostPendingTransferRequest {
+  string debitAccountId = 1;
+  string creditAccountId = 2;
+  string amount = 3;
+  string pendingTransferId = 4;
+}
+
+message VoidPendingTransferRequest {
+  string debitAccountId = 1;
+  string creditAccountId = 2;
+  string amount = 3;
+  string pendingTransferId = 4;
+}
+
+message TransferId { string TransferId = 1; };
+
+message CreatePendingRequest {
+  string debitAccountId = 1;
+  string creditAccountId = 2;
+  string amount = 3;
+  // optional string userData128 = 4;
+  // optional uint64 userData64 = 5;
+  // optional uint32 userData32 = 6;
+};
 
 message AccountId { string AccountId = 1; }
 
