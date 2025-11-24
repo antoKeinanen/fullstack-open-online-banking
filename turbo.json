@@ -36,20 +36,35 @@
       "cache": false
     },
     "format": {
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "^generate-protobuf"
+      ]
     },
     "format:fix": {
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "^generate-protobuf"
+      ]
     },
     "lint": {
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "^generate-protobuf"
+      ]
     },
     "lint:fix": {
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "^generate-protobuf"
+      ]
     },
     "typecheck": {
       "outputs": [
         ".cache/tsbuildinfo.json"
+      ],
+      "dependsOn": [
+        "^generate-protobuf"
       ]
     },
     "clean": {
