@@ -1,5 +1,18 @@
 {
   "extends": "@repo/tsconfig/base.json",
   "include": ["."],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "out",
+    ".next",
+    ".expo",
+    ".turbo",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "**/*.test.tsx"
+  ]
 }

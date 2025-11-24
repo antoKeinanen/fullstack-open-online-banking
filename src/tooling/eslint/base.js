@@ -1,5 +1,4 @@
 import * as path from "node:path";
-import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import turboPlugin from "eslint-plugin-turbo";
@@ -8,6 +7,7 @@ import tseslint from "typescript-eslint";
 
 /**
  * All packages that leverage t3-env should use this rule
+ *  @type {import('eslint').Linter.Config[]}
  */
 export const restrictEnvAccess = defineConfig(
   { ignores: ["**/env.ts"] },
@@ -36,6 +36,9 @@ export const restrictEnvAccess = defineConfig(
   },
 );
 
+/**
+ *  @type {import('eslint').Linter.Config[]}
+ */
 export const baseConfig = defineConfig(
   // Ignore files not tracked by VCS and any config files
   // includeIgnoreFile(path.join(import.meta.dirname, "../../../.gitignore")),
@@ -43,6 +46,8 @@ export const baseConfig = defineConfig(
     ignores: [
       "**/*.config.*",
       "**/node_modules",
+      "**/build",
+      "**/dist",
       "**/.turbo",
       "**/routeTree.gen.ts",
     ],

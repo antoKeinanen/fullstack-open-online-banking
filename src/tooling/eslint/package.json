@@ -3,9 +3,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./base": "./base.js",
-    "./nextjs": "./nextjs.js",
-    "./react": "./react.js"
+    "./base": {
+      "type": "./base.d.ts",
+      "default": "./base.js"
+    },
+    "./nextjs": {
+      "type": "./nextjs.d.ts",
+      "default": "./nextjs.js"
+    },
+    "./react": {
+      "type": "./react.d.ts",
+      "default": "./react.js"
+    }
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",

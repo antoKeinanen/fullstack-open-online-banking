@@ -9,8 +9,7 @@
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",
     "format": "prettier --check . --ignore-path ../../../.gitignore",
-    "format:fix": "prettier --check . --ignore-path ../../../.gitignore --write",
-    "typecheck": "tsc --noEmit"
+    "format:fix": "prettier --check . --ignore-path ../../../.gitignore --write"
   },
   "dependencies": {
     "@tailwindcss/postcss": "catalog:",
