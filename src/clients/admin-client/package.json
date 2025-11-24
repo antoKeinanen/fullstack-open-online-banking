@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "clean": "git clean -xdf .cache .turbo node_modules dist",
+    "clean": "git clean -xdf .cache .turbo node_modules dist src/routeTree.gen.ts",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
