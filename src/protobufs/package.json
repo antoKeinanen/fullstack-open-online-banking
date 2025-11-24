@@ -1,5 +1,6 @@
 {
   "name": "@repo/protobufs",
+  "private": true,
   "type": "module",
   "exports": {
     "./user-service": {

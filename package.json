@@ -1,5 +1,6 @@
 {
   "name": "fullstack-open-online-banking",
+  "private": true,
   "version": "1.0.0",
   "packageManager": "pnpm@10.15.0",
   "scripts": {
@@ -11,8 +12,9 @@
     "format": "turbo run format",
     "lint:fix": "turbo run lint:fix",
     "format:fix": "turbo run format:fix",
-    "clean": "turbo run clean",
-    "generate-keys": "dotenv -- turbo run generate-keys"
+    "clean": "turbo run clean && git clean -xdf .cache .turbo node_modules",
+    "generate-keys": "dotenv -- turbo run generate-keys",
+    "ui-add": "turbo run ui-add"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

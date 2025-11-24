@@ -65,6 +65,10 @@
         "OP_KEYGEN_ROLES",
         "OP_KEYGEN_PRIVATE_JWKS_PATH"
       ]
+    },
+    "ui-add": {
+      "cache": false,
+      "interactive": true
     }
   }
 }

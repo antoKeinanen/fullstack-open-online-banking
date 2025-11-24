@@ -3,10 +3,12 @@ import {
   createUserResponseSchema,
   getAllUsersResponseSchema,
   getUserResponseSchema,
-  type CreateUserRequest,
-  type CreateUserResponse,
-  type GetUserRequest,
-  type GetUserResponse,
+} from "@repo/validators/user";
+import type {
+  CreateUserRequest,
+  CreateUserResponse,
+  GetUserRequest,
+  GetUserResponse,
 } from "@repo/validators/user";
 
 export async function getAllUsersPaginated() {

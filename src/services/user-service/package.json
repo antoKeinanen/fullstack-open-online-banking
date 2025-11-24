@@ -1,5 +1,6 @@
 {
   "name": "@repo/user-service",
+  "private": true,
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules build",
     "dev": "go run src/main.go",

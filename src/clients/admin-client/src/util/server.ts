@@ -1,5 +1,6 @@
-import axios, { type AxiosRequestConfig } from "axios";
-import { type z } from "zod";
+import axios from "axios";
+import type {AxiosRequestConfig} from "axios";
+import type {z} from "zod";
 
 type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 

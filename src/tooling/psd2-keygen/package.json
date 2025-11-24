@@ -1,5 +1,6 @@
 {
   "name": "@repo/psd2-keygen",
+  "private": true,
   "type": "module",
   "scripts": {
     "generate-keys": "bun run src/main.ts",

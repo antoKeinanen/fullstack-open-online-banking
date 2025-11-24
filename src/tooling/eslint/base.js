@@ -38,7 +38,8 @@ export const restrictEnvAccess = defineConfig(
 
 export const baseConfig = defineConfig(
   // Ignore files not tracked by VCS and any config files
-  { ignores: ["**/*.config.*", "**/gen/**/*", "**/build/**/*"] },
+  // includeIgnoreFile(path.join(import.meta.dirname, "../../../.gitignore")),
+  { ignores: ["**/*.config.*", "**/node_modules", "**/.turbo"] },
   {
     files: ["**/*.js", "**/*.ts", "**/*.tsx"],
     plugins: {

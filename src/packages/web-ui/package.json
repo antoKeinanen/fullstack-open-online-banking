@@ -1,0 +1,43 @@
+{
+  "name": "@repo/web-ui",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    "./globals.css": "./src/globals.css",
+    "./button": "./src/components/button.tsx",
+    "./card": "./src/components/card.tsx"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo build node_modules",
+    "format": "prettier --check . --ignore-path ../../../.gitignore",
+    "format:fix": "prettier --write . --ignore-path ../../../.gitignore",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.554.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@repo/prettier-config"
+}
