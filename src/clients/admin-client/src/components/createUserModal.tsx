@@ -1,6 +1,8 @@
-import { createUserRequestSchema } from "@repo/validators/user";
 import { useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
+
+import { createUserRequestSchema } from "@repo/validators/user";
+
 import { createUser } from "../services/userService";
 
 export function CreateUserModal() {
@@ -28,7 +30,7 @@ export function CreateUserModal() {
       console.error(
         "Failed to parse form data:",
         userData,
-        parsedFormData.error
+        parsedFormData.error,
       );
       return;
     }
@@ -50,7 +52,7 @@ export function CreateUserModal() {
           <div className="space-x-2.5">
             <label htmlFor="firstName">First name</label>
             <input
-              className="border rounded-md"
+              className="rounded-md border"
               type="text"
               name="firstName"
               id="firstName"
@@ -59,7 +61,7 @@ export function CreateUserModal() {
           <div className="space-x-2.5">
             <label htmlFor="lastName">Last name</label>
             <input
-              className="border rounded-md"
+              className="rounded-md border"
               type="text"
               name="lastName"
               id="lastName"
@@ -68,7 +70,7 @@ export function CreateUserModal() {
           <div className="space-x-2.5">
             <label htmlFor="phoneNumber">Phone number</label>
             <input
-              className="border rounded-md"
+              className="rounded-md border"
               type="text"
               name="phoneNumber"
               id="phoneNumber"
@@ -77,7 +79,7 @@ export function CreateUserModal() {
           <div className="space-x-2.5">
             <label htmlFor="address">Address</label>
             <input
-              className="border rounded-md"
+              className="rounded-md border"
               type="text"
               name="address"
               id="address"

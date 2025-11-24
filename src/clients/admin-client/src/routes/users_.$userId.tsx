@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+
 import { getUser } from "../services/userService";
 
 export const Route = createFileRoute("/users_/$userId")({

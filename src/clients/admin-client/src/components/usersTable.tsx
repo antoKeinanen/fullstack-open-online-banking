@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllUsersPaginated } from "../services/userService";
 import { Link } from "@tanstack/react-router";
+
+import { getAllUsersPaginated } from "../services/userService";
 
 export function UserTable() {
   const { data, isPending, error } = useQuery({

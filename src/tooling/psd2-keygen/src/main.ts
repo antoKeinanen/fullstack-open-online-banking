@@ -59,7 +59,10 @@ async function main(): Promise<void> {
     JSON.stringify(privateJwks),
     { createPath: true },
   );
-  console.assert(certFileLen > 0, `Failed to write file: ${env.OP_KEYGEN_PRIVATE_JWKS_PATH}`);
+  console.assert(
+    certFileLen > 0,
+    `Failed to write file: ${env.OP_KEYGEN_PRIVATE_JWKS_PATH}`,
+  );
   console.log(`Wrote JWKS to '${env.OP_KEYGEN_PRIVATE_JWKS_PATH}'`);
 }
 

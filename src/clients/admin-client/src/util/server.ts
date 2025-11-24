@@ -1,6 +1,6 @@
+import type { AxiosRequestConfig } from "axios";
+import type { z } from "zod";
 import axios from "axios";
-import type {AxiosRequestConfig} from "axios";
-import type {z} from "zod";
 
 type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 
@@ -8,7 +8,7 @@ async function request<T extends z.ZodTypeAny>(
   method: HttpMethod,
   url: string,
   schema: T,
-  data?: unknown
+  data?: unknown,
 ): Promise<z.infer<T>> {
   const config: AxiosRequestConfig = {
     method,
@@ -27,7 +27,7 @@ async function request<T extends z.ZodTypeAny>(
     console.error(
       "Failed to parse server response:",
       parsedData.error,
-      response.data
+      response.data,
     );
     throw new Error("Failed to parse response");
   }
@@ -42,7 +42,7 @@ export function get<T extends z.ZodTypeAny>(url: string, schema: T) {
 export function post<T extends z.ZodTypeAny>(
   url: string,
   schema: T,
-  data?: unknown
+  data?: unknown,
 ) {
   return request("post", url, schema, data);
 }
@@ -50,7 +50,7 @@ export function post<T extends z.ZodTypeAny>(
 export function put<T extends z.ZodTypeAny>(
   url: string,
   schema: T,
-  data?: unknown
+  data?: unknown,
 ) {
   return request("put", url, schema, data);
 }
@@ -58,7 +58,7 @@ export function put<T extends z.ZodTypeAny>(
 export function del<T extends z.ZodTypeAny>(
   url: string,
   schema: T,
-  data?: unknown
+  data?: unknown,
 ) {
   return request("delete", url, schema, data);
 }
@@ -66,7 +66,7 @@ export function del<T extends z.ZodTypeAny>(
 export function patch<T extends z.ZodTypeAny>(
   url: string,
   schema: T,
-  data?: unknown
+  data?: unknown,
 ) {
   return request("patch", url, schema, data);
 }

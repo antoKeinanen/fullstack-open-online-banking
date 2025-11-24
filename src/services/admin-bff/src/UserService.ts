@@ -1,3 +1,6 @@
+import { promisify } from "util";
+import * as grpc from "@grpc/grpc-js";
+
 import type {
   CreateUserRequest,
   GetUserByIdRequest,
@@ -6,8 +9,7 @@ import type {
   User,
 } from "@repo/protobufs/user-service";
 import { UserServiceClient } from "@repo/protobufs/user-service";
-import * as grpc from "@grpc/grpc-js";
-import { promisify } from "util";
+
 import type { Result } from "./try-catch";
 import { tryCatch } from "./try-catch";
 

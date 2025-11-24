@@ -1,11 +1,4 @@
 import { faker } from "@faker-js/faker";
-import {
-  createUserRequestSchema,
-  createUserResponseSchema,
-  getAllUsersRequestSchema,
-  getAllUsersResponseSchema,
-  userSchema,
-} from "@repo/validators/user";
 import { Hono } from "hono";
 import {
   describeRoute,
@@ -14,6 +7,14 @@ import {
   validator,
 } from "hono-openapi";
 import { logger } from "hono/logger";
+
+import {
+  createUserRequestSchema,
+  createUserResponseSchema,
+  getAllUsersRequestSchema,
+  getAllUsersResponseSchema,
+  userSchema,
+} from "@repo/validators/user";
 
 import { UserService } from "./UserService";
 
