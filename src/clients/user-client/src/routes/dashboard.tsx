@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
@@ -10,31 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Button } from "@repo/web-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
 
+import { TransactionCard } from "../components/transactionCard";
+
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 });
-
-function TransactionCard() {
-  return (
-    <Card>
-      <CardContent className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarImage src="TODO" />
-            <AvatarFallback>AK</AvatarFallback>
-          </Avatar>
-          <div>
-            <p>Example Payment</p>
-            <p className="text-muted-foreground -mt-2 text-sm">
-              19.12 | 28.11.2025
-            </p>
-          </div>
-        </div>
-        <p className="text-lg">123.45€</p>
-      </CardContent>
-    </Card>
-  );
-}
 
 function RecommendedUserCard() {
   return (
@@ -90,7 +70,9 @@ function RouteComponent() {
       <section className="space-y-1.5">
         <div className="text-foreground flex items-center justify-between">
           <p>Recent transactions</p>
-          <Button variant="link">View all</Button>
+          <Link to="/transactions">
+            <Button variant="link">View all</Button>
+          </Link>
         </div>
 
         {[0, 1, 2].map((_, i) => (
@@ -98,10 +80,11 @@ function RouteComponent() {
         ))}
       </section>
 
+      <div className="text-foreground flex items-center justify-between">
+        <p>Suggestions</p>
+      </div>
+
       <Card>
-        <CardHeader>
-          <CardTitle>Suggestions</CardTitle>
-        </CardHeader>
         <CardContent className="grid grid-cols-3 grid-rows-2 items-center justify-items-center gap-2">
           {[0, 1, 2, 3, 4, 5].map((_, i) => (
             <RecommendedUserCard key={`recommended-user-${i}`} />

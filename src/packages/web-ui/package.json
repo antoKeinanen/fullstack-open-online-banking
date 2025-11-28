@@ -4,7 +4,7 @@
   "type": "module",
   "main": "src/index.ts",
   "exports": {
-    "./globals.css": "./src/globals.css",
+    ".": "./src/index.ts",
     "./button": "./src/components/button.tsx",
     "./card": "./src/components/card.tsx",
     "./form": "./src/components/form.tsx",
@@ -15,7 +15,8 @@
     "./textarea": "./src/components/textarea.tsx",
     "./field": "./src/components/field.tsx",
     "./checkbox": "./src/components/checkbox.tsx",
-    "./avatar": "./src/components/avatar.tsx"
+    "./avatar": "./src/components/avatar.tsx",
+    "./badge": "./src/components/badge.tsx"
   },
   "files": [
     "src"
