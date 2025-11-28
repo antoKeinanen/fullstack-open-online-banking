@@ -83,47 +83,45 @@ function RouteComponent() {
   };
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm md:max-w-4xl">
-        <Card className="flex flex-row gap-0 overflow-clip p-0">
-          <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
-            <CardHeader className="w-full">
-              <div className="flex w-full items-center justify-evenly gap-3">
-                <span className="bg-muted-foreground h-px w-full" />
-                <div className="text-muted-foreground bg-muted border-muted-foreground rounded-full border p-2">
-                  <BanknoteIcon />
-                </div>
-                <span className="bg-muted-foreground h-px w-full" />
+    <div className="m-auto w-full max-w-sm self-center md:max-w-4xl">
+      <Card className="flex flex-row gap-0 overflow-clip p-0">
+        <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
+          <CardHeader className="w-full">
+            <div className="flex w-full items-center justify-evenly gap-3">
+              <span className="bg-muted-foreground h-px w-full" />
+              <div className="text-muted-foreground bg-muted border-muted-foreground rounded-full border p-2">
+                <BanknoteIcon />
               </div>
-              <CardTitle className="text-center">
-                {loginPhase === "phoneNumber"
-                  ? "Welcome Back!"
-                  : "Authentication required"}
-              </CardTitle>
-              <CardDescription className="text-center">
-                {loginPhase === "phoneNumber"
-                  ? "Log back in using your phone number"
-                  : "We have sent you an authentication code to your phone"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="w-full">
-              {loginPhase == "phoneNumber" ? (
-                <PhoneNumberLoginPhase onSubmit={onPhoneNumberSubmit} />
-              ) : (
-                <OTPCodeLoginPhase
-                  onSubmit={() => {
-                    /* empty */
-                  }}
-                />
-              )}
-            </CardContent>
-            <div /> {/* An empty div to space out the ui evenly */}
-          </div>
-          <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse">
-            <BanknoteIcon size={48} />
-          </div>
-        </Card>
-      </div>
+              <span className="bg-muted-foreground h-px w-full" />
+            </div>
+            <CardTitle className="text-center">
+              {loginPhase === "phoneNumber"
+                ? "Welcome Back!"
+                : "Authentication required"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {loginPhase === "phoneNumber"
+                ? "Log back in using your phone number"
+                : "We have sent you an authentication code to your phone"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="w-full">
+            {loginPhase == "phoneNumber" ? (
+              <PhoneNumberLoginPhase onSubmit={onPhoneNumberSubmit} />
+            ) : (
+              <OTPCodeLoginPhase
+                onSubmit={() => {
+                  /* empty */
+                }}
+              />
+            )}
+          </CardContent>
+          <div /> {/* An empty div to space out the ui evenly */}
+        </div>
+        <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse">
+          <BanknoteIcon size={48} />
+        </div>
+      </Card>
     </div>
   );
 }

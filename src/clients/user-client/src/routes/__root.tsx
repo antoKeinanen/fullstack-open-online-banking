@@ -3,7 +3,9 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 const RootLayout = () => (
   <>
-    <Outlet />
+    <div className="bg-muted flex h-dvh w-full overflow-clip px-8 py-10">
+      <Outlet />
+    </div>
     <TanStackRouterDevtools />
   </>
 );
