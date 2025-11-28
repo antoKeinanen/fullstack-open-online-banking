@@ -13,7 +13,8 @@
     "./input": "./src/components/input.tsx",
     "./label": "./src/components/label.tsx",
     "./textarea": "./src/components/textarea.tsx",
-    "./field": "./src/components/field.tsx"
+    "./field": "./src/components/field.tsx",
+    "./checkbox": "./src/components/checkbox.tsx"
   },
   "files": [
     "src"
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",

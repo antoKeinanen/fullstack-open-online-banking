@@ -9,7 +9,9 @@ export default defineConfig({
       target: "react",
       autoCodeSplitting: true,
     }),
-    ,
     react(),
   ],
+  server: {
+    port: 5174,
+  },
 });
