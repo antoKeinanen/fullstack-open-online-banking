@@ -2,9 +2,7 @@
   "extends": "@repo/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "lib": ["DOM", "DOM.Iterable"],
     "jsx": "react-jsx"
   },
   "exclude": [

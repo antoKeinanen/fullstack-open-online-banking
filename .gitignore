@@ -179,3 +179,5 @@ go.work.sum
 # .vscode/
 
 build
+
+**/.tanstack/

@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "clean": "git clean -xdf .cache .turbo node_modules dist",
+    "clean": "git clean -xdf .cache .turbo node_modules dist .tanstack",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -13,6 +13,9 @@
   "dependencies": {
     "@repo/web-ui": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
+    "@tanstack/react-router": "^1.135.0",
+    "@tanstack/react-router-devtools": "^1.135.0",
+    "lucide-react": "^0.554.0",
     "postcss": "catalog:",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -23,8 +26,9 @@
     "@eslint/js": "^9.39.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
-    "@repo/tsconfig": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@tanstack/router-plugin": "^1.135.0",
     "@types/node": "catalog:",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -33,10 +37,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "prettier": "catalog:",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4",
-    "prettier": "catalog:"
+    "vite": "^7.2.4"
   },
   "prettier": "@repo/prettier-config"
 }
