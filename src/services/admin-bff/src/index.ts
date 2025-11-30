@@ -8,6 +8,7 @@ import {
 } from "hono-openapi";
 import { logger } from "hono/logger";
 
+import { UserService } from "@repo/service-bindings/user-service";
 import {
   createUserRequestSchema,
   createUserResponseSchema,
@@ -15,8 +16,6 @@ import {
   getAllUsersResponseSchema,
   userSchema,
 } from "@repo/validators/user";
-
-import { UserService } from "./UserService";
 
 const userService = new UserService("localhost:50052");
 

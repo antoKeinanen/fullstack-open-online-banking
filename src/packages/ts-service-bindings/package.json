@@ -1,10 +1,11 @@
 {
-  "name": "@repo/admin-bff",
+  "name": "@repo/service-bindings",
   "private": true,
   "type": "module",
+  "exports": {
+    "./user-service": "./src/user-service.ts"
+  },
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
-    "build": "bun build ./src/index.ts --outfile ./build/index.js --target bun",
     "clean": "git clean -xdf .cache .turbo build node_modules",
     "format": "prettier --check . --ignore-path ../../../.gitignore",
     "format:fix": "prettier --write . --ignore-path ../../../.gitignore",
@@ -13,22 +14,17 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.1.0",
-    "@hono/standard-validator": "^0.1.5",
-    "hono": "^4.10.4",
-    "hono-openapi": "^1.1.1",
-    "zod": "catalog:",
-    "@repo/service-bindings": "workspace:*",
-    "@repo/validators": "workspace:*"
+    "@grpc/grpc-js": "^1.14.0",
+    "@repo/protobufs": "workspace:*"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
     "eslint": "catalog:",
     "prettier": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
   },
   "prettier": "@repo/prettier-config"
 }

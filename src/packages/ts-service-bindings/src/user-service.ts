@@ -30,8 +30,8 @@ export class UserService {
         console.error("Failed to connect grpc", error);
         throw new Error("Failed to connect to grpc");
       }
+      console.log("Connected to user service grpc");
     });
-    console.log("Connected to user service grpc");
   }
 
   async createUser(
