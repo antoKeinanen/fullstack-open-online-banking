@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BanknoteArrowDownIcon,
@@ -10,25 +11,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Button } from "@repo/web-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
 
+import type { TransactionDialogState } from "../components/dialog/transactionDialog";
+import { TransactionDialog } from "../components/dialog/transactionDialog";
 import { TransactionCard } from "../components/transactionCard";
+import { RecommendedUserCard } from "../components/recommendedUser";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 });
 
-function RecommendedUserCard() {
-  return (
-    <div className="flex w-min flex-col items-center justify-center text-center">
-      <Avatar className="h-12 w-12">
-        <AvatarImage src="TODO" />
-        <AvatarFallback>AK</AvatarFallback>
-      </Avatar>
-      <p className="leading-5">Example User</p>
-    </div>
-  );
-}
-
 function RouteComponent() {
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [transactionState, setTransactionState] =
+    useState<TransactionDialogState>("deposit");
+
   return (
     <main className="w-full space-y-4">
       <div className="flex justify-between">
@@ -53,7 +49,10 @@ function RouteComponent() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            <Button className="col-span-2">
+            <Button
+              className="col-span-2"
+              onClick={() => setTransactionDialogOpen(true)}
+            >
               <WalletIcon />
               Deposit
             </Button>
@@ -91,6 +90,12 @@ function RouteComponent() {
           ))}
         </CardContent>
       </Card>
+      <TransactionDialog
+        open={transactionDialogOpen}
+        setOpen={setTransactionDialogOpen}
+        state={transactionState}
+        setState={setTransactionState}
+      />
     </main>
   );
 }
