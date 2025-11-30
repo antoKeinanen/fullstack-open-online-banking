@@ -10,11 +10,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Button } from "@repo/web-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@repo/web-ui/item";
 
 import type { TransactionDialogState } from "../components/dialog/transactionDialog";
 import { TransactionDialog } from "../components/dialog/transactionDialog";
-import { TransactionCard } from "../components/transactionCard";
 import { RecommendedUserCard } from "../components/recommendedUser";
+import { TransactionCard } from "../components/transactionCard";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -27,21 +36,23 @@ function RouteComponent() {
 
   return (
     <main className="w-full space-y-4">
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar>
+      <Item className="p-0">
+        <ItemMedia>
+          <Avatar className="size-10">
             <AvatarImage src="TODO" />
             <AvatarFallback>AK</AvatarFallback>
           </Avatar>
-          <div>
-            <p className="text-muted-foreground -mb-2 text-sm">Good evening</p>
-            <p className="text-foreground">Anto Keinänen</p>
-          </div>
-        </div>
-        <Button variant="outline">
-          <LockIcon /> Close
-        </Button>
-      </div>
+        </ItemMedia>
+        <ItemContent>
+          <ItemDescription className="-mb-1.5">Good evening</ItemDescription>
+          <ItemTitle>Anto Keinänen</ItemTitle>
+        </ItemContent>
+        <ItemActions>
+          <Button variant="outline">
+            <LockIcon /> Log out
+          </Button>
+        </ItemActions>
+      </Item>
 
       <Card className="w-full gap-2">
         <CardHeader>
@@ -74,9 +85,11 @@ function RouteComponent() {
           </Link>
         </div>
 
-        {[0, 1, 2].map((_, i) => (
-          <TransactionCard key={`transaction-card-${i}`} />
-        ))}
+        <ItemGroup>
+          {[0, 1, 2].map((_, i) => (
+            <TransactionCard key={`transaction-card-${i}`} />
+          ))}
+        </ItemGroup>
       </section>
 
       <div className="text-foreground flex items-center justify-between">
@@ -84,8 +97,8 @@ function RouteComponent() {
       </div>
 
       <Card>
-        <CardContent className="grid grid-cols-3 grid-rows-2 items-center justify-items-center gap-2">
-          {[0, 1, 2, 3, 4, 5].map((_, i) => (
+        <CardContent className="grid grid-cols-4 grid-rows-2 items-center justify-items-center gap-3">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
             <RecommendedUserCard key={`recommended-user-${i}`} />
           ))}
         </CardContent>

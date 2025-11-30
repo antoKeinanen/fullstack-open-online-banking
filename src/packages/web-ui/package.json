@@ -19,7 +19,8 @@
     "./badge": "./src/components/badge.tsx",
     "./drawer": "./src/components/drawer.tsx",
     "./dialog": "./src/components/dialog.tsx",
-    "./tabs": "./src/components/tabs.tsx"
+    "./tabs": "./src/components/tabs.tsx",
+    "./item": "./src/components/item.tsx"
   },
   "files": [
     "src"
