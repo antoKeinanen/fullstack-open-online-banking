@@ -32,7 +32,7 @@ func (s *TigerbeetleServiceServer) LookupAccount(_ context.Context, accountId *p
 	return ToPbAccount(accounts[0]), nil
 }
 
-func (s *TigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Account) (*pb.AccountId, error) {
+func (s *TigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Empty) (*pb.AccountId, error) {
 	accountId := tbt.ID()
 
 	account := tbt.Account{
@@ -42,8 +42,10 @@ func (s *TigerbeetleServiceServer) CreateAccount(_ context.Context, _ *pb.Accoun
 		UserData32:  0,
 		Ledger:      1,
 		Code:        718,
-		Flags:       0,
-		Timestamp:   0,
+		Flags: tbt.AccountFlags{
+			CreditsMustNotExceedDebits: true,
+		}.ToUint16(),
+		Timestamp: 0,
 	}
 
 	accountErrors, err := s.tbClient.CreateAccounts([]tbt.Account{account})

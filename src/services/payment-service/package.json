@@ -1,6 +1,5 @@
 {
-  "name": "@repo/user-service",
-  "private": true,
+  "name": "@repo/payment-service",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules build",
     "dev": "go run ./src/",

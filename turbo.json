@@ -22,7 +22,15 @@
       ],
       "env": [
         "TIGERBEETLE_SERVICE_PORT",
-        "TIGERBEETLE_ADDRESS"
+        "TIGERBEETLE_ADDRESS",
+        "PAYMENT_SERVICE_PORT",
+        "PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL",
+        "USER_SERVICE_PORT",
+        "USER_SERVICE_TIGERBEETLE_SERVICE_URL",
+        "USER_SERVICE_DATABASE_DSN",
+        "USER_SERVICE_JWT_SECRET",
+        "USER_BFF_PORT",
+        "USER_SERVICE_USER_SERVICE_URL"
       ],
       "cache": false,
       "persistent": true,

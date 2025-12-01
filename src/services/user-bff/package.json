@@ -1,5 +1,5 @@
 {
-  "name": "@repo/admin-bff",
+  "name": "@repo/user-bff",
   "private": true,
   "type": "module",
   "scripts": {

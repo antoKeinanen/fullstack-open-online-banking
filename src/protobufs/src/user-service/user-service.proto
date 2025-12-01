@@ -5,8 +5,9 @@ option go_package = "generated/user-protobuf";
 service UserService {
   rpc CreateUser(CreateUserRequest) returns (User);
   rpc GetUserById(GetUserByIdRequest) returns (User);
-  rpc GetUsersPaginated(GetUsersPaginatedRequest) returns (GetUsersPaginatedResponse);
-  rpc RefreshToken(Session) returns (Session);
+  rpc GetUsersPaginated(GetUsersPaginatedRequest)
+      returns (GetUsersPaginatedResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (Session);
   rpc RequestAuthentication(RequestAuthenticationRequest) returns (Empty);
   rpc AuthenticateWithOTP(OTPAuthenticationRequest) returns (Session);
 }
@@ -58,4 +59,6 @@ message User {
 message Session {
   string accessToken = 1;
   string refreshToken = 2;
+  string accessTokenExpires = 3;
+  string refreshTokenExpires = 4;
 }

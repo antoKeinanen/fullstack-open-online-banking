@@ -1,0 +1,23 @@
+{
+  "extends": "@repo/tsconfig/base",
+  "compilerOptions": {
+    "types": ["bun"],
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx"
+  },
+  "exclude": [
+    "../user-bff/node_modules",
+    "../user-bff/dist",
+    "../user-bff/build",
+    "../user-bff/out",
+    "../user-bff/.next",
+    "../user-bff/.expo",
+    "../user-bff/.turbo",
+    "../user-bff/coverage",
+    "../user-bff/**/*.spec.ts",
+    "../user-bff/**/*.test.ts",
+    "../user-bff/**/*.spec.tsx",
+    "../user-bff/**/*.test.tsx"
+  ]
+}

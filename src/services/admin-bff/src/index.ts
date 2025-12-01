@@ -17,7 +17,9 @@ import {
   userSchema,
 } from "@repo/validators/user";
 
-const userService = new UserService("localhost:50052");
+import { env } from "./env";
+
+const userService = new UserService(env.ADMIN_BFF_USER_SERVICE_URL);
 
 const app = new Hono().basePath("/api");
 app.use(logger());
@@ -167,4 +169,7 @@ if (Bun.env.NODE_ENV != "production") {
   );
 }
 
-export default app;
+export default {
+  port: env.ADMIN_BFF_PORT,
+  fetch: app.fetch,
+};

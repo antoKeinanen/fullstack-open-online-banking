@@ -3,13 +3,15 @@ package service.tigerbeetle;
 option go_package = "generated/tigerbeetle-protobuf";
 
 service TigerbeetleService {
-  rpc CreateAccount(Account) returns (AccountId);
+  rpc CreateAccount(Empty) returns (AccountId);
   rpc LookupAccount(AccountId) returns (Account);
   rpc CreatePendingTransfer(CreatePendingRequest) returns (TransferId);
   rpc PostPendingTransfer(PostPendingTransferRequest) returns (TransferId);
   rpc VoidPendingTransfer(VoidPendingTransferRequest) returns (TransferId);
   rpc LookupTransfer(TransferId) returns (Transfer);
 }
+
+message Empty {}
 
 message Transfer {
   reserved 5, 6, 7;

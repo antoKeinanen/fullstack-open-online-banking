@@ -425,6 +425,9 @@ importers:
       '@repo/validators':
         specifier: workspace:*
         version: link:../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.12)
       hono:
         specifier: ^4.10.4
         version: 4.10.4
@@ -457,60 +460,66 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  src/services/client-bff:
+  src/services/payment-service:
     dependencies:
-      '@faker-js/faker':
-        specifier: ^10.1.0
-        version: 10.1.0
-      '@grpc/grpc-js':
-        specifier: ^1.14.0
-        version: 1.14.0
-      '@hono/standard-validator':
-        specifier: ^0.1.5
-        version: 0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4)
       '@repo/protobufs':
         specifier: workspace:*
         version: link:../../protobufs
-      '@repo/validators':
-        specifier: workspace:*
-        version: link:../../packages/validators
-      hono:
-        specifier: ^4.10.4
-        version: 4.10.4
-      hono-openapi:
-        specifier: ^1.1.1
-        version: 1.1.1(@hono/standard-validator@0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod@4.1.12))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod@4.1.12))(@standard-schema/spec@1.0.0)(openapi-types@12.1.3)(zod@4.1.12))(@types/json-schema@7.0.15)(hono@4.10.4)(openapi-types@12.1.3)
-      zod:
-        specifier: 'catalog:'
-        version: 4.1.12
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
-      '@repo/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier
-      '@repo/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@types/bun':
-        specifier: latest
-        version: 1.3.3
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.1(jiti@2.6.1)
-      prettier:
-        specifier: 'catalog:'
-        version: 3.6.2
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
 
   src/services/tigerbeetle-service:
     dependencies:
       '@repo/protobufs':
         specifier: workspace:*
         version: link:../../protobufs
+
+  src/services/user-bff:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^10.1.0
+        version: 10.1.0
+      '@hono/standard-validator':
+        specifier: ^0.1.5
+        version: 0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4)
+      '@repo/service-bindings':
+        specifier: workspace:*
+        version: link:../../packages/ts-service-bindings
+      '@repo/validators':
+        specifier: workspace:*
+        version: link:../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.9.3)(zod@4.1.12)
+      hono:
+        specifier: ^4.10.4
+        version: 4.10.4
+      hono-openapi:
+        specifier: ^1.1.1
+        version: 1.1.1(@hono/standard-validator@0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod@4.1.12))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod@4.1.12))(@standard-schema/spec@1.0.0)(openapi-types@12.1.3)(zod@4.1.12))(@types/json-schema@7.0.15)(hono@4.10.4)(openapi-types@12.1.3)
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.12
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: file:src/tooling/eslint(eslint@9.39.1(jiti@2.6.1))(turbo@2.6.0)(typescript@5.9.3)
+      '@repo/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/bun':
+        specifier: latest
+        version: 1.3.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.1(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   src/services/user-service:
     dependencies:

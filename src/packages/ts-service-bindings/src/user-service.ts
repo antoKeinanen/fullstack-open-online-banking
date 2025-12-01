@@ -3,15 +3,22 @@ import * as grpc from "@grpc/grpc-js";
 
 import type {
   CreateUserRequest,
+  Empty,
   GetUserByIdRequest,
   GetUsersPaginatedRequest,
   GetUsersPaginatedResponse,
+  OTPAuthenticationRequest,
+  RefreshTokenRequest,
+  RequestAuthenticationRequest,
+  Session,
   User,
 } from "@repo/protobufs/user-service";
 import { UserServiceClient } from "@repo/protobufs/user-service";
 
 import type { Result } from "./try-catch";
 import { tryCatch } from "./try-catch";
+
+export type GrpcResponse<T> = Promise<Result<T, grpc.ServiceError>>;
 
 export class UserService {
   private client: UserServiceClient;
@@ -34,18 +41,39 @@ export class UserService {
     });
   }
 
-  async createUser(
-    request: CreateUserRequest,
-  ): Promise<Result<User, grpc.ServiceError>> {
+  async refreshToken(request: RefreshTokenRequest): GrpcResponse<Session> {
+    const refreshToken = promisify(this.client.refreshToken.bind(this.client));
+    return tryCatch(refreshToken(request)) as GrpcResponse<Session>;
+  }
+
+  async authenticateWithOTP(
+    request: OTPAuthenticationRequest,
+  ): GrpcResponse<Session> {
+    const authenticateWithOTP = promisify(
+      this.client.authenticateWithOtp.bind(this.client),
+    );
+    return tryCatch(authenticateWithOTP(request)) as GrpcResponse<Session>;
+  }
+
+  async requestAuthentication(
+    request: RequestAuthenticationRequest,
+  ): GrpcResponse<Empty> {
+    const requestAuthentication = promisify(
+      this.client.requestAuthentication.bind(this.client),
+    );
+    return tryCatch(requestAuthentication(request)) as Promise<
+      Result<Empty, grpc.ServiceError>
+    >;
+  }
+
+  async createUser(request: CreateUserRequest): GrpcResponse<User> {
     const createUser = promisify(this.client.createUser.bind(this.client));
     return tryCatch(createUser(request)) as Promise<
       Result<User, grpc.ServiceError>
     >;
   }
 
-  async getUserById(
-    request: GetUserByIdRequest,
-  ): Promise<Result<User, grpc.ServiceError>> {
+  async getUserById(request: GetUserByIdRequest): GrpcResponse<User> {
     const getUserById = promisify(this.client.getUserById.bind(this.client));
     return tryCatch(getUserById(request)) as Promise<
       Result<User, grpc.ServiceError>
@@ -54,7 +82,7 @@ export class UserService {
 
   async getUserPaginated(
     request: GetUsersPaginatedRequest,
-  ): Promise<Result<GetUsersPaginatedResponse, grpc.ServiceError>> {
+  ): GrpcResponse<GetUsersPaginatedResponse> {
     const getUsersPaginated = promisify(
       this.client.getUsersPaginated.bind(this.client),
     );

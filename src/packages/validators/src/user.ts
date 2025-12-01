@@ -19,6 +19,10 @@ export const getAllUsersResponseSchema = z.object({
   count: z.number(),
 });
 
+export const requestAuthenticationRequestSchema = z.object({
+  phoneNumber: z.string().nonempty(),
+});
+
 export const createUserRequestSchema = z.object({
   firstName: z.string().nonempty(),
   lastName: z.string().nonempty(),
@@ -28,6 +32,20 @@ export const createUserRequestSchema = z.object({
 
 export const getUserRequestSchema = z.object({
   userId: z.string().nonempty(),
+});
+
+export const OTPAuthenticationRequestSchema = z.object({
+  phoneNumber: z.string().nonempty(),
+  code: z.string().nonempty(),
+});
+
+export const sessionSchema = z.object({
+  accessToken: z.string().nonempty(),
+  accessTokenExpires: z.iso.datetime(),
+});
+
+export const refreshTokenRequestCookies = z.object({
+  refreshToken: z.jwt(),
 });
 
 export const createUserResponseSchema = userSchema;
@@ -43,3 +61,12 @@ export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
 
 export type GetUserRequest = z.infer<typeof getUserRequestSchema>;
 export type GetUserResponse = z.infer<typeof getUserResponseSchema>;
+
+export type requestAuthenticationRequest = z.infer<
+  typeof requestAuthenticationRequestSchema
+>;
+
+export type OTPAuthenticationRequest = z.infer<
+  typeof OTPAuthenticationRequestSchema
+>;
+export type Session = z.infer<typeof sessionSchema>;
