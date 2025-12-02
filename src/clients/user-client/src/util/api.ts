@@ -76,9 +76,7 @@ axios.interceptors.request.use((request) => {
 
 async function refreshToken(_failedRequest: unknown) {
   console.info("Refreshing tokens");
-  const response = await axios.post(
-    env.VITE_PUBLIC_USER_CLIENT_USER_BFF_URL + "api/auth/refresh-tokens",
-  );
+  const response = await axios.post("/api/auth/refresh-tokens");
   const parsed = sessionSchema.parse(response.data);
 
   const { setSession } = useAuthStore.getState();

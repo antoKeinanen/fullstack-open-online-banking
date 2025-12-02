@@ -9,7 +9,7 @@ import {
 
 export function RecommendedUserCard() {
   return (
-    <Item variant="muted" className="gap-1.5 p-0 flex justify">
+    <Item variant="muted" className="justify flex gap-1.5 p-0">
       <ItemHeader className="flex justify-center">
         <ItemMedia>
           <Avatar className="size-12">

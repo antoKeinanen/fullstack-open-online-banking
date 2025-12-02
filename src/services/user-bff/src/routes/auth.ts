@@ -132,6 +132,7 @@ authRouter.post(
     setCookie(c, "refreshToken", data.refreshToken!, {
       sameSite: "Strict",
       httpOnly: true,
+      secure: process.env.NODE_ENV === "PRODUCTION",
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expires: new Date(data.refreshTokenExpires!),
     });

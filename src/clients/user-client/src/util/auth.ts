@@ -1,5 +1,4 @@
 import { redirect } from "@tanstack/react-router";
-import axios from "axios";
 
 import { useAuthStore } from "../stores/authStore";
 

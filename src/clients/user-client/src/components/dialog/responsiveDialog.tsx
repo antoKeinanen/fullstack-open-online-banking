@@ -34,9 +34,7 @@ export function ResponsiveDialog({
         <DialogDescription className="sr-only">
           A dialog to send, request, deposit, and withdraw funds.
         </DialogDescription>
-        <DialogContent className="h-1/2 max-w-xl">
-          {children}
-        </DialogContent>
+        <DialogContent className="h-1/2 max-w-xl">{children}</DialogContent>
       </Dialog>
     );
   }

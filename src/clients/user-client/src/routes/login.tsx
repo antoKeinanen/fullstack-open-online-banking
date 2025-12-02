@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 

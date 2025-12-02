@@ -8,6 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check . --ignore-path ../../../.gitignore --ignore-path .prettierignore",
+    "format:fix": "prettier --write . --ignore-path ../../../.gitignore --ignore-path .prettierignore",
     "preview": "vite preview"
   },
   "dependencies": {
