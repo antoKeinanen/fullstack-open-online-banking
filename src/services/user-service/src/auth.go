@@ -157,8 +157,8 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 	return &pb.Session{
 		AccessToken:         accessToken,
 		RefreshToken:        refreshToken,
-		AccessTokenExpires:  accessTokenExpires.Format(time.RFC3339),
-		RefreshTokenExpires: refreshTokenExpires.Format(time.RFC3339),
+		AccessTokenExpires:  accessTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: refreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 
 }
@@ -204,7 +204,7 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 	return &pb.Session{
 		AccessToken:         accessToken,
 		RefreshToken:        refreshToken,
-		AccessTokenExpires:  accessTokenExpires.Format(time.RFC3339),
-		RefreshTokenExpires: refreshTokenExpires.Format(time.RFC3339),
+		AccessTokenExpires:  accessTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: refreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 }

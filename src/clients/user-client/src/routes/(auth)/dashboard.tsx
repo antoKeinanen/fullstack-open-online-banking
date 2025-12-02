@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import {
   BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
@@ -20,19 +20,27 @@ import {
   ItemTitle,
 } from "@repo/web-ui/item";
 
-import type { TransactionDialogState } from "../components/dialog/transactionDialog";
-import { TransactionDialog } from "../components/dialog/transactionDialog";
-import { RecommendedUserCard } from "../components/recommendedUser";
-import { TransactionCard } from "../components/transactionCard";
+import type { TransactionDialogState } from "../../components/dialog/transactionDialog";
+import { TransactionDialog } from "../../components/dialog/transactionDialog";
+import { RecommendedUserCard } from "../../components/recommendedUser";
+import { TransactionCard } from "../../components/transactionCard";
+import { useAuthStore } from "../../stores/authStore";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/(auth)/dashboard")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { clearSession } = useAuthStore();
+  const { navigate } = useRouter();
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
   const [transactionState, setTransactionState] =
     useState<TransactionDialogState>("deposit");
+
+  const logOut = async () => {
+    clearSession();
+    await navigate({ to: "/login", replace: true });
+  };
 
   return (
     <main className="w-full space-y-4">
@@ -48,7 +56,7 @@ function RouteComponent() {
           <ItemTitle>Anto Keinänen</ItemTitle>
         </ItemContent>
         <ItemActions>
-          <Button variant="outline">
+          <Button variant="outline" onClick={logOut}>
             <LockIcon /> Log out
           </Button>
         </ItemActions>

@@ -67,7 +67,7 @@ function RouteComponent() {
                       <Input
                         id="phoneNumber"
                         type="tel"
-                        placeholder="+358 686 4371"
+                        placeholder="+3586864371"
                       />
                     </Field>
 

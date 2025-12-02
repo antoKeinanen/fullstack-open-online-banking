@@ -4,4 +4,6 @@ use src/services/tigerbeetle-service/
 
 use src/services/user-service/
 
+use src/services/payment-service/
+
 use src/protobufs

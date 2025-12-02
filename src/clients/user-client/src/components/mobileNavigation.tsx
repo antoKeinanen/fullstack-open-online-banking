@@ -1,15 +1,17 @@
-import type { IconName } from "lucide-react/dynamic";
+import type { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { DynamicIcon } from "lucide-react/dynamic";
+import { ArrowLeftRightIcon, HomeIcon, UserIcon } from "lucide-react";
 
 import { cn } from "@repo/web-ui";
+
+const ICON_SIZE = 32 as const;
 
 interface MobileNavigationItem {
   label: string;
   id: string;
   urlRegex: RegExp;
   to: string;
-  icon: IconName;
+  icon: ReactNode;
 }
 
 const mobileNavigationItems: MobileNavigationItem[] = [
@@ -18,21 +20,21 @@ const mobileNavigationItems: MobileNavigationItem[] = [
     id: "home",
     urlRegex: /^\/dashboard(\/)?$/,
     to: "/dashboard",
-    icon: "home",
+    icon: <HomeIcon size={ICON_SIZE} />,
   },
   {
     label: "Transactions",
     id: "transactions",
     urlRegex: /^\/transactions(\/)?$/,
     to: "/transactions",
-    icon: "arrow-left-right",
+    icon: <ArrowLeftRightIcon size={ICON_SIZE} />,
   },
   {
     label: "Me",
     id: "me",
     urlRegex: /^\/me(\/)?$/,
     to: "/me",
-    icon: "user",
+    icon: <UserIcon size={ICON_SIZE} />,
   },
 ];
 
@@ -51,7 +53,7 @@ export function MobileNavigation() {
             },
           )}
         >
-          <DynamicIcon name={item.icon} size={32} />
+          {item.icon}
           <p>{item.label}</p>
         </Link>
       ))}

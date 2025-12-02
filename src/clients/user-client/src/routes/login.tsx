@@ -1,8 +1,17 @@
-import type { FormEvent, FormEventHandler } from "react";
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
 
+import type {
+  OTPAuthenticationRequest,
+  RequestAuthenticationRequest,
+} from "@repo/validators/user";
+import {
+  OTPAuthenticationRequestSchema,
+  requestAuthenticationRequestSchema,
+} from "@repo/validators/user";
 import { Button } from "@repo/web-ui/button";
 import {
   Card,
@@ -11,9 +20,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/web-ui/card";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@repo/web-ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@repo/web-ui/field";
 import { Input } from "@repo/web-ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@repo/web-ui/input-otp";
+
+import {
+  authenticateWithOp,
+  requestAuthentication,
+} from "../services/authService";
+import { useAuthStore } from "../stores/authStore";
 
 type LoginPhase = "phoneNumber" | "OTPCode";
 
@@ -22,18 +43,37 @@ export const Route = createFileRoute("/login")({
 });
 
 interface PhoneNumberLoginPhaseProps {
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (data: RequestAuthenticationRequest) => void;
 }
 
 function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
+  const form = useForm<RequestAuthenticationRequest>({
+    resolver: zodResolver(requestAuthenticationRequestSchema),
+  });
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldSet>
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="phoneNumber">Phone number</FieldLabel>
-            <Input id="phoneNumber" type="tel" placeholder="+358 686 4371" />
-          </Field>
+          <Controller
+            control={form.control}
+            name="phoneNumber"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="phoneNumber">Phone number</FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="+3586864371"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </FieldGroup>
         <Field>
           <Button type="submit">Log In</Button>
@@ -44,27 +84,49 @@ function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
 }
 
 interface OTPCodeLoginPhaseProps {
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (data: OTPAuthenticationRequest) => void;
+  phoneNumber: string;
 }
 
-function OTPCodeLoginPhase({ onSubmit }: OTPCodeLoginPhaseProps) {
+function OTPCodeLoginPhase({ onSubmit, phoneNumber }: OTPCodeLoginPhaseProps) {
+  const form = useForm({
+    resolver: zodResolver(OTPAuthenticationRequestSchema),
+    defaultValues: {
+      phoneNumber,
+    },
+  });
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldSet>
         <FieldGroup>
-          <Field>
-            <FieldLabel>Authentication code</FieldLabel>
-            <InputOTP id="OTPCode" maxLength={6}>
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
-          </Field>
+          <Controller
+            control={form.control}
+            name="code"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Authentication code</FieldLabel>
+                <InputOTP
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id="OTPCode"
+                  maxLength={6}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </FieldGroup>
         <Field>
           <Button type="submit">Log In</Button>
@@ -76,10 +138,20 @@ function OTPCodeLoginPhase({ onSubmit }: OTPCodeLoginPhaseProps) {
 
 function RouteComponent() {
   const [loginPhase, setLoginPhase] = useState<LoginPhase>("phoneNumber");
+  const [savedPhoneNumber, setSavedPhoneNumber] = useState<string | null>(null);
+  const { setSession } = useAuthStore();
+  const { navigate } = useRouter();
 
-  const onPhoneNumberSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const onPhoneNumberSubmit = async (data: RequestAuthenticationRequest) => {
+    await requestAuthentication(data);
+    setSavedPhoneNumber(data.phoneNumber);
     setLoginPhase("OTPCode");
+  };
+
+  const onOtpSubmit = async (data: OTPAuthenticationRequest) => {
+    const session = await authenticateWithOp(data);
+    setSession(session);
+    await navigate({ to: "/dashboard" });
   };
 
   return (
@@ -110,9 +182,9 @@ function RouteComponent() {
               <PhoneNumberLoginPhase onSubmit={onPhoneNumberSubmit} />
             ) : (
               <OTPCodeLoginPhase
-                onSubmit={() => {
-                  /* empty */
-                }}
+                onSubmit={onOtpSubmit}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                phoneNumber={savedPhoneNumber!}
               />
             )}
           </CardContent>

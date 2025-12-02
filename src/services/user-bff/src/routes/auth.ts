@@ -11,10 +11,10 @@ import {
 
 import { userService } from "../services/userService";
 
-export const authRouter = new Hono().basePath("/auth");
+export const authRouter = new Hono();
 
 authRouter.post(
-  "/auth/request-authentication",
+  "/request-authentication",
   describeRoute({
     description: "Generates authentication code and sends it to the user",
     responses: {
@@ -65,7 +65,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/auth/authenticate-with-otp",
+  "/authenticate-with-otp",
   describeRoute({
     description:
       "Get jwt token pair with the OTP code issued to user by calling request-authentication",
@@ -147,7 +147,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/auth/refresh-tokens",
+  "/refresh-tokens",
   describeRoute({
     description: "Refresh jwt token pair with the refresh token",
     responses: {

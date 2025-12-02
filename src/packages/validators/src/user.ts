@@ -31,12 +31,15 @@ export const createUserRequestSchema = z.object({
 });
 
 export const getUserRequestSchema = z.object({
-  userId: z.string().nonempty(),
+  userId: z.e164(),
 });
 
 export const OTPAuthenticationRequestSchema = z.object({
-  phoneNumber: z.string().nonempty(),
-  code: z.string().nonempty(),
+  phoneNumber: z.e164(),
+  code: z
+    .string()
+    .length(6)
+    .regex(/^[0-9]+$/),
 });
 
 export const sessionSchema = z.object({
@@ -62,7 +65,7 @@ export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
 export type GetUserRequest = z.infer<typeof getUserRequestSchema>;
 export type GetUserResponse = z.infer<typeof getUserResponseSchema>;
 
-export type requestAuthenticationRequest = z.infer<
+export type RequestAuthenticationRequest = z.infer<
   typeof requestAuthenticationRequestSchema
 >;
 

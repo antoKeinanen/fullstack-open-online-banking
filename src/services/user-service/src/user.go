@@ -18,7 +18,7 @@ func DbUserToPbUser(dbUser User) *pb.User {
 		FirstName:   dbUser.FirstName,
 		LastName:    dbUser.LastName,
 		Address:     dbUser.Address,
-		CreatedAt:   dbUser.CreatedAt.Format(time.RFC3339),
+		CreatedAt:   dbUser.CreatedAt.UTC().Format(time.RFC3339),
 	}
 }
 
