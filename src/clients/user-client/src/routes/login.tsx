@@ -190,7 +190,7 @@ function RouteComponent() {
           </CardContent>
           <div /> {/* An empty div to space out the ui evenly */}
         </div>
-        <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse">
+        <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse max-md:w-0">
           <BanknoteIcon size={48} />
         </div>
       </Card>
