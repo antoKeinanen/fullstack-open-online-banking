@@ -6,7 +6,7 @@ import { MobileNavigation } from "../components/mobileNavigation";
 const RootLayout = () => (
   <>
     <div className="bg-muted flex h-dvh w-full flex-col overflow-clip">
-      <main className="h-full w-full overflow-auto px-4 py-8">
+      <main className="h-full w-full overflow-auto px-4 py-8 flex flex-col">
         <Outlet />
       </main>
       <MobileNavigation />
