@@ -32,7 +32,8 @@
         "USER_BFF_PORT",
         "USER_BFF_USER_SERVICE_URL",
         "VITE_PUBLIC_USER_CLIENT_USER_BFF_URL",
-        "NODE_ENV"
+        "NODE_ENV",
+        "USER_BFF_JWT_SECRET"
       ],
       "cache": false,
       "persistent": true,

@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import type { z } from "zod";
 import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
@@ -6,6 +6,7 @@ import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { sessionSchema } from "@repo/validators/user";
 
 import { useAuthStore } from "../stores/authStore";
+import { tryCatch } from "./tryCatch";
 
 type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 
@@ -74,9 +75,19 @@ axios.interceptors.request.use((request) => {
   return request;
 });
 
-async function refreshToken(_failedRequest: unknown) {
+export async function refreshToken(_failedRequest: unknown) {
   console.info("Refreshing tokens");
-  const response = await axios.post("/api/auth/refresh-tokens");
+  const request = axios.post("/api/auth/refresh-tokens");
+  const { data: response, error } = await tryCatch<
+    AxiosResponse<unknown>,
+    AxiosError
+  >(request);
+  if (error) {
+    console.error("Failed to refresh tokens:", error);
+    window.location.replace("/login");
+    return;
+  }
+
   const parsed = sessionSchema.parse(response.data);
 
   const { setSession } = useAuthStore.getState();

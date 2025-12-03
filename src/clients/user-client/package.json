@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check . --ignore-path ../../../.gitignore --ignore-path .prettierignore",
     "format:fix": "prettier --write . --ignore-path ../../../.gitignore --ignore-path .prettierignore",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
