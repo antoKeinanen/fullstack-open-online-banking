@@ -27,7 +27,7 @@ export const Route = createFileRoute("/signup")({
 
 function RouteComponent() {
   return (
-    <div className="m-auto w-full max-w-sm self-center md:max-w-4xl">
+    <div className="m-auto w-full max-w-sm self-center md:max-w-4xl max-h-2/3">
       <Card className="flex h-full flex-row gap-0 overflow-clip p-0">
         <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
           <CardHeader className="w-full">
