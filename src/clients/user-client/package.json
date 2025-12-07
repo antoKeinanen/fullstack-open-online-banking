@@ -19,6 +19,7 @@
     "@repo/validators": "workspace:*",
     "@repo/web-ui": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
+    "@tanstack/react-query": "^5.90.7",
     "@tanstack/react-router": "^1.135.0",
     "@tanstack/react-router-devtools": "^1.135.0",
     "@uidotdev/usehooks": "^2.4.1",

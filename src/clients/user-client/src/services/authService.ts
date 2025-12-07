@@ -15,7 +15,7 @@ export function requestAuthentication(request: RequestAuthenticationRequest) {
   return api.post(url, z.any());
 }
 
-export function authenticateWithOp(request: OTPAuthenticationRequest) {
+export function authenticateWithOtp(request: OTPAuthenticationRequest) {
   const params = new URLSearchParams(request);
   const url = `/api/auth/authenticate-with-otp?${params.toString()}`;
 

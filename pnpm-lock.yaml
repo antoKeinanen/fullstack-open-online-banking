@@ -162,6 +162,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.1.17
+      '@tanstack/react-query':
+        specifier: ^5.90.7
+        version: 5.90.7(react@19.2.0)
       '@tanstack/react-router':
         specifier: ^1.135.0
         version: 1.135.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import type {
   OTPAuthenticationRequest,
@@ -31,12 +33,10 @@ import { Input } from "@repo/web-ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@repo/web-ui/input-otp";
 
 import {
-  authenticateWithOp,
+  authenticateWithOtp,
   requestAuthentication,
 } from "../services/authService";
 import { useAuthStore } from "../stores/authStore";
-
-type LoginPhase = "phoneNumber" | "OTPCode";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -44,11 +44,16 @@ export const Route = createFileRoute("/login")({
 
 interface PhoneNumberLoginPhaseProps {
   onSubmit: (data: RequestAuthenticationRequest) => void;
+  isPending: boolean;
 }
 
-function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
+function PhoneNumberLoginPhase({
+  onSubmit,
+  isPending,
+}: PhoneNumberLoginPhaseProps) {
   const form = useForm<RequestAuthenticationRequest>({
     resolver: zodResolver(requestAuthenticationRequestSchema),
+    disabled: isPending,
   });
 
   return (
@@ -76,7 +81,9 @@ function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
           />
         </FieldGroup>
         <Field>
-          <Button type="submit">Log In</Button>
+          <Button disabled={isPending} type="submit">
+            {!isPending ? "Log In" : "Loading..."}
+          </Button>
         </Field>
       </FieldSet>
     </form>
@@ -86,18 +93,30 @@ function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
 interface OTPCodeLoginPhaseProps {
   onSubmit: (data: OTPAuthenticationRequest) => void;
   phoneNumber: string;
+  isPending: boolean;
 }
 
-function OTPCodeLoginPhase({ onSubmit, phoneNumber }: OTPCodeLoginPhaseProps) {
-  const form = useForm({
+function OTPCodeLoginPhase({
+  onSubmit,
+  phoneNumber,
+  isPending,
+}: OTPCodeLoginPhaseProps) {
+  const form = useForm<OTPAuthenticationRequest>({
     resolver: zodResolver(OTPAuthenticationRequestSchema),
     defaultValues: {
       phoneNumber,
     },
+    disabled: isPending,
   });
 
+  useEffect(() => {
+    form.setValue("phoneNumber", phoneNumber, { shouldDirty: false });
+  }, [form, phoneNumber]);
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form
+      onSubmit={form.handleSubmit((data) => onSubmit({ ...data, phoneNumber }))}
+    >
       <FieldSet>
         <FieldGroup>
           <Controller
@@ -129,7 +148,9 @@ function OTPCodeLoginPhase({ onSubmit, phoneNumber }: OTPCodeLoginPhaseProps) {
           />
         </FieldGroup>
         <Field>
-          <Button type="submit">Log In</Button>
+          <Button disabled={isPending} type="submit">
+            {!isPending ? "Log In" : "Loading..."}
+          </Button>
         </Field>
       </FieldSet>
     </form>
@@ -137,22 +158,33 @@ function OTPCodeLoginPhase({ onSubmit, phoneNumber }: OTPCodeLoginPhaseProps) {
 }
 
 function RouteComponent() {
-  const [loginPhase, setLoginPhase] = useState<LoginPhase>("phoneNumber");
   const [savedPhoneNumber, setSavedPhoneNumber] = useState<string | null>(null);
   const { setSession } = useAuthStore();
   const { navigate } = useRouter();
+  const isPhoneNumberPhase = savedPhoneNumber === null;
 
-  const onPhoneNumberSubmit = async (data: RequestAuthenticationRequest) => {
-    await requestAuthentication(data);
-    setSavedPhoneNumber(data.phoneNumber);
-    setLoginPhase("OTPCode");
-  };
+  const requestAuthenticationMutation = useMutation({
+    mutationKey: ["request-authentication"],
+    mutationFn: requestAuthentication,
+    onSuccess: (_, request) => setSavedPhoneNumber(request.phoneNumber),
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to login, try again later");
+    },
+  });
 
-  const onOtpSubmit = async (data: OTPAuthenticationRequest) => {
-    const session = await authenticateWithOp(data);
-    setSession(session);
-    await navigate({ to: "/dashboard" });
-  };
+  const authenticateWithOTPMutation = useMutation({
+    mutationKey: ["submit-otp"],
+    mutationFn: authenticateWithOtp,
+    onSuccess: async (session) => {
+      setSession(session);
+      await navigate({ to: "/dashboard" });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to login, try again later");
+    },
+  });
 
   return (
     <div className="m-auto w-full max-w-sm self-center md:max-w-4xl">
@@ -167,24 +199,25 @@ function RouteComponent() {
               <span className="bg-muted-foreground h-px w-full" />
             </div>
             <CardTitle className="text-center">
-              {loginPhase === "phoneNumber"
-                ? "Welcome Back!"
-                : "Authentication required"}
+              {isPhoneNumberPhase ? "Welcome Back!" : "Authentication required"}
             </CardTitle>
             <CardDescription className="text-center">
-              {loginPhase === "phoneNumber"
+              {isPhoneNumberPhase
                 ? "Log back in using your phone number"
                 : "We have sent you an authentication code to your phone"}
             </CardDescription>
           </CardHeader>
           <CardContent className="w-full">
-            {loginPhase == "phoneNumber" ? (
-              <PhoneNumberLoginPhase onSubmit={onPhoneNumberSubmit} />
+            {isPhoneNumberPhase ? (
+              <PhoneNumberLoginPhase
+                isPending={requestAuthenticationMutation.isPending}
+                onSubmit={requestAuthenticationMutation.mutateAsync}
+              />
             ) : (
               <OTPCodeLoginPhase
-                onSubmit={onOtpSubmit}
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                phoneNumber={savedPhoneNumber!}
+                isPending={authenticateWithOTPMutation.isPending}
+                onSubmit={authenticateWithOTPMutation.mutateAsync}
+                phoneNumber={savedPhoneNumber}
               />
             )}
           </CardContent>

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { parse as parseDate } from "date-fns";
 import { BanknoteIcon } from "lucide-react";
@@ -40,12 +41,25 @@ export const Route = createFileRoute("/signup")({
 
 function SignUpFormValues() {
   const router = useRouter();
+  const signUpMutation = useMutation({
+    mutationKey: ["sign-up"],
+    mutationFn: signUp,
+    onSuccess: async () => {
+      toast.success("User created, please log in.");
+      await router.navigate({ to: "/login", replace: true });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to sign up, try again later");
+    },
+  });
   const form = useForm({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       isResident: false,
       isTruth: false,
     },
+    disabled: signUpMutation.isPending,
   });
 
   const onSubmit = async (values: SignUpFormValues) => {
@@ -65,10 +79,7 @@ function SignUpFormValues() {
       phoneNumber: values.phoneNumber,
     };
 
-    await signUp(request);
-
-    toast.success("User created, please log in.");
-    await router.navigate({ to: "/login", replace: true });
+    await signUpMutation.mutateAsync(request);
   };
 
   return (
@@ -320,7 +331,9 @@ function SignUpFormValues() {
           />
 
           <Field>
-            <Button type="submit">Sign up</Button>
+            <Button disabled={signUpMutation.isPending} type="submit">
+              {signUpMutation.isPending ? "Submitting..." : "Sign up"}
+            </Button>
           </Field>
         </FieldSet>
       </FieldGroup>
