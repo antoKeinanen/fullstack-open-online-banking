@@ -1,6 +1,8 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
+import { Toaster } from "@repo/web-ui/sonner";
+
 import { MobileNavigation } from "../components/mobileNavigation";
 
 const RootLayout = () => (
@@ -12,6 +14,7 @@ const RootLayout = () => (
       <MobileNavigation />
     </div>
     <TanStackRouterDevtools position="top-left" />
+    <Toaster richColors position="top-center" />
   </>
 );
 

@@ -1,9 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { parse as parseDate } from "date-fns";
 import { BanknoteIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import type { SignUpFormValues } from "@repo/validators/user";
+import type {
+  CreateUserRequest,
+  SignUpFormValues,
+} from "@repo/validators/user";
 import { signUpFormSchema } from "@repo/validators/user";
 import { Button } from "@repo/web-ui/button";
 import {
@@ -26,11 +31,15 @@ import {
 } from "@repo/web-ui/field";
 import { Input } from "@repo/web-ui/input";
 
+import { signUp } from "../services/authService";
+import { formatAddress } from "../util/formatters";
+
 export const Route = createFileRoute("/signup")({
   component: RouteComponent,
 });
 
 function SignUpFormValues() {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -39,8 +48,27 @@ function SignUpFormValues() {
     },
   });
 
-  const onSubmit = (values: SignUpFormValues) => {
-    console.log(values);
+  const onSubmit = async (values: SignUpFormValues) => {
+    const birthDate = parseDate(
+      `${values.birthDay}/${values.birthMonth}/${values.birthYear}`,
+      "dd/MM/yyyy",
+      new Date(),
+    );
+
+    const request: CreateUserRequest = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      address: formatAddress(values.homeAddress, values.postCode, values.city),
+      birthDate: birthDate,
+      isResident: values.isResident as true,
+      isTruth: values.isTruth as true,
+      phoneNumber: values.phoneNumber,
+    };
+
+    await signUp(request);
+
+    toast.success("User created, please log in.");
+    await router.navigate({ to: "/login", replace: true });
   };
 
   return (

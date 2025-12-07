@@ -1,6 +1,7 @@
 import z from "zod";
 
 import type {
+  CreateUserRequest,
   OTPAuthenticationRequest,
   RequestAuthenticationRequest,
 } from "@repo/validators/user";
@@ -19,4 +20,8 @@ export function authenticateWithOp(request: OTPAuthenticationRequest) {
   const url = `/api/auth/authenticate-with-otp?${params.toString()}`;
 
   return api.post(url, sessionSchema);
+}
+
+export function signUp(request: CreateUserRequest) {
+  return api.post("/api/auth/sign-up", z.string(), request);
 }

@@ -75,6 +75,7 @@ export const signUpFormSchema = z
     isResident: z.boolean().refine((v) => v === true, "Required"),
     isTruth: z.boolean().refine((v) => v === true, "Required"),
   })
+
   .superRefine(({ birthDay, birthMonth, birthYear }, ctx) => {
     const birthDate = parseDate(
       `${birthDay}/${birthMonth}/${birthYear}`,
@@ -82,7 +83,36 @@ export const signUpFormSchema = z
       new Date(),
     );
 
+    if (isNaN(birthDate.getTime())) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid date",
+        path: ["birthDay"],
+      });
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid date",
+        path: ["birthMonth"],
+      });
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid date",
+        path: ["birthYear"],
+      });
+      return;
+    }
+
     if (!isOverYears(18, birthDate)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "You must be at least 18 years old",
+        path: ["birthDay"],
+      });
+      ctx.addIssue({
+        code: "custom",
+        message: "You must be at least 18 years old",
+        path: ["birthMonth"],
+      });
       ctx.addIssue({
         code: "custom",
         message: "You must be at least 18 years old",
