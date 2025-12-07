@@ -38,6 +38,7 @@ type User struct {
 
 type OTPCode struct {
 	OTPCode string `db:"one_time_passcode"`
+	UserId  string `db:"user_id"`
 }
 
 func newServer(config *Configuration) *UserServiceServer {
