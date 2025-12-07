@@ -10,16 +10,11 @@ import { sessionSchema } from "@repo/validators/user";
 import * as api from "../util/api";
 
 export function requestAuthentication(request: RequestAuthenticationRequest) {
-  const params = new URLSearchParams(request);
-  const url = `/api/auth/request-authentication?${params.toString()}`;
-  return api.post(url, z.any());
+  return api.post("/api/auth/request-authentication", z.any(), request);
 }
 
 export function authenticateWithOtp(request: OTPAuthenticationRequest) {
-  const params = new URLSearchParams(request);
-  const url = `/api/auth/authenticate-with-otp?${params.toString()}`;
-
-  return api.post(url, sessionSchema);
+  return api.post("/api/auth/authenticate-with-otp", sessionSchema, request);
 }
 
 export function signUp(request: CreateUserRequest) {

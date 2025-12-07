@@ -39,10 +39,10 @@ authRouter.post(
     },
   }),
 
-  validator("query", requestAuthenticationRequestSchema),
+  validator("json", requestAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("query");
+    const query = c.req.valid("json");
 
     const { error } = await userService.requestAuthentication(query);
     if (error != null) {
@@ -104,10 +104,10 @@ authRouter.post(
     },
   }),
 
-  validator("query", OTPAuthenticationRequestSchema),
+  validator("json", OTPAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("query");
+    const query = c.req.valid("json");
 
     const { data, error } = await userService.authenticateWithOTP(query);
     if (error != null) {
