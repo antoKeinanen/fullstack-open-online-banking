@@ -1,6 +1,10 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
 
+import type { SignUpFormValues } from "@repo/validators/user";
+import { signUpFormSchema } from "@repo/validators/user";
 import { Button } from "@repo/web-ui/button";
 import {
   Card,
@@ -13,6 +17,7 @@ import { Checkbox } from "@repo/web-ui/checkbox";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
@@ -25,9 +30,279 @@ export const Route = createFileRoute("/signup")({
   component: RouteComponent,
 });
 
+function SignUpFormValues() {
+  const form = useForm({
+    resolver: zodResolver(signUpFormSchema),
+    defaultValues: {
+      isResident: false,
+      isTruth: false,
+    },
+  });
+
+  const onSubmit = (values: SignUpFormValues) => {
+    console.log(values);
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit, console.error)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend>About you</FieldLegend>
+          <FieldDescription>
+            We need to know a few things about you to get started
+          </FieldDescription>
+
+          <FieldGroup>
+            <div className="grid grid-cols-2 gap-2">
+              <Controller
+                control={form.control}
+                name="firstName"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      First name(s)
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="text"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="lastName"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      Last name
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="text"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <Controller
+              control={form.control}
+              name="phoneNumber"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel required htmlFor={field.name}>
+                    Phone number
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id={field.name}
+                    type="tel"
+                    placeholder="+3586864371"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <FieldSeparator />
+
+            <Controller
+              control={form.control}
+              name="homeAddress"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel required htmlFor={field.name}>
+                    Home address
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id={field.name}
+                    type="text"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Controller
+                control={form.control}
+                name="postCode"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      Postcode
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="text"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="city"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      City
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="text"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <FieldSeparator />
+
+            <div className="grid grid-cols-3 gap-2">
+              <Controller
+                control={form.control}
+                name="birthDay"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      Day
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="string"
+                      min="1"
+                      max="31"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="birthMonth"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      Month
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="number"
+                      min="1"
+                      max="12"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="birthYear"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required htmlFor={field.name}>
+                      Year
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      type="number"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+          </FieldGroup>
+
+          <FieldSeparator />
+
+          <Controller
+            control={form.control}
+            name="isResident"
+            render={({ field, fieldState }) => (
+              <Field orientation="horizontal">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldLabel required htmlFor={field.name}>
+                  I am a resident of Finland
+                </FieldLabel>
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="isTruth"
+            render={({ field, fieldState }) => (
+              <Field orientation="horizontal">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldLabel required htmlFor={field.name}>
+                  I hereby informing that the above mentioned all information is
+                  correct and true as the best of my knowledge and experience.
+                </FieldLabel>
+              </Field>
+            )}
+          />
+
+          <Field>
+            <Button type="submit">Sign up</Button>
+          </Field>
+        </FieldSet>
+      </FieldGroup>
+    </form>
+  );
+}
+
 function RouteComponent() {
   return (
-    <div className="m-auto w-full max-w-sm self-center md:max-w-4xl max-h-2/3">
+    <div className="m-auto max-h-2/3 w-full max-w-sm self-center md:max-w-4xl">
       <Card className="flex h-full flex-row gap-0 overflow-clip p-0">
         <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
           <CardHeader className="w-full">
@@ -37,110 +312,7 @@ function RouteComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="w-full overflow-x-auto">
-            <form>
-              <FieldGroup>
-                <FieldSet>
-                  <FieldLegend>About you</FieldLegend>
-                  <FieldDescription>
-                    We need to know a few things about you to get started
-                  </FieldDescription>
-
-                  <FieldGroup>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field>
-                        <FieldLabel required htmlFor="firstName">
-                          First name(s)
-                        </FieldLabel>
-                        <Input id="firstName" type="text" />
-                      </Field>
-                      <Field>
-                        <FieldLabel required htmlFor="lastName">
-                          Last name
-                        </FieldLabel>
-                        <Input id="lastName" type="text" />
-                      </Field>
-                    </div>
-                    <Field>
-                      <FieldLabel required htmlFor="phoneNumber">
-                        Phone number
-                      </FieldLabel>
-                      <Input
-                        id="phoneNumber"
-                        type="tel"
-                        placeholder="+3586864371"
-                      />
-                    </Field>
-
-                    <FieldSeparator />
-
-                    <Field>
-                      <FieldLabel required htmlFor="address">
-                        Home address
-                      </FieldLabel>
-                      <Input type="text" id="address" />
-                    </Field>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field>
-                        <FieldLabel required htmlFor="postcode">
-                          Postcode
-                        </FieldLabel>
-                        <Input id="postcode" type="text" />
-                      </Field>
-                      <Field>
-                        <FieldLabel required htmlFor="city">
-                          city
-                        </FieldLabel>
-                        <Input id="city" type="text" />
-                      </Field>
-                    </div>
-
-                    <FieldSeparator />
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <Field>
-                        <FieldLabel required htmlFor="birthDay">
-                          Day
-                        </FieldLabel>
-                        <Input id="birthDay" type="number" min="1" max="31" />
-                      </Field>
-                      <Field>
-                        <FieldLabel required htmlFor="birthMonth">
-                          Month
-                        </FieldLabel>
-                        <Input id="birthMonth" type="number" min="1" max="12" />
-                      </Field>
-                      <Field>
-                        <FieldLabel required htmlFor="birthYear">
-                          Year
-                        </FieldLabel>
-                        <Input id="birthYear" type="number" />
-                      </Field>
-                    </div>
-                  </FieldGroup>
-
-                  <FieldSeparator />
-
-                  <Field orientation="horizontal">
-                    <Checkbox id="isResident" />
-                    <FieldLabel required htmlFor="isResident">
-                      I am a resident of Finland
-                    </FieldLabel>
-                  </Field>
-                  <Field orientation="horizontal">
-                    <Checkbox id="isTruth" />
-                    <FieldLabel required htmlFor="isTruth">
-                      I hereby informing that the above mentioned all
-                      information is correct and true as the best of my
-                      knowledge and experience.
-                    </FieldLabel>
-                  </Field>
-
-                  <Field>
-                    <Button type="submit">Sign up</Button>
-                  </Field>
-                </FieldSet>
-              </FieldGroup>
-            </form>
+            <SignUpFormValues />
           </CardContent>
           <div /> {/* An empty div to space out the ui evenly */}
         </div>

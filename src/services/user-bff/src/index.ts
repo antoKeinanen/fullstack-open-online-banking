@@ -1,6 +1,5 @@
 import type { JwtVariables } from "hono/jwt";
 import { Hono } from "hono";
-import { jwt } from "hono/jwt";
 import { logger } from "hono/logger";
 
 import { env } from "./env";
