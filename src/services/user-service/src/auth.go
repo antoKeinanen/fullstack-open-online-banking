@@ -97,14 +97,23 @@ func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.Req
 func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAuthenticationRequest) (*pb.Session, error) {
 	otpCode := OTPCode{}
 	err := s.db.Get(&otpCode, `
-		update banking.one_time_passcodes
-		set expires = now()
-		from banking.users
-		where
-				users.phone_number = $1
-				and users.user_id = one_time_passcodes.user_id
-				and one_time_passcodes.expires > now()
-		returning one_time_passcode, users.user_id as user_id`,
+		with otp_expiry_update as (
+				update banking.one_time_passcodes
+						set expires = now()
+						from banking.users
+						where
+								users.phone_number = $1
+										and users.user_id = one_time_passcodes.user_id
+										and one_time_passcodes.expires > now()
+						returning one_time_passcode, users.user_id as user_id),
+				last_phone_verification_update AS (
+						update banking.users
+								set last_phone_verification = now()
+								where phone_number = $1
+										and user_id in (select user_id from otp_expiry_update)
+								returning user_id)
+		select *
+		from otp_expiry_update`,
 		req.PhoneNumber,
 	)
 	if err != nil {
