@@ -3,6 +3,7 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 
 import {
+  createUserRequestSchema,
   OTPAuthenticationRequestSchema,
   refreshTokenRequestCookies,
   requestAuthenticationRequestSchema,
@@ -210,5 +211,53 @@ authRouter.post(
       },
       200,
     );
+  },
+);
+
+authRouter.post(
+  "/sign-up",
+  describeRoute({
+    description: "Creates a user",
+    responses: {
+      201: {
+        description: "Successfully created a user",
+        content: {
+          "text/plain": {
+            example: "Created",
+          },
+        },
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+    },
+  }),
+
+  validator("json", createUserRequestSchema),
+
+  async (c) => {
+    const request = c.req.valid("json");
+
+    const { data, error } = await userService.createUser({
+      ...request,
+      birthDate: request.birthDate.toISOString(),
+    });
+    if (error !== null) {
+      if (error.details == "user_already_exists") {
+        return c.text("Created", 201);
+      }
+      return c.text("Action failed", 500);
+    }
+
+    // TODO: remove logging
+    console.log("Created", data);
+
+    return c.text("Created", 201);
   },
 );

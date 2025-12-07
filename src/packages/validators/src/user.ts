@@ -25,12 +25,14 @@ export const requestAuthenticationRequestSchema = z.object({
 });
 
 export const createUserRequestSchema = z.object({
+  phoneNumber: z.e164(),
   firstName: z.string().nonempty(),
   lastName: z.string().nonempty(),
-  phoneNumber: z.string().nonempty(),
   address: z.string().nonempty(),
+  birthDate: z.coerce.date().refine((birthDate) => isOverYears(18, birthDate)),
+  isResident: z.literal(true),
+  isTruth: z.literal(true),
 });
-
 export const getUserRequestSchema = z.object({
   userId: z.e164(),
 });
@@ -89,16 +91,6 @@ export const signUpFormSchema = z
     }
   });
 export type SignUpFormValues = z.infer<typeof signUpFormSchema>;
-
-export const createUserRequest = z.object({
-  phoneNumber: z.e164(),
-  firstName: z.string().nonempty(),
-  lastName: z.string().nonempty(),
-  address: z.string().nonempty(),
-  birthDate: z.coerce.date().refine((birthDate) => isOverYears(18, birthDate)),
-  isResident: z.literal(true),
-  isTruth: z.literal(true),
-});
 
 export const signUpRequestSchema = z.object({});
 

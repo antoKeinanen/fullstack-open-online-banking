@@ -55,6 +55,7 @@ message User {
   string lastName = 4;
   string address = 5;
   string createdAt = 6;
+  string birthDate = 7;
 }
 
 message Session {

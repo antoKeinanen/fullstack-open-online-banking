@@ -55,7 +55,7 @@ func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.Req
 
 	user := User{}
 	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address, created_at
+		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
 		from banking.users
 		where phone_number = $1`,
 		req.PhoneNumber,
@@ -104,7 +104,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 
 	user := User{}
 	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address, created_at
+		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
 		from banking.users
 		where phone_number = $1`,
 		req.PhoneNumber,
