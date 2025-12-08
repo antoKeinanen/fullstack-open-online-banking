@@ -119,7 +119,7 @@ function SendTab() {
 
             <Field>
               <FieldLabel htmlFor="recipient">Recipient</FieldLabel>
-              <Input id="recipient" type="tel" placeholder="+358 686 4371" />
+              <Input id="recipient" type="tel" placeholder="+3586864371" />
             </Field>
 
             <Field>
@@ -150,7 +150,7 @@ function RequestTab() {
 
             <Field>
               <FieldLabel htmlFor="recipient">Recipient</FieldLabel>
-              <Input id="recipient" type="tel" placeholder="+358 686 4371" />
+              <Input id="recipient" type="tel" placeholder="+3586864371" />
             </Field>
 
             <Field>

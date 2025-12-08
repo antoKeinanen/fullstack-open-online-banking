@@ -55,7 +55,7 @@ func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.Req
 
 	user := User{}
 	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address, created_at
+		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
 		from banking.users
 		where phone_number = $1`,
 		req.PhoneNumber,
@@ -95,31 +95,26 @@ func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.Req
 }
 
 func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAuthenticationRequest) (*pb.Session, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		log.Printf("Error: failed to create database transaction: %v", err)
-		return nil, errors.New("database_error")
-	}
-	defer tx.Rollback()
-
-	user := User{}
-	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address, created_at
-		from banking.users
-		where phone_number = $1`,
-		req.PhoneNumber,
-	)
-	if err != nil {
-		log.Printf("Error: Failed to get user from the database: %v", err)
-		return nil, errors.New("user_not_found")
-	}
-
 	otpCode := OTPCode{}
-	err = tx.Get(&otpCode, `
-		select one_time_passcode
-		from banking.one_time_passcodes
-		where user_id = $1 and expires > now()`,
-		user.UserId,
+	err := s.db.Get(&otpCode, `
+		with otp_expiry_update as (
+				update banking.one_time_passcodes
+						set expires = now()
+						from banking.users
+						where
+								users.phone_number = $1
+										and users.user_id = one_time_passcodes.user_id
+										and one_time_passcodes.expires > now()
+						returning one_time_passcode, users.user_id as user_id),
+				last_phone_verification_update AS (
+						update banking.users
+								set last_phone_verification = now()
+								where phone_number = $1
+										and user_id in (select user_id from otp_expiry_update)
+								returning user_id)
+		select *
+		from otp_expiry_update`,
+		req.PhoneNumber,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -134,21 +129,15 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 		return nil, errors.New("codes_do_not_match")
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("Error: Failed to commit the otp code: %v", err)
-		return nil, errors.New("database_error")
-	}
-
 	accessTokenExpires := time.Now().Add(5 * time.Minute)
-	accessToken, err := GenerateJwtToken(user.UserId, accessTokenExpires, s.config.UserServiceJWTSecret)
+	accessToken, err := GenerateJwtToken(otpCode.UserId, accessTokenExpires, s.config.UserServiceJWTSecret)
 	if err != nil {
 		log.Printf("Error: failed to generate access token: %v", err)
 		return nil, errors.New("token_error")
 	}
 
 	refreshTokenExpires := time.Now().Add(10 * time.Minute)
-	refreshToken, err := GenerateJwtToken(user.UserId, refreshTokenExpires, s.config.UserServiceJWTSecret)
+	refreshToken, err := GenerateJwtToken(otpCode.UserId, refreshTokenExpires, s.config.UserServiceJWTSecret)
 	if err != nil {
 		log.Printf("Error: failed to generate refresh token: %v", err)
 		return nil, errors.New("token_error")
@@ -157,8 +146,8 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 	return &pb.Session{
 		AccessToken:         accessToken,
 		RefreshToken:        refreshToken,
-		AccessTokenExpires:  accessTokenExpires.Format(time.RFC3339),
-		RefreshTokenExpires: refreshTokenExpires.Format(time.RFC3339),
+		AccessTokenExpires:  accessTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: refreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 
 }
@@ -204,7 +193,7 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 	return &pb.Session{
 		AccessToken:         accessToken,
 		RefreshToken:        refreshToken,
-		AccessTokenExpires:  accessTokenExpires.Format(time.RFC3339),
-		RefreshTokenExpires: refreshTokenExpires.Format(time.RFC3339),
+		AccessTokenExpires:  accessTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: refreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 }

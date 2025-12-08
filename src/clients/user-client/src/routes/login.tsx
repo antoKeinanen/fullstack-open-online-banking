@@ -1,8 +1,19 @@
-import type { FormEvent, FormEventHandler } from "react";
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
+import type {
+  OTPAuthenticationRequest,
+  RequestAuthenticationRequest,
+} from "@repo/validators/user";
+import {
+  OTPAuthenticationRequestSchema,
+  requestAuthenticationRequestSchema,
+} from "@repo/validators/user";
 import { Button } from "@repo/web-ui/button";
 import {
   Card,
@@ -11,32 +22,68 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/web-ui/card";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@repo/web-ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@repo/web-ui/field";
 import { Input } from "@repo/web-ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@repo/web-ui/input-otp";
 
-type LoginPhase = "phoneNumber" | "OTPCode";
+import {
+  authenticateWithOtp,
+  requestAuthentication,
+} from "../services/authService";
+import { useAuthStore } from "../stores/authStore";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
 });
 
 interface PhoneNumberLoginPhaseProps {
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (data: RequestAuthenticationRequest) => void;
+  isPending: boolean;
 }
 
-function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
+function PhoneNumberLoginPhase({
+  onSubmit,
+  isPending,
+}: PhoneNumberLoginPhaseProps) {
+  const form = useForm<RequestAuthenticationRequest>({
+    resolver: zodResolver(requestAuthenticationRequestSchema),
+    disabled: isPending,
+  });
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldSet>
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="phoneNumber">Phone number</FieldLabel>
-            <Input id="phoneNumber" type="tel" placeholder="+358 686 4371" />
-          </Field>
+          <Controller
+            control={form.control}
+            name="phoneNumber"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="phoneNumber">Phone number</FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="+3586864371"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </FieldGroup>
         <Field>
-          <Button type="submit">Log In</Button>
+          <Button disabled={isPending} type="submit">
+            {!isPending ? "Log In" : "Loading..."}
+          </Button>
         </Field>
       </FieldSet>
     </form>
@@ -44,30 +91,62 @@ function PhoneNumberLoginPhase({ onSubmit }: PhoneNumberLoginPhaseProps) {
 }
 
 interface OTPCodeLoginPhaseProps {
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (data: OTPAuthenticationRequest) => void;
+  phoneNumber: string;
+  isPending: boolean;
 }
 
-function OTPCodeLoginPhase({ onSubmit }: OTPCodeLoginPhaseProps) {
+function OTPCodeLoginPhase({
+  onSubmit,
+  phoneNumber,
+  isPending,
+}: OTPCodeLoginPhaseProps) {
+  const form = useForm<OTPAuthenticationRequest>({
+    resolver: zodResolver(OTPAuthenticationRequestSchema),
+    defaultValues: {
+      phoneNumber,
+    },
+    disabled: isPending,
+  });
+
   return (
-    <form onSubmit={onSubmit}>
+    <form
+      onSubmit={form.handleSubmit((data) => onSubmit({ ...data, phoneNumber }))}
+    >
       <FieldSet>
         <FieldGroup>
-          <Field>
-            <FieldLabel>Authentication code</FieldLabel>
-            <InputOTP id="OTPCode" maxLength={6}>
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
-          </Field>
+          <Controller
+            control={form.control}
+            name="code"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Authentication code</FieldLabel>
+                <InputOTP
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id="OTPCode"
+                  maxLength={6}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </FieldGroup>
         <Field>
-          <Button type="submit">Log In</Button>
+          <Button disabled={isPending} type="submit">
+            {!isPending ? "Log In" : "Loading..."}
+          </Button>
         </Field>
       </FieldSet>
     </form>
@@ -75,12 +154,33 @@ function OTPCodeLoginPhase({ onSubmit }: OTPCodeLoginPhaseProps) {
 }
 
 function RouteComponent() {
-  const [loginPhase, setLoginPhase] = useState<LoginPhase>("phoneNumber");
+  const [savedPhoneNumber, setSavedPhoneNumber] = useState<string | null>(null);
+  const { setSession } = useAuthStore();
+  const { navigate } = useRouter();
+  const isPhoneNumberPhase = savedPhoneNumber === null;
 
-  const onPhoneNumberSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setLoginPhase("OTPCode");
-  };
+  const requestAuthenticationMutation = useMutation({
+    mutationKey: ["request-authentication"],
+    mutationFn: requestAuthentication,
+    onSuccess: (_, request) => setSavedPhoneNumber(request.phoneNumber),
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to login, try again later");
+    },
+  });
+
+  const authenticateWithOTPMutation = useMutation({
+    mutationKey: ["submit-otp"],
+    mutationFn: authenticateWithOtp,
+    onSuccess: async (session) => {
+      setSession(session);
+      await navigate({ to: "/dashboard" });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to login, try again later");
+    },
+  });
 
   return (
     <div className="m-auto w-full max-w-sm self-center md:max-w-4xl">
@@ -95,30 +195,31 @@ function RouteComponent() {
               <span className="bg-muted-foreground h-px w-full" />
             </div>
             <CardTitle className="text-center">
-              {loginPhase === "phoneNumber"
-                ? "Welcome Back!"
-                : "Authentication required"}
+              {isPhoneNumberPhase ? "Welcome Back!" : "Authentication required"}
             </CardTitle>
             <CardDescription className="text-center">
-              {loginPhase === "phoneNumber"
+              {isPhoneNumberPhase
                 ? "Log back in using your phone number"
                 : "We have sent you an authentication code to your phone"}
             </CardDescription>
           </CardHeader>
           <CardContent className="w-full">
-            {loginPhase == "phoneNumber" ? (
-              <PhoneNumberLoginPhase onSubmit={onPhoneNumberSubmit} />
+            {isPhoneNumberPhase ? (
+              <PhoneNumberLoginPhase
+                isPending={requestAuthenticationMutation.isPending}
+                onSubmit={requestAuthenticationMutation.mutateAsync}
+              />
             ) : (
               <OTPCodeLoginPhase
-                onSubmit={() => {
-                  /* empty */
-                }}
+                isPending={authenticateWithOTPMutation.isPending}
+                onSubmit={authenticateWithOTPMutation.mutateAsync}
+                phoneNumber={savedPhoneNumber}
               />
             )}
           </CardContent>
           <div /> {/* An empty div to space out the ui evenly */}
         </div>
-        <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse">
+        <div className="bg-muted text-muted-foreground flex w-1/2 items-center justify-center max-md:collapse max-md:w-0">
           <BanknoteIcon size={48} />
         </div>
       </Card>

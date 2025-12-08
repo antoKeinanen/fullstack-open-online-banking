@@ -3,6 +3,7 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 
 import {
+  createUserRequestSchema,
   OTPAuthenticationRequestSchema,
   refreshTokenRequestCookies,
   requestAuthenticationRequestSchema,
@@ -11,10 +12,10 @@ import {
 
 import { userService } from "../services/userService";
 
-export const authRouter = new Hono().basePath("/auth");
+export const authRouter = new Hono();
 
 authRouter.post(
-  "/auth/request-authentication",
+  "/request-authentication",
   describeRoute({
     description: "Generates authentication code and sends it to the user",
     responses: {
@@ -38,23 +39,23 @@ authRouter.post(
     },
   }),
 
-  validator("query", requestAuthenticationRequestSchema),
+  validator("json", requestAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("query");
+    const body = c.req.valid("json");
 
-    const { error } = await userService.requestAuthentication(query);
+    const { error } = await userService.requestAuthentication(body);
     if (error != null) {
       if (error.details == "user_not_found") {
         console.warn(
           "Failed to create authentication request: user does not exist",
-          query,
+          body,
         );
         return c.text("Success", 200);
       }
       console.error(
         "Failed to create authentication request for user:",
-        query,
+        body,
         error,
       );
       return c.text("Action failed", 500);
@@ -65,7 +66,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/auth/authenticate-with-otp",
+  "/authenticate-with-otp",
   describeRoute({
     description:
       "Get jwt token pair with the OTP code issued to user by calling request-authentication",
@@ -103,12 +104,12 @@ authRouter.post(
     },
   }),
 
-  validator("query", OTPAuthenticationRequestSchema),
+  validator("json", OTPAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("query");
+    const body = c.req.valid("json");
 
-    const { data, error } = await userService.authenticateWithOTP(query);
+    const { data, error } = await userService.authenticateWithOTP(body);
     if (error != null) {
       console.log(error);
       if (
@@ -132,6 +133,7 @@ authRouter.post(
     setCookie(c, "refreshToken", data.refreshToken!, {
       sameSite: "Strict",
       httpOnly: true,
+      secure: process.env.NODE_ENV?.toUpperCase() === "PRODUCTION",
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expires: new Date(data.refreshTokenExpires!),
     });
@@ -147,7 +149,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/auth/refresh-tokens",
+  "/refresh-tokens",
   describeRoute({
     description: "Refresh jwt token pair with the refresh token",
     responses: {
@@ -198,6 +200,7 @@ authRouter.post(
     setCookie(c, "refreshToken", data.refreshToken!, {
       sameSite: "Strict",
       httpOnly: true,
+      secure: process.env.NODE_ENV?.toUpperCase() === "PRODUCTION",
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expires: new Date(data.refreshTokenExpires!),
     });
@@ -209,5 +212,49 @@ authRouter.post(
       },
       200,
     );
+  },
+);
+
+authRouter.post(
+  "/sign-up",
+  describeRoute({
+    description: "Creates a user",
+    responses: {
+      201: {
+        description: "Successfully created a user",
+        content: {
+          "text/plain": {
+            example: "Created",
+          },
+        },
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+    },
+  }),
+
+  validator("json", createUserRequestSchema),
+
+  async (c) => {
+    const request = c.req.valid("json");
+
+    const { error } = await userService.createUser({
+      ...request,
+      birthDate: request.birthDate.toISOString(),
+    });
+    if (error !== null) {
+      if (error.details == "user_already_exists") {
+        return c.text("Created", 201);
+      }
+      return c.text("Action failed", 500);
+    }
+    return c.text("Created", 201);
   },
 );

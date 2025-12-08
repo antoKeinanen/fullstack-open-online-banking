@@ -30,7 +30,10 @@
         "USER_SERVICE_DATABASE_DSN",
         "USER_SERVICE_JWT_SECRET",
         "USER_BFF_PORT",
-        "USER_SERVICE_USER_SERVICE_URL"
+        "USER_BFF_USER_SERVICE_URL",
+        "VITE_PUBLIC_USER_CLIENT_USER_BFF_URL",
+        "NODE_ENV",
+        "USER_BFF_JWT_SECRET"
       ],
       "cache": false,
       "persistent": true,
@@ -73,7 +76,8 @@
       ],
       "dependsOn": [
         "^generate-protobuf"
-      ]
+      ],
+      "cache": false
     },
     "clean": {
       "cache": false

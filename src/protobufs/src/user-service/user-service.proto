@@ -45,6 +45,7 @@ message CreateUserRequest {
   string firstName = 2;
   string lastName = 3;
   string address = 4;
+  string birthDate = 5;
 }
 
 message User {
@@ -54,6 +55,7 @@ message User {
   string lastName = 4;
   string address = 5;
   string createdAt = 6;
+  string birthDate = 7;
 }
 
 message Session {
