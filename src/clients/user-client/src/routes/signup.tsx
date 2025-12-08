@@ -193,6 +193,7 @@ function SignUpForm() {
                       aria-invalid={fieldState.invalid}
                       id={field.name}
                       type="text"
+                      inputMode="numeric"
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -238,6 +239,7 @@ function SignUpForm() {
                       aria-invalid={fieldState.invalid}
                       id={field.name}
                       type="string"
+                      inputMode="numeric"
                       min="1"
                       max="31"
                     />
@@ -259,7 +261,8 @@ function SignUpForm() {
                       {...field}
                       aria-invalid={fieldState.invalid}
                       id={field.name}
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       min="1"
                       max="12"
                     />
@@ -281,7 +284,8 @@ function SignUpForm() {
                       {...field}
                       aria-invalid={fieldState.invalid}
                       id={field.name}
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
