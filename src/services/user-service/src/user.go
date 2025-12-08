@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"strings"
 	"time"
+
+	"github.com/lib/pq"
 
 	tbPb "protobufs/gen/go/tigerbeetle-service"
 	pb "protobufs/gen/go/user-service"
@@ -41,10 +42,11 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, req.BirthDate,
 	)
 	if err != nil {
-		log.Printf("Error: Failed to insert user to the database: %v", err)
-		if strings.Contains(err.Error(), "unique constraint") {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			return nil, errors.New("user_already_exists")
 		}
+
+		log.Printf("Error: Failed to insert user to the database: %v", err)
 		return nil, errors.New("database_insert_failed")
 	}
 
