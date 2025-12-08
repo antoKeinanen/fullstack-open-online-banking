@@ -3,5 +3,7 @@ export function formatAddress(
   postCode: string,
   city: string,
 ): string {
-  return `${homeAddress} ${postCode} ${city}`;
+  return [homeAddress.trim(), postCode.trim(), city.trim()]
+    .filter(Boolean)
+    .join(" ");
 }
