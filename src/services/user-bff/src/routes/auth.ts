@@ -42,20 +42,20 @@ authRouter.post(
   validator("json", requestAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("json");
+    const body = c.req.valid("json");
 
-    const { error } = await userService.requestAuthentication(query);
+    const { error } = await userService.requestAuthentication(body);
     if (error != null) {
       if (error.details == "user_not_found") {
         console.warn(
           "Failed to create authentication request: user does not exist",
-          query,
+          body,
         );
         return c.text("Success", 200);
       }
       console.error(
         "Failed to create authentication request for user:",
-        query,
+        body,
         error,
       );
       return c.text("Action failed", 500);
@@ -107,9 +107,9 @@ authRouter.post(
   validator("json", OTPAuthenticationRequestSchema),
 
   async (c) => {
-    const query = c.req.valid("json");
+    const body = c.req.valid("json");
 
-    const { data, error } = await userService.authenticateWithOTP(query);
+    const { data, error } = await userService.authenticateWithOTP(body);
     if (error != null) {
       console.log(error);
       if (
