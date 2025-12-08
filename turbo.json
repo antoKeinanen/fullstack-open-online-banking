@@ -76,7 +76,8 @@
       ],
       "dependsOn": [
         "^generate-protobuf"
-      ]
+      ],
+      "cache": false
     },
     "clean": {
       "cache": false

@@ -59,9 +59,11 @@ app.post(
   }),
   validator("json", createUserRequestSchema),
   async (c) => {
-    const payload = c.req.valid("json");
-    const { data: userData, error: userError } =
-      await userService.createUser(payload);
+    const request = c.req.valid("json");
+    const { data: userData, error: userError } = await userService.createUser({
+      ...request,
+      birthDate: request.birthDate.toISOString(),
+    });
     if (userError != null) {
       return c.text("Unknown error", 500);
     }
