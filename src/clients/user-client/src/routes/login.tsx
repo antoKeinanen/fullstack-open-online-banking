@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
@@ -108,10 +108,6 @@ function OTPCodeLoginPhase({
     },
     disabled: isPending,
   });
-
-  useEffect(() => {
-    form.setValue("phoneNumber", phoneNumber, { shouldDirty: false });
-  }, [form, phoneNumber]);
 
   return (
     <form
