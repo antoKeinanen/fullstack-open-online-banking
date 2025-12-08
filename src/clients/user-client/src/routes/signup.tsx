@@ -330,8 +330,8 @@ function SignUpForm() {
                   aria-invalid={fieldState.invalid}
                 />
                 <FieldLabel required htmlFor={field.name}>
-                  I hereby informing that the above mentioned all information is
-                  correct and true as the best of my knowledge and experience.
+                  I confirm that all of the above information is correct and
+                  true to the best of my knowledge.
                 </FieldLabel>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
