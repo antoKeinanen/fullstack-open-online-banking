@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"log"
@@ -46,50 +45,33 @@ func GenerateJwtToken(userId string, expires time.Time, secret string) (string, 
 }
 
 func (s *UserServiceServer) RequestAuthentication(_ context.Context, req *pb.RequestAuthenticationRequest) (*pb.Empty, error) {
-	tx, err := s.db.Beginx()
-	if err != nil {
-		log.Printf("Error: failed to create database transaction: %v", err)
-		return nil, errors.New("database_error")
-	}
-	defer tx.Rollback()
-
-	user := User{}
-	err = tx.Get(&user, `
-		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
-		from banking.users
-		where phone_number = $1`,
-		req.PhoneNumber,
-	)
-	if err != nil {
-		log.Printf("Error: Failed to get user from the database: %v", err)
-		return nil, errors.New("user_not_found")
-	}
-
 	otpCode, err := GenerateOTPCode()
 	if err != nil {
 		log.Printf("Error: Failed to generate otp code: %v", err)
 		return nil, errors.New("generation_error")
 	}
 
-	_, err = tx.Exec(`
-		insert into banking.one_time_passcodes (user_id, one_time_passcode)
-		values ($1, $2)
+	hashedOtpCode, err := GenerateHash(otpCode)
+	if err != nil {
+		log.Println("Error: failed to generate hash", err)
+		return nil, errors.New("hashing_error")
+	}
+
+	_, err = s.db.Exec(`
+		insert into banking.one_time_passcodes (user_id, one_time_passcode_hash)
+		select users.user_id, $2
+		from banking.users
+		where users.phone_number = $1
 		on conflict (user_id) do update
-			set one_time_passcode = $2, expires = now() + ('5 minutes')::interval
-	`, user.UserId, otpCode)
+				set one_time_passcode_hash = $2, expires = now() + ('5 minutes')::interval`,
+		req.PhoneNumber, hashedOtpCode)
 	if err != nil {
 		log.Printf("Error: Failed to write otp code to the database: %v", err)
 		return nil, errors.New("database_error")
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("Error: Failed to commit the otp code: %v", err)
-		return nil, errors.New("database_error")
-	}
-
 	//TODO: remove me
-	log.Printf("Issued otp code %s for %s", otpCode, user.UserId)
+	log.Printf("Issued otp code %s", otpCode)
 
 	return &pb.Empty{}, nil
 }
@@ -105,7 +87,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 								users.phone_number = $1
 										and users.user_id = one_time_passcodes.user_id
 										and one_time_passcodes.expires > now()
-						returning one_time_passcode, users.user_id as user_id),
+						returning one_time_passcode_hash, users.user_id as user_id),
 				last_phone_verification_update AS (
 						update banking.users
 								set last_phone_verification = now()
@@ -125,7 +107,13 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 		return nil, errors.New("database_error")
 	}
 
-	if subtle.ConstantTimeCompare([]byte(otpCode.OTPCode), []byte(req.Code)) != 1 {
+	hashesMatch, err := VerifyHash(otpCode.HashedOTPCode, req.Code)
+	if err != nil {
+		log.Println("Error: failed to check otp hash validity", err)
+		return nil, errors.New("hash_error")
+	}
+
+	if !hashesMatch {
 		return nil, errors.New("codes_do_not_match")
 	}
 
