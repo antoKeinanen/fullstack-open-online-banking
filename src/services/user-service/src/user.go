@@ -32,6 +32,18 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		return nil, errors.New("tigerbeetle_error")
 	}
 
+	birthDate, err := time.Parse(time.RFC3339, req.BirthDate)
+	if err != nil {
+		log.Println("Error: failed to parse user's birth day", err)
+		return nil, errors.New("invalid_age")
+	}
+
+	now := time.Now().UTC()
+	if birthDate.AddDate(18, 0, 0).After(now) {
+		log.Println("Warning: failed to create user: user is not over 18", birthDate)
+		return nil, errors.New("user_underage")
+	}
+
 	user := User{}
 	err = s.db.Get(&user,
 		`INSERT INTO banking.users
@@ -39,7 +51,7 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		VALUES ($1,$2,$3,$4,$5,$6) 
 		RETURNING user_id, phone_number, first_name, last_name, address, created_at, birth_date
 	`,
-		tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, req.BirthDate,
+		tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, birthDate,
 	)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
