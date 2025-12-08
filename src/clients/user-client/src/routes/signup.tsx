@@ -53,7 +53,7 @@ function SignUpForm() {
       toast.error("Failed to sign up, try again later");
     },
   });
-  const form = useForm({
+  const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       isResident: false,
@@ -312,6 +312,9 @@ function SignUpForm() {
                 <FieldLabel required htmlFor={field.name}>
                   I am a resident of Finland
                 </FieldLabel>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -330,6 +333,9 @@ function SignUpForm() {
                   I hereby informing that the above mentioned all information is
                   correct and true as the best of my knowledge and experience.
                 </FieldLabel>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -347,7 +353,7 @@ function SignUpForm() {
 
 function RouteComponent() {
   return (
-    <div className="m-auto max-h-10/12 md:max-h-2/3 w-full max-w-sm self-center md:max-w-4xl">
+    <div className="m-auto max-h-10/12 w-full max-w-sm self-center md:max-h-2/3 md:max-w-4xl">
       <Card className="flex h-full flex-row gap-0 overflow-clip p-0">
         <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
           <CardHeader className="w-full">
