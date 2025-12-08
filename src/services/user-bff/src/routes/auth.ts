@@ -244,7 +244,7 @@ authRouter.post(
   async (c) => {
     const request = c.req.valid("json");
 
-    const { data, error } = await userService.createUser({
+    const { error } = await userService.createUser({
       ...request,
       birthDate: request.birthDate.toISOString(),
     });
@@ -254,10 +254,6 @@ authRouter.post(
       }
       return c.text("Action failed", 500);
     }
-
-    // TODO: remove logging
-    console.log("Created", data);
-
     return c.text("Created", 201);
   },
 );
