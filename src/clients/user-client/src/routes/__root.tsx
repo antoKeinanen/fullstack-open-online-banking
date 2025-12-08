@@ -11,7 +11,7 @@ const queryClient = new QueryClient();
 const RootLayout = () => (
   <QueryClientProvider client={queryClient}>
     <div className="bg-muted flex h-dvh w-full flex-col overflow-clip">
-      <main className="flex h-full w-full flex-col overflow-auto px-4 py-8">
+      <main className="flex w-full flex-1 flex-col overflow-auto px-4 py-8">
         <Outlet />
       </main>
       <MobileNavigation />
