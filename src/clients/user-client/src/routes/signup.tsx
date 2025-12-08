@@ -39,7 +39,7 @@ export const Route = createFileRoute("/signup")({
   component: RouteComponent,
 });
 
-function SignUpFormValues() {
+function SignUpForm() {
   const router = useRouter();
   const signUpMutation = useMutation({
     mutationKey: ["sign-up"],
@@ -353,7 +353,7 @@ function RouteComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="w-full overflow-x-auto">
-            <SignUpFormValues />
+            <SignUpForm />
           </CardContent>
           <div /> {/* An empty div to space out the ui evenly */}
         </div>
