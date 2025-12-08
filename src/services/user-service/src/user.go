@@ -54,7 +54,8 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, birthDate,
 	)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
 			return nil, errors.New("user_already_exists")
 		}
 
