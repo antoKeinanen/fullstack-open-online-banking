@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 
 	pb "protobufs/gen/go/user-service"
 )
@@ -33,12 +34,13 @@ func DecodeJwtToken(tokenString string, secret string) (*jwt.Token, error) {
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 }
 
-func GenerateJwtToken(userId string, expires time.Time, secret string) (string, error) {
+func GenerateJwtToken(userId string, expires time.Time, secret string, sessionId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": "banking-user-service",
 		"sub": userId,
 		"exp": expires.Unix(),
 		"iat": time.Now().Unix(),
+		"sid": sessionId,
 	})
 
 	return token.SignedString([]byte(secret))
@@ -117,18 +119,34 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 		return nil, errors.New("codes_do_not_match")
 	}
 
-	accessTokenExpires := time.Now().Add(5 * time.Minute)
-	accessToken, err := GenerateJwtToken(otpCode.UserId, accessTokenExpires, s.config.UserServiceJWTSecret)
+	sessionId, err := uuid.NewV7()
+	if err != nil {
+		log.Println("Error: failed to generate sessionId", err)
+		return nil, errors.New("session_id_error")
+	}
+
+	// TODO: use minute
+	accessTokenExpires := time.Now().Add(1 * time.Minute)
+	accessToken, err := GenerateJwtToken(otpCode.UserId, accessTokenExpires, s.config.UserServiceJWTSecret, sessionId.String())
 	if err != nil {
 		log.Printf("Error: failed to generate access token: %v", err)
 		return nil, errors.New("token_error")
 	}
 
 	refreshTokenExpires := time.Now().Add(10 * time.Minute)
-	refreshToken, err := GenerateJwtToken(otpCode.UserId, refreshTokenExpires, s.config.UserServiceJWTSecret)
+	refreshToken, err := GenerateJwtToken(otpCode.UserId, refreshTokenExpires, s.config.UserServiceJWTSecret, sessionId.String())
 	if err != nil {
 		log.Printf("Error: failed to generate refresh token: %v", err)
 		return nil, errors.New("token_error")
+	}
+
+	_, err = s.db.Exec(`
+		insert into banking.sessions (session_id, user_id, expires)
+		select $1, $2, $3`,
+		sessionId, otpCode.UserId, refreshTokenExpires.UTC().Format(time.RFC3339))
+	if err != nil {
+		log.Println("Error: failed to register the session", err)
+		return nil, errors.New("database_error")
 	}
 
 	return &pb.Session{
@@ -164,18 +182,49 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 		return nil, errors.New("token_decode_error")
 	}
 
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		log.Printf("Error: Failed to get claims from token")
+		return nil, errors.New("token_decode_error")
+	}
+
+	sessionId, ok := claims["sid"].(string)
+	if !ok {
+		log.Printf("Error: Failed to get session id from token")
+		return nil, errors.New("token_decode_error")
+	}
+
 	accessTokenExpires := time.Now().Add(5 * time.Minute)
-	accessToken, err := GenerateJwtToken(userId, accessTokenExpires, s.config.UserServiceJWTSecret)
+	accessToken, err := GenerateJwtToken(userId, accessTokenExpires, s.config.UserServiceJWTSecret, sessionId)
 	if err != nil {
 		log.Printf("Error: failed to generate access token: %v", err)
 		return nil, errors.New("token_error")
 	}
 
 	refreshTokenExpires := time.Now().Add(10 * time.Minute)
-	refreshToken, err := GenerateJwtToken(userId, refreshTokenExpires, s.config.UserServiceJWTSecret)
+	refreshToken, err := GenerateJwtToken(userId, refreshTokenExpires, s.config.UserServiceJWTSecret, sessionId)
 	if err != nil {
 		log.Printf("Error: failed to generate refresh token: %v", err)
 		return nil, errors.New("token_error")
+	}
+
+	result, err := s.db.Exec(`
+		update banking.sessions
+		set expires = $1
+		where session_id = $2 AND expires > now()`,
+		refreshTokenExpires.UTC().Format(time.RFC3339), sessionId)
+	if err != nil {
+		log.Println("Error: failed to register the session", err)
+		return nil, errors.New("database_error")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error: failed to register the session", err)
+		return nil, errors.New("database_error")
+	}
+	if rowsAffected == 0 {
+		return nil, errors.New("token_expired")
 	}
 
 	return &pb.Session{
