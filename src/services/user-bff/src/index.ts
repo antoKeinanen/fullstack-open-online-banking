@@ -5,11 +5,12 @@ import { logger } from "hono/logger";
 import { env } from "./env";
 import { authRouter } from "./routes/auth";
 
-interface JwtPayload {
+export interface JwtPayload {
   iss: string;
   sub: string;
   exp: number;
   iat: number;
+  sid: string;
 }
 
 const app = new Hono<{ Variables: JwtVariables<JwtPayload> }>().basePath(

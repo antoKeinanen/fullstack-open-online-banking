@@ -1,15 +1,21 @@
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
+import { jwt } from "hono/jwt";
 
 import {
   createUserRequestSchema,
+  getActiveSessionsRequestsSchema,
+  getActiveSessionsResponseSchema,
+  invalidateSessionRequestSchema,
   OTPAuthenticationRequestSchema,
   refreshTokenRequestCookies,
   requestAuthenticationRequestSchema,
   sessionSchema,
 } from "@repo/validators/user";
 
+import { JwtPayload } from "..";
+import { env } from "../env";
 import { userService } from "../services/userService";
 
 export const authRouter = new Hono();
@@ -256,5 +262,104 @@ authRouter.post(
       return c.text("Action failed", 500);
     }
     return c.text("Created", 201);
+  },
+);
+
+authRouter.use(
+  "/sessions",
+  jwt({ secret: env.USER_BFF_JWT_SECRET, alg: env.USER_BFF_JWT_ALG }),
+);
+
+authRouter.get(
+  "/sessions",
+  describeRoute({
+    description:
+      "Gets a list of active sessions for the authenticated user. Requires the use of bearer authentication",
+    responses: {
+      200: {
+        description: "A successful response",
+        content: {
+          "application/json": {
+            schema: resolver(getActiveSessionsResponseSchema),
+          },
+        },
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+      401: {
+        description: "Missing authentication",
+      },
+    },
+  }),
+
+  validator("query", getActiveSessionsRequestsSchema),
+
+  async (c) => {
+    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const { page } = c.req.valid("query");
+    const pageSize = 20;
+
+    const { data, error } = await userService.getActiveSessions({
+      offset: page * pageSize,
+      take: pageSize,
+      userId,
+    });
+
+    if (error != null) {
+      console.error("Failed to get active sessions", error);
+      return c.text("Action failed", 500);
+    }
+
+    return c.json(data);
+  },
+);
+
+authRouter.delete(
+  "/sessions",
+  describeRoute({
+    description:
+      "Invalidates a session and prevents any new access tokens from being issued with its refresh token",
+    responses: {
+      200: {
+        description: "A successful response",
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+      401: {
+        description: "Missing authentication",
+      },
+    },
+  }),
+
+  validator("json", invalidateSessionRequestSchema),
+
+  async (c) => {
+    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const { sessionId } = c.req.valid("json");
+
+    const { error } = await userService.invalidateSession({
+      sessionId,
+      userId,
+    });
+    if (error != null) {
+      console.error("Failed to invalidate session", error);
+      return c.text("Action failed", 500);
+    }
+
+    return c.text("Success", 200);
   },
 );

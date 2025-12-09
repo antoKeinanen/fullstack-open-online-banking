@@ -122,6 +122,30 @@ export const signUpFormSchema = z
   });
 export type SignUpFormValues = z.infer<typeof signUpFormSchema>;
 
+export const getActiveSessionsRequestsSchema = z.object({
+  page: z.coerce.number().nonnegative(),
+});
+export type GetActiveSessionsRequest = z.infer<
+  typeof getActiveSessionsRequestsSchema
+>;
+
+export const getActiveSessionsResponseSchema = z.object({
+  sessions: z.array(
+    z.object({
+      sessionId: z.string(),
+      createdAt: z.iso.datetime(),
+      expires: z.iso.datetime(),
+    }),
+  ),
+});
+export type GetActiveSessionsResponse = z.infer<
+  typeof getActiveSessionsResponseSchema
+>;
+
+export const invalidateSessionRequestSchema = z.object({
+  sessionId: z.string(),
+});
+
 export const signUpRequestSchema = z.object({});
 
 export const createUserResponseSchema = userSchema;

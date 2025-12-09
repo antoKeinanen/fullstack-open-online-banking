@@ -126,7 +126,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 	}
 
 	// TODO: use minute
-	accessTokenExpires := time.Now().Add(1 * time.Minute)
+	accessTokenExpires := time.Now().Add(5 * time.Minute)
 	accessToken, err := GenerateJwtToken(otpCode.UserId, accessTokenExpires, s.config.UserServiceJWTSecret, sessionId.String())
 	if err != nil {
 		log.Printf("Error: failed to generate access token: %v", err)

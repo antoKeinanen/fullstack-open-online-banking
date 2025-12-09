@@ -4,9 +4,12 @@ import * as grpc from "@grpc/grpc-js";
 import type {
   CreateUserRequest,
   Empty,
+  GetActiveSessionsRequest,
+  GetActiveSessionsResponse,
   GetUserByIdRequest,
   GetUsersPaginatedRequest,
   GetUsersPaginatedResponse,
+  InvalidateSessionRequest,
   OTPAuthenticationRequest,
   RefreshTokenRequest,
   RequestAuthenticationRequest,
@@ -39,6 +42,26 @@ export class UserService {
       }
       console.log("Connected to user service grpc");
     });
+  }
+
+  async invalidateSession(
+    request: InvalidateSessionRequest,
+  ): GrpcResponse<Empty> {
+    const invalidateSessions = promisify(
+      this.client.invalidateSession.bind(this.client),
+    );
+    return tryCatch(invalidateSessions(request)) as GrpcResponse<Empty>;
+  }
+
+  async getActiveSessions(
+    request: GetActiveSessionsRequest,
+  ): GrpcResponse<GetActiveSessionsResponse> {
+    const getActiveSessions = promisify(
+      this.client.getActiveSessions.bind(this.client),
+    );
+    return tryCatch(
+      getActiveSessions(request),
+    ) as GrpcResponse<GetActiveSessionsResponse>;
   }
 
   async refreshToken(request: RefreshTokenRequest): GrpcResponse<Session> {
