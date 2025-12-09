@@ -41,6 +41,20 @@ type OTPCode struct {
 	UserId        string `db:"user_id"`
 }
 
+type ActiveSession struct {
+	SessionId string    `db:"session_id"`
+	CreatedAt time.Time `db:"created_at"`
+	Expires   time.Time `db:"expires"`
+}
+
+func DbActiveSessionToPbActiveSession(session ActiveSession) *pb.ActiveSession {
+	return &pb.ActiveSession{
+		SessionId: session.SessionId,
+		CreatedAt: session.CreatedAt.UTC().Format(time.RFC3339),
+		Expires:   session.Expires.UTC().Format(time.RFC3339),
+	}
+}
+
 func newServer(config *Configuration) *UserServiceServer {
 	// TODO: preform connections concurrently
 	db, err := sqlx.Connect("postgres", config.UserServiceDatabaseDsn)

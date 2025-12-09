@@ -234,3 +234,45 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 		RefreshTokenExpires: refreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 }
+
+func (s *UserServiceServer) GetActiveSessions(_ context.Context, req *pb.GetActiveSessionsRequest) (*pb.GetActiveSessionsResponse, error) {
+	rows, err := s.db.Queryx(`
+		select session_id, expires, created_at
+		from banking.sessions
+		where user_id = $1 and expires > now()
+		offset $2
+		limit $3
+		`, req.UserId, req.Offset, req.Take)
+	if err != nil {
+		log.Println("Error: Failed to get active sessions", err)
+		return nil, errors.New("database_error")
+	}
+
+	var activeSessions []*pb.ActiveSession
+	for rows.Next() {
+		session := ActiveSession{}
+		if err := rows.StructScan(&session); err != nil {
+			log.Println("Error: Failed to get active sessions", err)
+			return nil, errors.New("database_error")
+		}
+
+		activeSessions = append(activeSessions, DbActiveSessionToPbActiveSession(session))
+	}
+
+	return &pb.GetActiveSessionsResponse{
+		Sessions: activeSessions,
+	}, nil
+}
+
+func (s *UserServiceServer) InvalidateSession(_ context.Context, req *pb.InvalidateSessionRequest) (*pb.Empty, error) {
+	_, err := s.db.Exec(`update banking.sessions
+		set expires = now()
+		where session_id = $1 and user_id = $2
+		`, req.SessionId, req.UserId)
+	if err != nil {
+		log.Println("Failed to invalidate session", err)
+		return nil, errors.New("database_error")
+	}
+
+	return &pb.Empty{}, nil
+}
