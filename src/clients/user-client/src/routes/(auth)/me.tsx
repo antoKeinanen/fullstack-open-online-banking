@@ -25,6 +25,7 @@ export const Route = createFileRoute("/(auth)/me")({
   loader: async () => ({
     sessions: (await getActiveSessions()).sessions,
   }),
+  errorComponent: () => <p>Failed to load page data</p>,
 });
 
 export function SessionCard({
@@ -81,7 +82,7 @@ function RouteComponent() {
       <ItemGroup>
         <p className="text-foreground py-2 first:pt-0">Sessions</p>
         {sessions.map((session) => (
-          <SessionCard {...session} />
+          <SessionCard key={session.sessionId} {...session} />
         ))}
       </ItemGroup>
     </div>

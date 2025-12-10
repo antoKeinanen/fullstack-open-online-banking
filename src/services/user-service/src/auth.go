@@ -125,7 +125,6 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 		return nil, errors.New("session_id_error")
 	}
 
-	// TODO: use minute
 	accessTokenExpires := time.Now().Add(5 * time.Minute)
 	accessToken, err := GenerateJwtToken(otpCode.UserId, accessTokenExpires, s.config.UserServiceJWTSecret, sessionId.String())
 	if err != nil {
@@ -245,6 +244,7 @@ func (s *UserServiceServer) GetActiveSessions(_ context.Context, req *pb.GetActi
 		log.Println("Error: Failed to get active sessions", err)
 		return nil, errors.New("database_error")
 	}
+	defer rows.Close()
 
 	var activeSessions []*pb.ActiveSession
 	for rows.Next() {

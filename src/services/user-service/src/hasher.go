@@ -32,11 +32,11 @@ var (
 	ErrIncompatibleVersion = errors.New("incompatible version of argon2")
 )
 
-func GenerateHash(secret string) (*string, error) {
+func GenerateHash(secret string) (string, error) {
 
 	salt, err := generateRandomBytes(encodeParams.saltLength)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	hash := argon2.IDKey([]byte(secret), salt, encodeParams.iterations, encodeParams.memory, encodeParams.parallelism, encodeParams.keyLength)
@@ -46,7 +46,7 @@ func GenerateHash(secret string) (*string, error) {
 
 	encodedHash := fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, encodeParams.memory, encodeParams.iterations, encodeParams.parallelism, b64Salt, b64Hash)
 
-	return &encodedHash, nil
+	return encodedHash, nil
 }
 
 func generateRandomBytes(n uint32) ([]byte, error) {
