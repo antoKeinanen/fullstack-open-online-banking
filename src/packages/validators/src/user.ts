@@ -122,13 +122,6 @@ export const signUpFormSchema = z
   });
 export type SignUpFormValues = z.infer<typeof signUpFormSchema>;
 
-export const getActiveSessionsRequestsSchema = z.object({
-  page: z.coerce.number().nonnegative(),
-});
-export type GetActiveSessionsRequest = z.infer<
-  typeof getActiveSessionsRequestsSchema
->;
-
 export const getActiveSessionsResponseSchema = z.object({
   sessions: z.array(
     z.object({

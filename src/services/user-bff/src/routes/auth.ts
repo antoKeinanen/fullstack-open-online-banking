@@ -318,16 +318,10 @@ authRouter.get(
     },
   }),
 
-  validator("query", getActiveSessionsRequestsSchema),
-
   async (c) => {
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
-    const { page } = c.req.valid("query");
-    const pageSize = 20;
 
     const { data, error } = await userService.getActiveSessions({
-      offset: page * pageSize,
-      take: pageSize,
       userId,
     });
 

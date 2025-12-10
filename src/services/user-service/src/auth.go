@@ -240,9 +240,7 @@ func (s *UserServiceServer) GetActiveSessions(_ context.Context, req *pb.GetActi
 		select session_id, expires, created_at, device, application, ip_address
 		from banking.sessions
 		where user_id = $1 and expires > now()
-		offset $2
-		limit $3
-		`, req.UserId, req.Offset, req.Take)
+		`, req.UserId)
 	if err != nil {
 		log.Println("Error: Failed to get active sessions", err)
 		return nil, errors.New("database_error")
