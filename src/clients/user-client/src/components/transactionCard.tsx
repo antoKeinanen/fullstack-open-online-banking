@@ -26,19 +26,5 @@ export function TransactionCard() {
         <Badge variant="secondary">123.45€</Badge>
       </ItemActions>
     </Item>
-    // <Card>
-    //   <CardContent className="flex items-center justify-between">
-    //     <div className="flex items-center gap-2">
-
-    //       <div>
-    //         <p>Example Payment</p>
-    //         <p className="text-muted-foreground -mt-1 text-sm">
-    //
-    //         </p>
-    //       </div>
-    //     </div>
-
-    //   </CardContent>
-    // </Card>
   );
 }

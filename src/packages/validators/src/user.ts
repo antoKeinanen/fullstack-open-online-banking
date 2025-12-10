@@ -141,6 +141,9 @@ export type GetActiveSessionsResponse = z.infer<
 export const invalidateSessionRequestSchema = z.object({
   sessionId: z.string(),
 });
+export type InvalidateSessionRequest = z.infer<
+  typeof invalidateSessionRequestSchema
+>;
 
 export const signUpRequestSchema = z.object({});
 

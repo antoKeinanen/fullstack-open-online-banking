@@ -6,7 +6,6 @@ import { UAParser } from "ua-parser-js";
 
 import {
   createUserRequestSchema,
-  getActiveSessionsRequestsSchema,
   getActiveSessionsResponseSchema,
   invalidateSessionRequestSchema,
   OTPAuthenticationRequestSchema,
