@@ -213,13 +213,13 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 		where session_id = $2 AND expires > now()`,
 		refreshTokenExpires.UTC().Format(time.RFC3339), sessionId)
 	if err != nil {
-		log.Println("Error: failed to register the session", err)
+		log.Println("Error: failed to refresh the session", err)
 		return nil, errors.New("database_error")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Println("Error: failed to register the session", err)
+		log.Println("Error: failed to refresh the session", err)
 		return nil, errors.New("database_error")
 	}
 	if rowsAffected == 0 {
