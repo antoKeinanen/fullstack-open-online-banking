@@ -253,8 +253,11 @@ func (s *UserServiceServer) GetActiveSessions(_ context.Context, req *pb.GetActi
 			log.Println("Error: Failed to get active sessions", err)
 			return nil, errors.New("database_error")
 		}
-
 		activeSessions = append(activeSessions, DbActiveSessionToPbActiveSession(session))
+	}
+	if err := rows.Err(); err != nil {
+		log.Println("Error: Failed to get active sessions", err)
+		return nil, errors.New("database_error")
 	}
 
 	return &pb.GetActiveSessionsResponse{
