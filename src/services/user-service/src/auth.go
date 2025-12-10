@@ -141,9 +141,9 @@ func (s *UserServiceServer) AuthenticateWithOTP(_ context.Context, req *pb.OTPAu
 	}
 
 	_, err = s.db.Exec(`
-		insert into banking.sessions (session_id, user_id, expires)
-		select $1, $2, $3`,
-		sessionId, otpCode.UserId, refreshTokenExpires.UTC().Format(time.RFC3339))
+		insert into banking.sessions (session_id, user_id, expires, device, application, ip_address)
+		values ($1, $2, $3, $4, $5, $6)`,
+		sessionId, otpCode.UserId, refreshTokenExpires.UTC().Format(time.RFC3339), req.Device, req.Application, req.IpAddress)
 	if err != nil {
 		log.Println("Error: failed to register the session", err)
 		return nil, errors.New("database_error")
@@ -237,7 +237,7 @@ func (s *UserServiceServer) RefreshToken(_ context.Context, session *pb.RefreshT
 
 func (s *UserServiceServer) GetActiveSessions(_ context.Context, req *pb.GetActiveSessionsRequest) (*pb.GetActiveSessionsResponse, error) {
 	rows, err := s.db.Queryx(`
-		select session_id, expires, created_at
+		select session_id, expires, created_at, device, application, ip_address
 		from banking.sessions
 		where user_id = $1 and expires > now()
 		offset $2

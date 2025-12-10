@@ -135,6 +135,9 @@ export const getActiveSessionsResponseSchema = z.object({
       sessionId: z.string(),
       createdAt: z.iso.datetime(),
       expires: z.iso.datetime(),
+      device: z.string(),
+      application: z.string(),
+      ipAddress: z.string(),
     }),
   ),
 });

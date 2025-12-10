@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
 import { jwt } from "hono/jwt";
+import { UAParser } from "ua-parser-js";
 
 import {
   createUserRequestSchema,
@@ -14,7 +15,7 @@ import {
   sessionSchema,
 } from "@repo/validators/user";
 
-import { JwtPayload } from "..";
+import type { JwtPayload } from "..";
 import { env } from "../env";
 import { userService } from "../services/userService";
 
@@ -115,7 +116,25 @@ authRouter.post(
   async (c) => {
     const body = c.req.valid("json");
 
-    const { data, error } = await userService.authenticateWithOTP(body);
+    const userAgent = c.req.header("User-Agent");
+    if (!userAgent) {
+      console.info("Failed to login, missing useragent header");
+      return c.text("Action failed", 500);
+    }
+    const userAgentParser = UAParser(userAgent);
+
+    const ipAddress = c.req.header("x-forwarded-for");
+    if (!ipAddress) {
+      console.error("Failed to login, missing x-forwarded-for");
+      return c.text("Action failed", 500);
+    }
+
+    const { data, error } = await userService.authenticateWithOTP({
+      ...body,
+      application: userAgentParser.browser.name ?? "Unknown",
+      device: userAgentParser.os.name ?? "Unknown",
+      ipAddress: ipAddress,
+    });
     if (error != null) {
       console.log(error);
       if (

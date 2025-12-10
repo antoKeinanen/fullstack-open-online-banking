@@ -32,6 +32,9 @@ message ActiveSession {
   string sessionId = 1;
   string expires = 2;
   string createdAt = 3;
+  string device = 4;
+  string application = 5;
+  string ipAddress = 6;
 }
 
 message GetActiveSessionsResponse { repeated ActiveSession sessions = 1; }
@@ -55,6 +58,9 @@ message RefreshTokenRequest { string refreshToken = 1; }
 message OTPAuthenticationRequest {
   string phoneNumber = 1;
   string code = 2;
+  string device = 3;
+  string application = 4;
+  string ipAddress = 5;
 }
 
 message CreateUserRequest {

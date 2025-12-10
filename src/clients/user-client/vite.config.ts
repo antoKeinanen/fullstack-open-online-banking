@@ -14,7 +14,17 @@ export default defineConfig({
   server: {
     port: 5174,
     proxy: {
-      "/api": "http://localhost:3002",
+      "/api": {
+        target: "http://localhost:3002",
+        configure(proxy, _options) {
+          proxy.on("proxyReq", (proxyReq, req, _res) => {
+            const forwarded = req.headers["x-forwarded-for"] as string;
+            const ip = forwarded ? forwarded : req.socket.remoteAddress;
+            proxyReq.setHeader("X-Forwarded-For", ip || "");
+            proxyReq.setHeader("X-Real-IP", ip || "");
+          });
+        },
+      },
     },
   },
 });
