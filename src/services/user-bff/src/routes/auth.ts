@@ -1,15 +1,21 @@
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
+import { jwt } from "hono/jwt";
+import { UAParser } from "ua-parser-js";
 
 import {
   createUserRequestSchema,
+  getActiveSessionsResponseSchema,
+  invalidateSessionRequestSchema,
   OTPAuthenticationRequestSchema,
   refreshTokenRequestCookies,
   requestAuthenticationRequestSchema,
   sessionSchema,
 } from "@repo/validators/user";
 
+import type { JwtPayload } from "..";
+import { env } from "../env";
 import { userService } from "../services/userService";
 
 export const authRouter = new Hono();
@@ -109,7 +115,25 @@ authRouter.post(
   async (c) => {
     const body = c.req.valid("json");
 
-    const { data, error } = await userService.authenticateWithOTP(body);
+    const userAgent = c.req.header("User-Agent");
+    if (!userAgent) {
+      console.info("Failed to login, missing useragent header");
+      return c.text("Action failed", 500);
+    }
+    const userAgentParser = UAParser(userAgent);
+
+    const ipAddress = c.req.header("x-forwarded-for");
+    if (!ipAddress) {
+      console.error("Failed to login, missing x-forwarded-for");
+      return c.text("Action failed", 500);
+    }
+
+    const { data, error } = await userService.authenticateWithOTP({
+      ...body,
+      application: userAgentParser.browser.name ?? "Unknown",
+      device: userAgentParser.os.name ?? "Unknown",
+      ipAddress: ipAddress,
+    });
     if (error != null) {
       console.log(error);
       if (
@@ -256,5 +280,98 @@ authRouter.post(
       return c.text("Action failed", 500);
     }
     return c.text("Created", 201);
+  },
+);
+
+authRouter.use(
+  "/sessions",
+  jwt({ secret: env.USER_BFF_JWT_SECRET, alg: env.USER_BFF_JWT_ALG }),
+);
+
+authRouter.get(
+  "/sessions",
+  describeRoute({
+    description:
+      "Gets a list of active sessions for the authenticated user. Requires the use of bearer authentication",
+    responses: {
+      200: {
+        description: "A successful response",
+        content: {
+          "application/json": {
+            schema: resolver(getActiveSessionsResponseSchema),
+          },
+        },
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+      401: {
+        description: "Missing authentication",
+      },
+    },
+  }),
+
+  async (c) => {
+    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+
+    const { data, error } = await userService.getActiveSessions({
+      userId,
+    });
+
+    if (error != null) {
+      console.error("Failed to get active sessions", error);
+      return c.text("Action failed", 500);
+    }
+
+    return c.json(data);
+  },
+);
+
+authRouter.delete(
+  "/sessions",
+  describeRoute({
+    description:
+      "Invalidates a session and prevents any new access tokens from being issued with its refresh token",
+    responses: {
+      200: {
+        description: "A successful response",
+      },
+      500: {
+        description:
+          "Error has occurred, for security reasons details are omitted",
+        content: {
+          "text/plain": {
+            example: "Action failed",
+          },
+        },
+      },
+      401: {
+        description: "Missing authentication",
+      },
+    },
+  }),
+
+  validator("json", invalidateSessionRequestSchema),
+
+  async (c) => {
+    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const { sessionId } = c.req.valid("json");
+
+    const { error } = await userService.invalidateSession({
+      sessionId,
+      userId,
+    });
+    if (error != null) {
+      console.error("Failed to invalidate session", error);
+      return c.text("Action failed", 500);
+    }
+
+    return c.text("Success", 200);
   },
 );

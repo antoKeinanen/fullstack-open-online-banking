@@ -10,14 +10,30 @@ service UserService {
   rpc RefreshToken(RefreshTokenRequest) returns (Session);
   rpc RequestAuthentication(RequestAuthenticationRequest) returns (Empty);
   rpc AuthenticateWithOTP(OTPAuthenticationRequest) returns (Session);
+  rpc GetActiveSessions(GetActiveSessionsRequest)
+      returns (GetActiveSessionsResponse);
+  rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
 }
 
 message Empty {}
 
-message Result {
-  bool success = 1;
-  optional string error = 2;
+message InvalidateSessionRequest {
+  string sessionId = 1;
+  string userId = 2;
 }
+
+message GetActiveSessionsRequest { string userId = 1; }
+
+message ActiveSession {
+  string sessionId = 1;
+  string expires = 2;
+  string createdAt = 3;
+  string device = 4;
+  string application = 5;
+  string ipAddress = 6;
+}
+
+message GetActiveSessionsResponse { repeated ActiveSession sessions = 1; }
 
 message GetUserByIdRequest { string userId = 1; }
 
@@ -38,6 +54,9 @@ message RefreshTokenRequest { string refreshToken = 1; }
 message OTPAuthenticationRequest {
   string phoneNumber = 1;
   string code = 2;
+  string device = 3;
+  string application = 4;
+  string ipAddress = 5;
 }
 
 message CreateUserRequest {

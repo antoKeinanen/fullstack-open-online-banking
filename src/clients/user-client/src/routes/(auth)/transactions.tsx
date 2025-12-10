@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ItemGroup } from "@repo/web-ui/item";
 
-import { TransactionCard } from "../components/transactionCard";
+import { TransactionCard } from "../../components/transactionCard";
 
-export const Route = createFileRoute("/transactions")({
+export const Route = createFileRoute("/(auth)/transactions")({
   component: RouteComponent,
 });
 

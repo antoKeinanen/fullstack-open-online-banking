@@ -37,8 +37,28 @@ type User struct {
 }
 
 type OTPCode struct {
-	OTPCode string `db:"one_time_passcode"`
-	UserId  string `db:"user_id"`
+	HashedOTPCode string `db:"one_time_passcode_hash"`
+	UserId        string `db:"user_id"`
+}
+
+type ActiveSession struct {
+	SessionId   string    `db:"session_id"`
+	CreatedAt   time.Time `db:"created_at"`
+	Expires     time.Time `db:"expires"`
+	Device      string    `db:"device"`
+	Application string    `db:"application"`
+	IpAddress   string    `db:"ip_address"`
+}
+
+func DbActiveSessionToPbActiveSession(session ActiveSession) *pb.ActiveSession {
+	return &pb.ActiveSession{
+		SessionId:   session.SessionId,
+		CreatedAt:   session.CreatedAt.UTC().Format(time.RFC3339),
+		Expires:     session.Expires.UTC().Format(time.RFC3339),
+		Device:      session.Device,
+		Application: session.Application,
+		IpAddress:   session.IpAddress,
+	}
 }
 
 func newServer(config *Configuration) *UserServiceServer {
