@@ -1,5 +1,6 @@
 syntax = "proto3";
 package service.tigerbeetle;
+
 option go_package = "generated/tigerbeetle-protobuf";
 
 service TigerbeetleService {
@@ -15,9 +16,9 @@ message Empty {}
 
 message Transfer {
   reserved 5, 6, 7;
-  string transferId = 1;
-  string debitAccountId = 2;
-  string creditAccountId = 3;
+  string transfer_id = 1;
+  string debit_account_id = 2;
+  string credit_account_id = 3;
   string amount = 4;
   // optional string userData128 = 5;
   // optional uint64 userData64 = 6;
@@ -25,43 +26,47 @@ message Transfer {
 }
 
 message PostPendingTransferRequest {
-  string debitAccountId = 1;
-  string creditAccountId = 2;
+  string debit_account_id = 1;
+  string credit_account_id = 2;
   string amount = 3;
-  string pendingTransferId = 4;
+  string pending_transfer_id = 4;
 }
 
 message VoidPendingTransferRequest {
-  string debitAccountId = 1;
-  string creditAccountId = 2;
+  string debit_account_id = 1;
+  string credit_account_id = 2;
   string amount = 3;
-  string pendingTransferId = 4;
+  string pending_transfer_id = 4;
 }
 
-message TransferId { string TransferId = 1; };
+message TransferId {
+  string transfer_id = 1;
+}
 
 message CreatePendingRequest {
-  string debitAccountId = 1;
-  string creditAccountId = 2;
+  string debit_account_id = 1;
+  string credit_account_id = 2;
   string amount = 3;
   // optional string userData128 = 4;
   // optional uint64 userData64 = 5;
   // optional uint32 userData32 = 6;
-};
+}
 
-message AccountId { string AccountId = 1; }
+message AccountId {
+  string account_id = 1;
+}
 
 message Account {
-  string accountId = 1;
-  string debitsPending = 2;
-  string debitsPosted = 3;
-  string creditsPending = 4;
-  string creditsPosted = 5;
+  string account_id = 1;
+  string debits_pending = 2;
+  string debits_posted = 3;
+  string credits_pending = 4;
+  string credits_posted = 5;
   uint32 code = 6;
   uint64 timestamp = 7;
   uint32 flags = 8;
   uint32 ledger = 9;
-  optional string userData128 = 10;
-  optional uint64 userData64 = 11;
-  optional uint32 userData32 = 12;
+  optional string user_data128 = 10;
+  optional uint64 user_data64 = 11;
+  optional uint32 user_data32 = 12;
 }

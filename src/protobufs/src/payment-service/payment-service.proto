@@ -1,11 +1,16 @@
 syntax = "proto3";
 package service.tigerbeetle;
+
 option go_package = "generated/payment-service";
 
 service PaymentService {
-  rpc InitializePayment(InitializePaymentRequest)
-      returns (InitializePaymentResponse);
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
 }
 
-message InitializePaymentRequest {}
-message InitializePaymentResponse {}
+message CreatePaymentRequest {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  uint64 amount = 3;
+}
+
+message CreatePaymentResponse {}

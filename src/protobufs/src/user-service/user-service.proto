@@ -1,41 +1,46 @@
 syntax = "proto3";
 package service.user;
+
 option go_package = "generated/user-protobuf";
 
 service UserService {
   rpc CreateUser(CreateUserRequest) returns (User);
   rpc GetUserById(GetUserByIdRequest) returns (User);
-  rpc GetUsersPaginated(GetUsersPaginatedRequest)
-      returns (GetUsersPaginatedResponse);
+  rpc GetUsersPaginated(GetUsersPaginatedRequest) returns (GetUsersPaginatedResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (Session);
   rpc RequestAuthentication(RequestAuthenticationRequest) returns (Empty);
   rpc AuthenticateWithOTP(OTPAuthenticationRequest) returns (Session);
-  rpc GetActiveSessions(GetActiveSessionsRequest)
-      returns (GetActiveSessionsResponse);
+  rpc GetActiveSessions(GetActiveSessionsRequest) returns (GetActiveSessionsResponse);
   rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
 }
 
 message Empty {}
 
 message InvalidateSessionRequest {
-  string sessionId = 1;
-  string userId = 2;
+  string session_id = 1;
+  string user_id = 2;
 }
 
-message GetActiveSessionsRequest { string userId = 1; }
+message GetActiveSessionsRequest {
+  string user_id = 1;
+}
 
 message ActiveSession {
-  string sessionId = 1;
+  string session_id = 1;
   string expires = 2;
-  string createdAt = 3;
+  string created_at = 3;
   string device = 4;
   string application = 5;
-  string ipAddress = 6;
+  string ip_address = 6;
 }
 
-message GetActiveSessionsResponse { repeated ActiveSession sessions = 1; }
+message GetActiveSessionsResponse {
+  repeated ActiveSession sessions = 1;
+}
 
-message GetUserByIdRequest { string userId = 1; }
+message GetUserByIdRequest {
+  string user_id = 1;
+}
 
 message GetUsersPaginatedRequest {
   uint32 take = 1;
@@ -47,39 +52,43 @@ message GetUsersPaginatedResponse {
   repeated User users = 2;
 }
 
-message RequestAuthenticationRequest { string phoneNumber = 1; }
+message RequestAuthenticationRequest {
+  string phone_number = 1;
+}
 
-message RefreshTokenRequest { string refreshToken = 1; }
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
 
 message OTPAuthenticationRequest {
-  string phoneNumber = 1;
+  string phone_number = 1;
   string code = 2;
   string device = 3;
   string application = 4;
-  string ipAddress = 5;
+  string ip_address = 5;
 }
 
 message CreateUserRequest {
-  string phoneNumber = 1;
-  string firstName = 2;
-  string lastName = 3;
+  string phone_number = 1;
+  string first_name = 2;
+  string last_name = 3;
   string address = 4;
-  string birthDate = 5;
+  string birth_date = 5;
 }
 
 message User {
-  string userId = 1;
-  string phoneNumber = 2;
-  string firstName = 3;
-  string lastName = 4;
+  string user_id = 1;
+  string phone_number = 2;
+  string first_name = 3;
+  string last_name = 4;
   string address = 5;
-  string createdAt = 6;
-  string birthDate = 7;
+  string created_at = 6;
+  string birth_date = 7;
 }
 
 message Session {
-  string accessToken = 1;
-  string refreshToken = 2;
-  string accessTokenExpires = 3;
-  string refreshTokenExpires = 4;
+  string access_token = 1;
+  string refresh_token = 2;
+  string access_token_expires = 3;
+  string refresh_token_expires = 4;
 }

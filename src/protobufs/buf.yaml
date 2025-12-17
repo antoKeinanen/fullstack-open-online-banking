@@ -8,3 +8,6 @@ lint:
 breaking:
   use:
     - FILE
+  except:
+    - FIELD_SAME_NAME
+    - FIELD_SAME_JSON_NAME
