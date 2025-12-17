@@ -3,17 +3,18 @@ package lib
 import (
 	"crypto/rand"
 	"math/big"
+	"strings"
 )
 
 func GenerateOTPCode() (string, error) {
-	otpCode := ""
+	var otpCode strings.Builder
 	for range OTPLength {
 		num, err := rand.Int(rand.Reader, big.NewInt(10))
 		if err != nil {
 			return "", err
 		}
-		otpCode += num.String()
+		otpCode.WriteString(num.String())
 	}
 
-	return otpCode, nil
+	return otpCode.String(), nil
 }
