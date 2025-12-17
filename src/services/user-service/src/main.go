@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
 	pb "protobufs/gen/go/user-service"
-	"time"
+
+	"user-service/src/lib"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -14,60 +15,23 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var (
-	otpLength = 6
-)
-
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 	db                           *sqlx.DB
-	config                       *Configuration
+	config                       *lib.Configuration
 	tigerbeetleService           tbPb.TigerbeetleServiceClient
 	tigerbeetleServiceConnection *grpc.ClientConn
+	tokenService                 *lib.TokenService
 }
 
-type User struct {
-	UserId      string    `db:"user_id"`
-	PhoneNumber string    `db:"phone_number"`
-	FirstName   string    `db:"first_name"`
-	LastName    string    `db:"last_name"`
-	Address     string    `db:"address"`
-	BirthDate   time.Time `db:"birth_date"`
-	CreatedAt   time.Time `db:"created_at"`
-}
-
-type OTPCode struct {
-	HashedOTPCode string `db:"one_time_passcode_hash"`
-	UserId        string `db:"user_id"`
-}
-
-type ActiveSession struct {
-	SessionId   string    `db:"session_id"`
-	CreatedAt   time.Time `db:"created_at"`
-	Expires     time.Time `db:"expires"`
-	Device      string    `db:"device"`
-	Application string    `db:"application"`
-	IpAddress   string    `db:"ip_address"`
-}
-
-func DbActiveSessionToPbActiveSession(session ActiveSession) *pb.ActiveSession {
-	return &pb.ActiveSession{
-		SessionId:   session.SessionId,
-		CreatedAt:   session.CreatedAt.UTC().Format(time.RFC3339),
-		Expires:     session.Expires.UTC().Format(time.RFC3339),
-		Device:      session.Device,
-		Application: session.Application,
-		IpAddress:   session.IpAddress,
-	}
-}
-
-func newServer(config *Configuration) *UserServiceServer {
-	// TODO: preform connections concurrently
+func newServer(config *lib.Configuration) *UserServiceServer {
 	db, err := sqlx.Connect("postgres", config.UserServiceDatabaseDsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+
+		slog.Error("Failed to connect to the database", "error", err)
+		panic(err)
 	}
-	log.Println("Connected to db")
+	slog.Info("Connected to db")
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -75,24 +39,29 @@ func newServer(config *Configuration) *UserServiceServer {
 
 	conn, err := grpc.NewClient(config.TigerbeetleServiceUrl, opts...)
 	if err != nil {
-		log.Fatalln("Failed to open Tigerbeetle service grpc connection:", err)
+		slog.Error("Failed to open Tigerbeetle service grpc connection", "error", err)
+		panic(err)
 	}
 	client := tbPb.NewTigerbeetleServiceClient(conn)
-	log.Println("Connected to Tigerbeetle service grpc")
+	slog.Info("Connected to Tigerbeetle service grpc")
+
+	tokenService := lib.NewTokenService(config.UserServiceJWTSecret)
 
 	return &UserServiceServer{
 		db:                           db,
 		config:                       config,
 		tigerbeetleServiceConnection: conn,
 		tigerbeetleService:           client,
+		tokenService:                 tokenService,
 	}
 }
 
 func main() {
-	config := ParseConfiguration()
+	config := lib.ParseConfiguration()
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.UserServicePort))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		slog.Error("Failed to listen", "error", err)
+		panic(err)
 	}
 
 	var opts []grpc.ServerOption
