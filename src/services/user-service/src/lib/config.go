@@ -1,8 +1,16 @@
-package main
+package lib
 
 import (
 	"log"
 	"os"
+	"time"
+)
+
+const (
+	OTPLength                  = 6
+	AccessTokenTTL             = 5 * time.Minute
+	RefreshTokenTTL            = 30 * time.Minute
+	OTPExpirationWindowMinutes = 5
 )
 
 type Configuration struct {
