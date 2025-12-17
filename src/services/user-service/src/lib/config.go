@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"time"
 )
@@ -23,7 +23,8 @@ type Configuration struct {
 func GetEnv(envName string) string {
 	variable := os.Getenv(envName)
 	if len(variable) == 0 {
-		log.Fatalf("Missing env variable %s", envName)
+		slog.Error("Missing env variable", "name", envName)
+		panic("Missing env variable")
 	}
 	return variable
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
 	pb "protobufs/gen/go/user-service"
@@ -27,9 +27,11 @@ type UserServiceServer struct {
 func newServer(config *lib.Configuration) *UserServiceServer {
 	db, err := sqlx.Connect("postgres", config.UserServiceDatabaseDsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+
+		slog.Error("Failed to connect to the database", "error", err)
+		panic(err)
 	}
-	log.Println("Connected to db")
+	slog.Info("Connected to db")
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -37,10 +39,11 @@ func newServer(config *lib.Configuration) *UserServiceServer {
 
 	conn, err := grpc.NewClient(config.TigerbeetleServiceUrl, opts...)
 	if err != nil {
-		log.Fatalln("Failed to open Tigerbeetle service grpc connection:", err)
+		slog.Error("Failed to open Tigerbeetle service grpc connection", "error", err)
+		panic(err)
 	}
 	client := tbPb.NewTigerbeetleServiceClient(conn)
-	log.Println("Connected to Tigerbeetle service grpc")
+	slog.Info("Connected to Tigerbeetle service grpc")
 
 	tokenService := lib.NewTokenService(config.UserServiceJWTSecret)
 
@@ -57,7 +60,8 @@ func main() {
 	config := lib.ParseConfiguration()
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.UserServicePort))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		slog.Error("Failed to listen", "error", err)
+		panic(err)
 	}
 
 	var opts []grpc.ServerOption

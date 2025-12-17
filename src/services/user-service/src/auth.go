@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"time"
 
@@ -40,7 +39,7 @@ func (s *UserServiceServer) RequestAuthentication(ctx context.Context, req *pb.R
 	}
 
 	//TODO: remove me
-	log.Printf("Issued otp code %s", otpCode)
+	slog.Info("Issued otp code", "code", otpCode)
 
 	return &pb.Empty{}, nil
 }
@@ -92,7 +91,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 		req.IpAddress,
 	)
 	if err != nil {
-		log.Println("Error: failed to register the session", err)
+		slog.Error("Failed to register the session", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
@@ -134,13 +133,13 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 		token.SessionId,
 	)
 	if err != nil {
-		log.Println("Error: failed to register the session", err)
+		slog.Error("Failed to register the session", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Println("Error: failed to refresh the session", err)
+		slog.Error("Failed to refresh the session", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 	if rowsAffected == 0 {
@@ -158,7 +157,7 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetActiveSessionsRequest) (*pb.GetActiveSessionsResponse, error) {
 	rows, err := s.db.QueryxContext(ctx, queries.QueryGetActiveSessions, req.UserId)
 	if err != nil {
-		log.Println("Error: Failed to get active sessions", err)
+		slog.Error("Failed to get active sessions", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 	defer rows.Close()
@@ -167,13 +166,13 @@ func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetAc
 	for rows.Next() {
 		session := repo.ActiveSession{}
 		if err := rows.StructScan(&session); err != nil {
-			log.Println("Error: Failed to get active sessions", err)
+			slog.Error("Failed to get active sessions", "error", err)
 			return nil, lib.ErrUnexpected
 		}
 		activeSessions = append(activeSessions, repo.DbActiveSessionToPbActiveSession(session))
 	}
 	if err := rows.Err(); err != nil {
-		log.Println("Error: Failed to get active sessions", err)
+		slog.Error("Failed to get active sessions", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
@@ -185,7 +184,7 @@ func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetAc
 func (s *UserServiceServer) InvalidateSession(ctx context.Context, req *pb.InvalidateSessionRequest) (*pb.Empty, error) {
 	_, err := s.db.ExecContext(ctx, queries.QueryInvalidateSession, req.SessionId, req.UserId)
 	if err != nil {
-		log.Println("Failed to invalidate session", err)
+		slog.Error("Failed to invalidate session", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
