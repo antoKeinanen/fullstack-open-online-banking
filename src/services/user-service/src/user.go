@@ -17,7 +17,7 @@ import (
 	pb "protobufs/gen/go/user-service"
 )
 
-func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	birthDate, err := time.Parse(time.RFC3339, req.BirthDate)
 	if err != nil {
 		slog.Error("Failed to create user, birthday parsing failed", "error", err)
@@ -30,14 +30,14 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 		return nil, lib.ErrUnacceptableRequest
 	}
 
-	tbUser, err := s.tigerbeetleService.CreateAccount(context.Background(), &tbPb.Empty{})
+	tbUser, err := s.tigerbeetleService.CreateAccount(ctx, &tbPb.Empty{})
 	if err != nil {
 		slog.Error("Failed to create tigerbeetle account", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
 	user := repo.User{}
-	err = s.db.Get(&user, queries.QueryCreateUser, tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, birthDate)
+	err = s.db.GetContext(ctx, &user, queries.QueryCreateUser, tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, birthDate)
 	if err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
@@ -52,9 +52,9 @@ func (s *UserServiceServer) CreateUser(_ context.Context, req *pb.CreateUserRequ
 	return repo.DbUserToPbUser(user), nil
 }
 
-func (s *UserServiceServer) GetUserById(_ context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
+func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
 	user := repo.User{}
-	err := s.db.Get(&user, queries.QueryGetUserById, req.UserId)
+	err := s.db.GetContext(ctx, &user, queries.QueryGetUserById, req.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			slog.Info("User not found", "error", err)
@@ -68,8 +68,8 @@ func (s *UserServiceServer) GetUserById(_ context.Context, req *pb.GetUserByIdRe
 	return repo.DbUserToPbUser(user), nil
 }
 
-func (s *UserServiceServer) GetUsersPaginated(_ context.Context, req *pb.GetUsersPaginatedRequest) (*pb.GetUsersPaginatedResponse, error) {
-	rows, err := s.db.Queryx(queries.QueryGetAllUsersPaginated, req.Offset, req.Take)
+func (s *UserServiceServer) GetUsersPaginated(ctx context.Context, req *pb.GetUsersPaginatedRequest) (*pb.GetUsersPaginatedResponse, error) {
+	rows, err := s.db.QueryxContext(ctx, queries.QueryGetAllUsersPaginated, req.Offset, req.Take)
 	if err != nil {
 		slog.Error("Failed to get users from the database", "error", err)
 		return nil, lib.ErrUnexpected
