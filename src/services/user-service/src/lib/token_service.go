@@ -11,8 +11,8 @@ type TokenPair struct {
 	AccessToken        string
 	AccessTokenExpires time.Time
 
-	RefreshToken       string
-	RefersTokenExpires time.Time
+	RefreshToken        string
+	RefreshTokenExpires time.Time
 }
 
 type TokenClaims struct {
@@ -40,10 +40,10 @@ func (ts *TokenService) GenerateTokenPair(userId, sessionId string) (*TokenPair,
 	}
 
 	return &TokenPair{
-		AccessToken:        accessToken,
-		AccessTokenExpires: accessTokenExpires,
-		RefreshToken:       refreshToken,
-		RefersTokenExpires: refreshTokenExpires,
+		AccessToken:         accessToken,
+		AccessTokenExpires:  accessTokenExpires,
+		RefreshToken:        refreshToken,
+		RefreshTokenExpires: refreshTokenExpires,
 	}, nil
 }
 

@@ -86,7 +86,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 		queries.QueryInsertSession,
 		sessionId,
 		otpCode.UserId,
-		tokenPair.RefersTokenExpires.UTC().Format(time.RFC3339),
+		tokenPair.RefreshTokenExpires.UTC().Format(time.RFC3339),
 		req.Device,
 		req.Application,
 		req.IpAddress,
@@ -100,7 +100,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 		AccessToken:         tokenPair.AccessToken,
 		RefreshToken:        tokenPair.RefreshToken,
 		AccessTokenExpires:  tokenPair.AccessTokenExpires.UTC().Format(time.RFC3339),
-		RefreshTokenExpires: tokenPair.RefersTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: tokenPair.RefreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 }
 
@@ -130,7 +130,7 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 	result, err := s.db.ExecContext(
 		ctx,
 		queries.QueryRefreshSession,
-		tokenPair.RefersTokenExpires,
+		tokenPair.RefreshTokenExpires,
 		token.SessionId,
 	)
 	if err != nil {
@@ -151,7 +151,7 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 		AccessToken:         tokenPair.AccessToken,
 		RefreshToken:        tokenPair.RefreshToken,
 		AccessTokenExpires:  tokenPair.AccessTokenExpires.UTC().Format(time.RFC3339),
-		RefreshTokenExpires: tokenPair.RefersTokenExpires.UTC().Format(time.RFC3339),
+		RefreshTokenExpires: tokenPair.RefreshTokenExpires.UTC().Format(time.RFC3339),
 	}, nil
 }
 
