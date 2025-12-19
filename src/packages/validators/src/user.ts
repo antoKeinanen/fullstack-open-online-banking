@@ -8,16 +8,7 @@ export const userSchema = z.object({
   lastName: z.string(),
   address: z.string(),
   createdAt: z.iso.datetime(),
-});
-
-export const getAllUsersRequestSchema = z.object({
-  offset: z.coerce.number().default(0),
-  take: z.coerce.number().default(100),
-});
-
-export const getAllUsersResponseSchema = z.object({
-  users: z.array(userSchema),
-  count: z.number(),
+  balance: z.string(),
 });
 
 export const requestAuthenticationRequestSchema = z.object({
@@ -147,13 +138,18 @@ export type InvalidateSessionRequest = z.infer<
 
 export const signUpRequestSchema = z.object({});
 
+export const GetUserBalanceRequestSchema = z.object({
+  userId: z.string(),
+});
+
+export const GetUserBalanceResponseSchema = z.object({
+  balance: z.string(),
+});
+
 export const createUserResponseSchema = userSchema;
 export const getUserResponseSchema = userSchema;
 
 export type User = z.infer<typeof userSchema>;
-
-export type GetAllUsersRequest = z.infer<typeof getAllUsersRequestSchema>;
-export type GetAllUsersResponse = z.infer<typeof getAllUsersResponseSchema>;
 
 export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
 export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;

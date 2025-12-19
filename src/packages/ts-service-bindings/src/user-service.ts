@@ -7,8 +7,6 @@ import type {
   GetActiveSessionsRequest,
   GetActiveSessionsResponse,
   GetUserByIdRequest,
-  GetUsersPaginatedRequest,
-  GetUsersPaginatedResponse,
   InvalidateSessionRequest,
   OTPAuthenticationRequest,
   RefreshTokenRequest,
@@ -100,18 +98,6 @@ export class UserService {
     const getUserById = promisify(this.client.getUserById.bind(this.client));
     return tryCatch(getUserById(request)) as Promise<
       Result<User, grpc.ServiceError>
-    >;
-  }
-
-  async getUserPaginated(
-    request: GetUsersPaginatedRequest,
-  ): GrpcResponse<GetUsersPaginatedResponse> {
-    const getUsersPaginated = promisify(
-      this.client.getUsersPaginated.bind(this.client),
-    );
-
-    return tryCatch(getUsersPaginated(request)) as Promise<
-      Result<GetUsersPaginatedResponse, grpc.ServiceError>
     >;
   }
 }

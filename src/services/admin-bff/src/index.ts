@@ -12,8 +12,6 @@ import { UserService } from "@repo/service-bindings/user-service";
 import {
   createUserRequestSchema,
   createUserResponseSchema,
-  getAllUsersRequestSchema,
-  getAllUsersResponseSchema,
   userSchema,
 } from "@repo/validators/user";
 
@@ -69,42 +67,6 @@ app.post(
     }
 
     return c.json(userData, 201);
-  },
-);
-
-app.get(
-  "/users",
-  describeRoute({
-    description: "Get paginated list of all users",
-    responses: {
-      200: {
-        description: "Successful response",
-        content: {
-          "application/json": { schema: resolver(getAllUsersResponseSchema) },
-        },
-      },
-      500: {
-        description:
-          "Something has gone wrong, retry and backoff if error persists",
-        content: {
-          "text/plain": {
-            example: "Unknown error",
-          },
-        },
-      },
-    },
-  }),
-  validator("query", getAllUsersRequestSchema),
-  async (c) => {
-    const query = c.req.valid("query");
-
-    const { data: users, error: usersError } =
-      await userService.getUserPaginated(query);
-    if (usersError != null) {
-      console.log("Failed to get paginated users:", usersError.details);
-      return c.text("Unknown error", 500);
-    }
-    return c.json(users);
   },
 );
 

@@ -1,12 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-
-import { getAllUsersPaginated } from "../services/userService";
 
 export function UserTable() {
   const { data, isPending, error } = useQuery({
     queryKey: ["users"],
-    queryFn: getAllUsersPaginated,
+    queryFn: () => [],
   });
 
   if (isPending) {
@@ -32,7 +29,7 @@ export function UserTable() {
           </tr>
         </thead>
         <tbody>
-          {data.users.map((user) => (
+          {/* {data.users.map((user) => (
             <tr id={user.userId}>
               <td>
                 <Link
@@ -49,7 +46,7 @@ export function UserTable() {
               <td>{user.address}</td>
               <td>{user.createdAt}</td>
             </tr>
-          ))}
+          ))} */}
         </tbody>
       </table>
     </div>
