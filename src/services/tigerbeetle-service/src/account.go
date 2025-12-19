@@ -10,14 +10,43 @@ import (
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
 
+func (s *TigerbeetleServiceServer) EnsureSystemFloatAccountExists(_ context.Context, _ *pb.Empty) (*pb.Empty, error) {
+	account := tbt.Account{
+		ID:          tbt.Uint128{1},
+		UserData128: tbt.ToUint128(0),
+		UserData64:  0,
+		UserData32:  0,
+		Ledger:      1,
+		Code:        718,
+		Flags:       0,
+		Timestamp:   0,
+	}
+
+	accountErrors, err := s.tbClient.CreateAccounts([]tbt.Account{account})
+	if err != nil {
+		log.Printf("Failed to create account: %v", err)
+		return nil, errors.New("creation_failed")
+	}
+	for _, err := range accountErrors {
+		switch err.Result {
+		case tbt.AccountExists:
+			return &pb.Empty{}, nil
+		default:
+			log.Printf("Failed to ensure that system float account exists: %v", err)
+			return nil, errors.New("creation_failed")
+
+		}
+	}
+
+	return &pb.Empty{}, nil
+}
+
 func (s *TigerbeetleServiceServer) LookupAccount(_ context.Context, accountId *pb.AccountId) (*pb.Account, error) {
 	accountIdUint128, err := tbt.HexStringToUint128(accountId.AccountId)
 	if err != nil {
 		log.Printf("Failed to lookup account: %v", err)
 		return nil, errors.New("invalid_request")
 	}
-
-	log.Println("Looking up account with id", accountIdUint128.BigInt())
 
 	accounts, err := s.tbClient.LookupAccounts([]tbt.Uint128{accountIdUint128})
 	if err != nil {

@@ -10,9 +10,17 @@ service TigerbeetleService {
   rpc PostPendingTransfer(PostPendingTransferRequest) returns (TransferId);
   rpc VoidPendingTransfer(VoidPendingTransferRequest) returns (TransferId);
   rpc LookupTransfer(TransferId) returns (Transfer);
+  rpc CreateTransfer(CreateTransferRequest) returns (TransferId);
+  rpc EnsureSystemFloatAccountExists(Empty) returns (Empty);
 }
 
 message Empty {}
+
+message CreateTransferRequest {
+  string debit_account_id = 1;
+  string credit_account_id = 2;
+  string amount = 3;
+}
 
 message Transfer {
   reserved 5, 6, 7;
