@@ -49,7 +49,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user), nil
+	return repo.DbUserToPbUser(user, "0", "0")
 }
 
 func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {

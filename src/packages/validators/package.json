@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./user": "./src/user.ts"
+    "./user": "./src/user/index.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo build node_modules",

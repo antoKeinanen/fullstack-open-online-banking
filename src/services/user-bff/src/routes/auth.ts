@@ -9,7 +9,7 @@ import {
   getActiveSessionsResponseSchema,
   invalidateSessionRequestSchema,
   OTPAuthenticationRequestSchema,
-  refreshTokenRequestCookies,
+  refreshTokenRequestCookiesSchema,
   requestAuthenticationRequestSchema,
   sessionSchema,
 } from "@repo/validators/user";
@@ -202,7 +202,7 @@ authRouter.post(
     },
   }),
 
-  validator("cookie", refreshTokenRequestCookies),
+  validator("cookie", refreshTokenRequestCookiesSchema),
 
   async (c) => {
     const cookies = c.req.valid("cookie");
