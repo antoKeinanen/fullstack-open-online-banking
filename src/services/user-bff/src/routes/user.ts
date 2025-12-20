@@ -11,7 +11,7 @@ import { userService } from "../services/userService";
 export const userRouter = new Hono();
 
 userRouter.use(
-  "*I",
+  "*",
   jwt({ secret: env.USER_BFF_JWT_SECRET, alg: env.USER_BFF_JWT_ALG }),
 );
 

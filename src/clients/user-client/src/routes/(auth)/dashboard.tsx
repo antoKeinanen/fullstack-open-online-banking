@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useLoaderData,
+  useRouter,
+} from "@tanstack/react-router";
 import {
   BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
   LockIcon,
   WalletIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Button } from "@repo/web-ui/button";
@@ -24,13 +30,23 @@ import type { TransactionDialogState } from "../../components/dialog/transaction
 import { TransactionDialog } from "../../components/dialog/transactionDialog";
 import { RecommendedUserCard } from "../../components/recommendedUser";
 import { TransactionCard } from "../../components/transactionCard";
+import { getUserDetails } from "../../services/userService";
 import { useAuthStore } from "../../stores/authStore";
+import { formatBalance } from "../../util/formatters";
 
 export const Route = createFileRoute("/(auth)/dashboard")({
   component: RouteComponent,
+  loader: async () => ({
+    user: await getUserDetails(),
+  }),
+  onError: (err) => {
+    console.error(err);
+    toast.error("Failed to load page :(");
+  },
 });
 
 function RouteComponent() {
+  const { user } = useLoaderData({ from: Route.id });
   const { clearSession } = useAuthStore();
   const { navigate } = useRouter();
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
@@ -53,7 +69,9 @@ function RouteComponent() {
         </ItemMedia>
         <ItemContent>
           <ItemDescription className="-mb-1.5">Good evening</ItemDescription>
-          <ItemTitle>Anto Keinänen</ItemTitle>
+          <ItemTitle>
+            {user.firstName} {user.lastName}
+          </ItemTitle>
         </ItemContent>
         <ItemActions>
           <Button variant="outline" onClick={logOut}>
@@ -64,7 +82,9 @@ function RouteComponent() {
 
       <Card className="w-full gap-2">
         <CardHeader>
-          <CardTitle className="text-xl">12 345.67€</CardTitle>
+          <CardTitle className="text-xl">
+            {formatBalance(user.balance)}€
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 grid-rows-2 gap-2">

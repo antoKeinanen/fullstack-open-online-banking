@@ -57,8 +57,8 @@ export function SessionCard({
           {application}, {device}
         </ItemTitle>
         <ItemDescription>
-          <p>From: {ipAddress}</p>
-          <p>Created: {formatDateTime(createdAt)}</p>
+          From: {ipAddress} <br />
+          Created: {formatDateTime(createdAt)}
         </ItemDescription>
       </ItemContent>
       <ItemActions>

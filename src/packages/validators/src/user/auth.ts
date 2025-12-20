@@ -5,7 +5,7 @@ import { userSchema } from "./user";
 export const requestAuthenticationRequestSchema = z.object({
   phoneNumber: z.string().nonempty(),
 });
-export type RequestAuthentication = z.infer<
+export type RequestAuthenticationRequest = z.infer<
   typeof requestAuthenticationRequestSchema
 >;
 

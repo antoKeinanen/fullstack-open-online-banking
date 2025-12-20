@@ -30,4 +30,4 @@ export const createUserRequestSchema = z.object({
 export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
 
 export const getUserResponseSchema = userSchema;
-export type getUserResponse = z.infer<typeof getUserResponseSchema>;
+export type GetUserResponse = z.infer<typeof getUserResponseSchema>;

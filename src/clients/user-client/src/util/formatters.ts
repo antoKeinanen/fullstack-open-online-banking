@@ -25,3 +25,11 @@ export function formatDateTime(
   }
   return new Intl.DateTimeFormat("en-CA", options).format(d);
 }
+
+export function formatBalance(hex: string): string {
+  return (BigInt(`0x${hex}`) / BigInt(100)).toLocaleString("ca-CA", {
+    currency: "EUR",
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
+}
