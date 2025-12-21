@@ -17,9 +17,8 @@ import type {
 import { UserServiceClient } from "@repo/protobufs/user-service";
 
 import type { Result } from "./try-catch";
+import type { GrpcResponse } from "./types";
 import { tryCatch } from "./try-catch";
-
-export type GrpcResponse<T> = Promise<Result<T, grpc.ServiceError>>;
 
 export class UserService {
   private client: UserServiceClient;

@@ -14,18 +14,22 @@ func (s *TigerbeetleServiceServer) CreateTransfer(ctx context.Context, req *pb.C
 	debitAccountIdUint128, err := tbt.HexStringToUint128(req.DebitAccountId)
 	if err != nil {
 		slog.Warn("Failed to create a single stage transfer", "error", err)
-		return nil, errors.New("invalid_request")
+		return nil, ErrInvalidRequest
 	}
 	creditAccountIdUint128, err := tbt.HexStringToUint128(req.CreditAccountId)
 	if err != nil {
 		log.Printf("Failed to create pending transfer: creditAccountId parsing failed %v", err)
-		return nil, errors.New("invalid_request")
+		return nil, ErrInvalidRequest
 	}
 	amountUint128, err := tbt.HexStringToUint128(req.Amount)
 	if err != nil {
 		log.Printf("Failed to create pending transfer: amount parsing failed %v", err)
-		return nil, errors.New("invalid_request")
+		return nil, ErrInvalidRequest
 	}
+	slog.Info("CreateTransfer request",
+		"debitAccountId", req.DebitAccountId,
+		"creditAccountId", req.CreditAccountId,
+		"amount", req.Amount)
 
 	transfer := tbt.Transfer{
 		ID:              tbt.ID(),
@@ -39,15 +43,15 @@ func (s *TigerbeetleServiceServer) CreateTransfer(ctx context.Context, req *pb.C
 	transferErrors, err := s.tbClient.CreateTransfers([]tbt.Transfer{transfer})
 	if err != nil {
 		log.Printf("Failed to create transfer: %v", err)
-		return nil, errors.New("creation_failed")
+		return nil, ErrUnexpected
 	}
 	for _, err := range transferErrors {
 		switch err.Result {
 		case tbt.TransferExceedsDebits:
-			return nil, errors.New("not_enough_funds")
+			return nil, ErrNotEnoughFunds
 		default:
 			log.Printf("Failed to create transaction %v", err)
-			return nil, errors.New("creation_failed")
+			return nil, ErrUnexpected
 		}
 	}
 

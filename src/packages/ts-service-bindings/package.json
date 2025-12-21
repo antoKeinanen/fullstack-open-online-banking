@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./user-service": "./src/user-service.ts"
+    "./user-service": "./src/user-service.ts",
+    "./payment-service": "./src/payment-service.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo build node_modules",

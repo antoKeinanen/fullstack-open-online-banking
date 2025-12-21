@@ -27,7 +27,7 @@ export function formatDateTime(
 }
 
 export function formatBalance(hex: string): string {
-  return (BigInt(`0x${hex}`) / BigInt(100)).toLocaleString("ca-CA", {
+  return (BigInt(`0x${hex}`) / BigInt(100)).toLocaleString("fi-FI", {
     currency: "EUR",
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,

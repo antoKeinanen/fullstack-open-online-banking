@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	pb "protobufs/gen/go/payment-service"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
+
+	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,9 +22,27 @@ type PaymentServiceServer struct {
 	tigerbeetleServiceConnection *grpc.ClientConn
 }
 
-// func (s *PaymentServiceServer) InitializePayment(_ context.Context, req *pb.InitializePaymentRequest) (*pb.InitializePaymentResponse, error) {
+func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.CreatePaymentRequest) (*pb.CreatePaymentResponse, error) {
+	amount := tbt.ToUint128(req.Amount).String()
+	slog.Info("TODO remove", "amount", amount, "req", req)
 
-// }
+	_, err := s.tigerbeetleServiceClient.CreateTransfer(
+		ctx,
+		&tbPb.CreateTransferRequest{
+			CreditAccountId: req.FromUserId,
+			DebitAccountId:  req.ToUserId,
+			Amount:          amount,
+		},
+	)
+
+	if err != nil {
+		slog.Error("Failed to create payment", "error", err)
+		return nil, err
+	}
+
+	return &pb.CreatePaymentResponse{}, nil
+
+}
 
 func newServer(config *Configuration) *PaymentServiceServer {
 	conn, err := grpc.NewClient(
@@ -29,10 +50,11 @@ func newServer(config *Configuration) *PaymentServiceServer {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Fatalf("Failed to connect to the tigerbeetle service %v", err)
+		slog.Error("Failed to connect to the tigerbeetle service", "error", err)
+		panic(err)
 	}
 	tigerbeetleClient := tbPb.NewTigerbeetleServiceClient(conn)
-	log.Println("Connected to tiger beetle service.")
+	slog.Info("Connected to tiger beetle service.")
 
 	s := &PaymentServiceServer{
 		config:                       config,
@@ -48,7 +70,8 @@ func main() {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.PaymentServicePort))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		slog.Error("failed to listen", "error", err)
+		panic(err)
 	}
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)

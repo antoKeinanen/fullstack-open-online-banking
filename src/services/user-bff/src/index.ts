@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 
 import { env } from "./env";
 import { authRouter } from "./routes/auth";
+import { paymentRouter } from "./routes/payments";
 import { userRouter } from "./routes/user";
 
 export interface JwtPayload {
@@ -22,6 +23,7 @@ app.use(logger());
 
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
+app.route("/payment", paymentRouter);
 
 if (process.env.NODE_ENV !== "production")
   app.get("/openapi", openAPIRouteHandler(app, {}));

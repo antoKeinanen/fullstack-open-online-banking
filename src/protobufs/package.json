@@ -3,10 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./user-service": {
-      "import": "./gen/ts/user-service/user-service.ts",
-      "types": "./gen/ts/user-service/user-service.ts"
-    }
+    "./user-service": "./gen/ts/user-service/user-service.ts",
+    "./payment-service": "./gen/ts/payment-service/payment-service.ts"
   },
   "scripts": {
     "generate-protobuf": "buf generate",

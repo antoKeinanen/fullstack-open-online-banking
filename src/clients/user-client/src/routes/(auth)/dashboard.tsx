@@ -58,6 +58,11 @@ function RouteComponent() {
     await navigate({ to: "/login", replace: true });
   };
 
+  const openTransactionDialog = (state?: TransactionDialogState) => {
+    setTransactionState(state ?? "deposit");
+    setTransactionDialogOpen(true);
+  };
+
   return (
     <main className="w-full space-y-4">
       <Item className="p-0">
@@ -90,15 +95,21 @@ function RouteComponent() {
           <div className="grid grid-cols-2 grid-rows-2 gap-2">
             <Button
               className="col-span-2"
-              onClick={() => setTransactionDialogOpen(true)}
+              onClick={() => openTransactionDialog("deposit")}
             >
               <WalletIcon />
               Deposit
             </Button>
-            <Button variant="secondary">
+            <Button
+              variant="secondary"
+              onClick={() => openTransactionDialog("send")}
+            >
               <BanknoteArrowUpIcon /> Send
             </Button>
-            <Button variant="secondary">
+            <Button
+              variant="secondary"
+              onClick={() => openTransactionDialog("request")}
+            >
               <BanknoteArrowDownIcon /> Request
             </Button>
           </div>
