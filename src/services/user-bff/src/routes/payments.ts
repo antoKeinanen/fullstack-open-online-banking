@@ -86,6 +86,21 @@ paymentRouter.post(
       return c.json(createUnexpectedError(), 500);
     }
 
+    if (userId === toUser.userId) {
+      return c.json(
+        {
+          errors: [
+            {
+              code: "INVALID_INPUT",
+              message: "You cannot send balance to yourself",
+              showUser: true,
+            },
+          ],
+        } as ApiErrorResponse,
+        500,
+      );
+    }
+
     const { error } = await paymentService.createPayment({
       toUserId: toUser.userId,
       amount: Long.fromInt(amount),

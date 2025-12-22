@@ -26,6 +26,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/web-ui/tabs";
 
 import { createPayment } from "../../services/paymentService";
+import { toastErrors } from "../../util/errorToaster";
 import { ResponsiveDialog } from "./responsiveDialog";
 
 export type TransactionDialogState =
@@ -125,7 +126,7 @@ function SendTab() {
       toast.success("Success");
       await router.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: toastErrors,
   });
   const form = useForm({
     resolver: zodResolver(createPaymentFormSchema),
