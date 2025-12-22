@@ -77,3 +77,29 @@ func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserById
 
 	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
 }
+
+func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.GetUserByPhoneNumberRequest) (*pb.User, error) {
+	user := repo.User{}
+	err := s.db.GetContext(ctx, &user, queries.QueryGetUserByPhoneNumber, req.PhoneNumber)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			slog.Info("User not found", "error", err)
+			return nil, lib.ErrNotFound
+		}
+
+		slog.Error("Failed to get user from the database", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+
+	account, err := s.tigerbeetleService.LookupAccount(ctx, &tbPb.AccountId{AccountId: user.UserId})
+	if err != nil {
+		if err == lib.ErrNotFound {
+			slog.Info("Account not found", "error", err)
+			return nil, lib.ErrNotFound
+		}
+		slog.Error("Failed to get account for user", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+
+	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
+}

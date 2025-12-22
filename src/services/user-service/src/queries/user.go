@@ -14,6 +14,12 @@ var (
 		where user_id = $1
 	`
 
+	QueryGetUserByPhoneNumber = `
+		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
+		from banking.users
+		where phone_number = $1
+	`
+
 	QueryGetAllUsersPaginated = `
 		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
 		from banking.users

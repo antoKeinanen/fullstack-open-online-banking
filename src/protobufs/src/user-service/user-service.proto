@@ -11,6 +11,11 @@ service UserService {
   rpc AuthenticateWithOTP(OTPAuthenticationRequest) returns (Session);
   rpc GetActiveSessions(GetActiveSessionsRequest) returns (GetActiveSessionsResponse);
   rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
+  rpc GetUserByPhoneNumber(GetUserByPhoneNumberRequest) returns (User);
+}
+
+message GetUserByPhoneNumberRequest {
+  string phone_number = 1;
 }
 
 message Empty {}

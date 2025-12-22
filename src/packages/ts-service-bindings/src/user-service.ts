@@ -7,6 +7,7 @@ import type {
   GetActiveSessionsRequest,
   GetActiveSessionsResponse,
   GetUserByIdRequest,
+  GetUserByPhoneNumberRequest,
   InvalidateSessionRequest,
   OTPAuthenticationRequest,
   RefreshTokenRequest,
@@ -98,5 +99,14 @@ export class UserService {
     return tryCatch(getUserById(request)) as Promise<
       Result<User, grpc.ServiceError>
     >;
+  }
+
+  async getUserByPhoneNumber(
+    request: GetUserByPhoneNumberRequest,
+  ): GrpcResponse<User> {
+    const getUserByPhoneNumber = promisify(
+      this.client.getUserByPhoneNumber.bind(this.client),
+    );
+    return tryCatch(getUserByPhoneNumber(request)) as GrpcResponse<User>;
   }
 }

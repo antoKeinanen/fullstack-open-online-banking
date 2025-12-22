@@ -88,7 +88,7 @@ function RouteComponent() {
       <Card className="w-full gap-2">
         <CardHeader>
           <CardTitle className="text-xl">
-            {formatBalance(user.balance)}€
+            {formatBalance(user.balance)}
           </CardTitle>
         </CardHeader>
         <CardContent>

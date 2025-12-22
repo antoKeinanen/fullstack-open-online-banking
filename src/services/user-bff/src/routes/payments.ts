@@ -8,11 +8,12 @@ import {
   apiErrorResponseSchema,
   createUnexpectedError,
 } from "@repo/validators/error";
-import { createPaymentApiRequestSchema } from "@repo/validators/payment";
+import { createPaymentRequestSchema } from "@repo/validators/payment";
 
 import type { JwtPayload } from "..";
 import { env } from "../env";
 import { paymentService } from "../services/paymentService";
+import { userService } from "../services/userService";
 
 export const paymentRouter = new Hono();
 
@@ -38,6 +39,14 @@ paymentRouter.post(
       401: {
         description: "Missing or expired access token",
       },
+      404: {
+        description: "The phone number does not match any users on record",
+        content: {
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
+          },
+        },
+      },
       500: {
         description:
           "An error has occurred. Refer to the response error object",
@@ -50,19 +59,38 @@ paymentRouter.post(
     },
   }),
 
-  validator("json", createPaymentApiRequestSchema),
+  validator("json", createPaymentRequestSchema),
 
   async (c) => {
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
-    const { toUserId, amount } = c.req.valid("json");
+    const { toUserPhoneNumber, amount } = c.req.valid("json");
+
+    const { data: toUser, error: toUserError } =
+      await userService.getUserByPhoneNumber({
+        phoneNumber: toUserPhoneNumber,
+      });
+    if (toUserError != null) {
+      if (toUserError.details == "NOT_FOUND") {
+        const errors: ApiErrorResponse = {
+          errors: [
+            {
+              code: "NOT_FOUND",
+              message: "User with the phone number does not exist.",
+              showUser: true,
+            },
+          ],
+        };
+        return c.json(errors, 404);
+      }
+      console.error(toUserError);
+      return c.json(createUnexpectedError(), 500);
+    }
 
     const { error } = await paymentService.createPayment({
-      toUserId,
+      toUserId: toUser.userId,
       amount: Long.fromInt(amount),
       fromUserId: userId,
     });
-
-    console.error(error);
 
     if (error != null) {
       if (error.details == "NOT_ENOUGH_FUNDS") {

@@ -27,9 +27,12 @@ export function formatDateTime(
 }
 
 export function formatBalance(hex: string): string {
-  return (BigInt(`0x${hex}`) / BigInt(100)).toLocaleString("fi-FI", {
+  const balance = BigInt(`0x${hex}`);
+  const balanceInDecimals = Number(balance) / 100;
+  return new Intl.NumberFormat("fi-FI", {
+    style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 2,
     minimumFractionDigits: 2,
-  });
+    maximumFractionDigits: 2,
+  }).format(balanceInDecimals);
 }

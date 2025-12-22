@@ -135,7 +135,7 @@ function SendTab() {
   const onSubmit = (values: CreatePaymentForm) => {
     createPaymentMutation.mutate({
       amount: Math.floor(values.amount * 100),
-      toUserId: values.userId,
+      toUserPhoneNumber: values.userPhoneNumber,
     });
   };
 
@@ -170,7 +170,7 @@ function SendTab() {
 
             <Controller
               control={form.control}
-              name="userId"
+              name="userPhoneNumber"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Recipient</FieldLabel>
