@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const createPaymentRequestSchema = z.object({
-  fromUserId: z.string(),
   toUserId: z.string(),
   amount: z
     .number()

@@ -1,9 +1,22 @@
 import type { Dispatch } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { WalletIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
+import type { CreatePaymentForm } from "@repo/validators/payment";
+import { createPaymentFormSchema } from "@repo/validators/payment";
 import { Button } from "@repo/web-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@repo/web-ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@repo/web-ui/field";
 import { Input } from "@repo/web-ui/input";
 import {
   InputGroup,
@@ -12,6 +25,7 @@ import {
 } from "@repo/web-ui/input-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/web-ui/tabs";
 
+import { createPayment } from "../../services/paymentService";
 import { ResponsiveDialog } from "./responsiveDialog";
 
 export type TransactionDialogState =
@@ -104,23 +118,70 @@ function WithdrawTab() {
 }
 
 function SendTab() {
+  const router = useRouter();
+  const createPaymentMutation = useMutation({
+    mutationFn: createPayment,
+    onSuccess: async () => {
+      toast.success("Success");
+      await router.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const form = useForm({
+    resolver: zodResolver(createPaymentFormSchema),
+    disabled: createPaymentMutation.isPending,
+  });
+
+  const onSubmit = (values: CreatePaymentForm) => {
+    createPaymentMutation.mutate({
+      amount: Math.floor(values.amount * 100),
+      toUserId: values.userId,
+    });
+  };
+
   return (
-    <form>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
-            <Field>
-              <FieldLabel htmlFor="amount">Amount</FieldLabel>
-              <InputGroup>
-                <InputGroupInput itemID="amount" placeholder="0.00" />
-                <InputGroupAddon align="inline-end">€</InputGroupAddon>
-              </InputGroup>
-            </Field>
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput
+                      {...field}
+                      value={field.value as string}
+                      aria-invalid={fieldState.invalid}
+                      itemID={field.name}
+                      type="number"
+                      placeholder="0.00"
+                    />
+                    <InputGroupAddon align="inline-end">€</InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-            <Field>
-              <FieldLabel htmlFor="recipient">Recipient</FieldLabel>
-              <Input id="recipient" type="tel" placeholder="+3586864371" />
-            </Field>
+            <Controller
+              control={form.control}
+              name="userId"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Recipient</FieldLabel>
+                  {/* TODO: make phone number */}
+                  <Input {...field} id={field.name} placeholder="+3586864371" />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
             <Field>
               <Button>
