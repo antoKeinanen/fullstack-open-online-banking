@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { jwt } from "hono/jwt";
 
+import { createUnexpectedError } from "@repo/validators/error";
 import { userSchema } from "@repo/validators/user";
 
 import type { JwtPayload } from "..";
@@ -44,7 +45,7 @@ userRouter.get(
     const { data, error } = await userService.getUserById({ userId });
     if (error != null) {
       console.error("Failed to get user", error);
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     return c.json(data);

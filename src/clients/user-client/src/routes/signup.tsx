@@ -33,6 +33,7 @@ import {
 import { Input } from "@repo/web-ui/input";
 
 import { signUp } from "../services/authService";
+import { toastErrors } from "../util/errorToaster";
 import { formatAddress } from "../util/formatters";
 
 export const Route = createFileRoute("/signup")({
@@ -48,10 +49,7 @@ function SignUpForm() {
       toast.success("User created, please log in.");
       await router.navigate({ to: "/login", replace: true });
     },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Failed to sign up, try again later");
-    },
+    onError: toastErrors,
   });
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpFormSchema),

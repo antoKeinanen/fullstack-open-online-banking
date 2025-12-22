@@ -31,3 +31,19 @@ export function createUnexpectedError(): ApiErrorResponse {
     ],
   };
 }
+
+export function createSingleError(
+  code: ApiError["code"],
+  message: string,
+  showUser = true,
+) {
+  return {
+    errors: [
+      {
+        code,
+        message,
+        showUser,
+      },
+    ],
+  } as ApiErrorResponse;
+}
