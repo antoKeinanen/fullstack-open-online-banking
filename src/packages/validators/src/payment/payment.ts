@@ -7,6 +7,7 @@ export const createPaymentRequestSchema = z.object({
     .int()
     .min(0)
     .max(10 ** 6),
+  idempotencyKey: z.uuidv4(),
 });
 export type CreatePaymentApiRequest = z.infer<
   typeof createPaymentRequestSchema

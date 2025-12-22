@@ -25,6 +25,7 @@ import {
 } from "@repo/web-ui/input-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/web-ui/tabs";
 
+import type { ApiError } from "../../util/api";
 import { createPayment } from "../../services/paymentService";
 import { toastErrors } from "../../util/errorToaster";
 import { ResponsiveDialog } from "./responsiveDialog";
@@ -118,25 +119,33 @@ function WithdrawTab() {
   );
 }
 
-function SendTab() {
+function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   const router = useRouter();
+  const form = useForm({
+    resolver: zodResolver(createPaymentFormSchema),
+    defaultValues: {
+      idempotencyKey: crypto.randomUUID(),
+    },
+  });
+
   const createPaymentMutation = useMutation({
     mutationFn: createPayment,
     onSuccess: async () => {
       toast.success("Success");
       await router.invalidate();
+      setOpen(false);
     },
-    onError: toastErrors,
-  });
-  const form = useForm({
-    resolver: zodResolver(createPaymentFormSchema),
-    disabled: createPaymentMutation.isPending,
+    onError: (error: ApiError) => {
+      toastErrors(error);
+      form.setValue("idempotencyKey", crypto.randomUUID());
+    },
   });
 
   const onSubmit = (values: CreatePaymentForm) => {
     createPaymentMutation.mutate({
       amount: Math.floor(values.amount * 100),
       toUserPhoneNumber: values.userPhoneNumber,
+      idempotencyKey: values.idempotencyKey,
     });
   };
 
@@ -256,7 +265,7 @@ export function TransactionDialog({
           <WithdrawTab />
         </TabsContent>
         <TabsContent value="send">
-          <SendTab />
+          <SendTab setOpen={setOpen} />
         </TabsContent>
         <TabsContent value="request">
           <RequestTab />

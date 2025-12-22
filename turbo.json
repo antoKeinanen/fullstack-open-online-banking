@@ -34,7 +34,8 @@
         "VITE_PUBLIC_USER_CLIENT_USER_BFF_URL",
         "NODE_ENV",
         "USER_BFF_JWT_SECRET",
-        "USER_BFF_PAYMENT_SERVICE_URL"
+        "USER_BFF_PAYMENT_SERVICE_URL",
+        "USER_BFF_REDIS_CONNECTION_STRING"
       ],
       "cache": false,
       "persistent": true,

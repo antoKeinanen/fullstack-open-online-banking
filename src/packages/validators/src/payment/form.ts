@@ -7,5 +7,6 @@ export const createPaymentFormSchema = z.object({
     .multipleOf(0.01)
     .positive()
     .max(10 ** 4),
+  idempotencyKey: z.uuidv4(),
 });
 export type CreatePaymentForm = z.infer<typeof createPaymentFormSchema>;

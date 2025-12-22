@@ -6,6 +6,7 @@ const errorCodes = [
   "CONFLICT",
   "ACTION_FAILED",
   "NOT_ENOUGH_FUNDS",
+  "IDEMPOTENCY_ERROR",
 ] as const;
 
 export const apiErrorSchema = z.object({
