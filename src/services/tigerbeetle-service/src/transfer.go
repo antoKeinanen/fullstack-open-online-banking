@@ -124,7 +124,7 @@ func (s *TigerbeetleServiceServer) PostPendingTransfer(_ context.Context, req *p
 		log.Printf("Failed to post pending transfer: amount parsing failed %v", err)
 		return nil, errors.New("invalid_request")
 	}
-	pendingTransferIdUint128, err := tbt.HexStringToUint128(req.Amount)
+	pendingTransferIdUint128, err := tbt.HexStringToUint128(req.PendingTransferId)
 	if err != nil {
 		log.Printf("Failed to post pending transfer: pending transfer id parsing failed %v", err)
 		return nil, errors.New("invalid_request")
