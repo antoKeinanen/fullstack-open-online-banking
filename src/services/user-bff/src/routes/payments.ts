@@ -101,7 +101,7 @@ paymentRouter.post(
       return c.json(createUnexpectedError(), 500);
     }
 
-    const paymentId = randomUUIDv7().replace("-", "");
+    const paymentId = randomUUIDv7().replaceAll("-", "");
     await cacheTransaction(userId, idempotencyKey, paymentId, "pending");
 
     const { data: toUser, error: toUserError } =
