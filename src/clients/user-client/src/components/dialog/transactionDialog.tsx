@@ -109,7 +109,7 @@ function WithdrawTab() {
 
             <Field>
               <Button>
-                <WalletIcon /> Deposit
+                <WalletIcon /> Withdraw
               </Button>
             </Field>
           </FieldSet>
@@ -195,7 +195,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
 
             <Field>
               <Button>
-                <WalletIcon /> Deposit
+                <WalletIcon /> Send
               </Button>
             </Field>
           </FieldSet>
@@ -226,7 +226,7 @@ function RequestTab() {
 
             <Field>
               <Button>
-                <WalletIcon /> Deposit
+                <WalletIcon /> Request
               </Button>
             </Field>
           </FieldSet>
