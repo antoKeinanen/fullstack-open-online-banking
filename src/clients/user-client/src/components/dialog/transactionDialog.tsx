@@ -133,6 +133,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
     onSuccess: async () => {
       toast.success("Success");
       await router.invalidate();
+      form.reset();
       setOpen(false);
     },
     onError: (error: ApiError) => {
