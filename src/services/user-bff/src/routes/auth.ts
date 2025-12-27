@@ -57,7 +57,7 @@ authRouter.post(
 
     const { error } = await userService.requestAuthentication(body);
     if (error != null) {
-      if (error.details == "NOT_FOUND") {
+      if (error.details === "NOT_FOUND") {
         console.warn(
           "Failed to create authentication request: user does not exist",
           body,
@@ -141,7 +141,7 @@ authRouter.post(
     });
     if (error != null) {
       console.log(error);
-      if (error.details == "NOT_FOUND" || error.details == "OTP_MISMATCH") {
+      if (error.details === "NOT_FOUND" || error.details === "OTP_MISMATCH") {
         return c.json(
           createSingleError("INVALID_INPUT", "Invalid number and/or code"),
           406,
@@ -279,7 +279,7 @@ authRouter.post(
       birthDate: request.birthDate.toISOString(),
     });
     if (error !== null) {
-      if (error.details == "CONFLICT") {
+      if (error.details === "CONFLICT") {
         return c.text("Created", 201);
       }
       return c.json(createUnexpectedError(), 500);
