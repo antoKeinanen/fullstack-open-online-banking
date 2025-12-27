@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   createFileRoute,
   Link,
@@ -30,6 +31,7 @@ import type { TransactionDialogState } from "../../components/dialog/transaction
 import { TransactionDialog } from "../../components/dialog/transactionDialog";
 import { RecommendedUserCard } from "../../components/recommendedUser";
 import { TransactionCard } from "../../components/transactionCard";
+import { logOut } from "../../services/authService";
 import { getUserDetails } from "../../services/userService";
 import { useAuthStore } from "../../stores/authStore";
 import { formatBalance } from "../../util/formatters";
@@ -57,10 +59,16 @@ function RouteComponent() {
   const [transactionState, setTransactionState] =
     useState<TransactionDialogState>("deposit");
 
-  const logOut = async () => {
-    clearSession();
-    await navigate({ to: "/login", replace: true });
-  };
+  const logOutMutation = useMutation({
+    mutationFn: logOut,
+    onSuccess: async () => {
+      clearSession();
+      await navigate({ to: "/login", replace: true });
+    },
+    onError: () => {
+      toast.error("Failed to log out. Try again later");
+    },
+  });
 
   const openTransactionDialog = (state?: TransactionDialogState) => {
     setTransactionState(state ?? "deposit");
@@ -83,7 +91,7 @@ function RouteComponent() {
           </ItemTitle>
         </ItemContent>
         <ItemActions>
-          <Button variant="outline" onClick={logOut}>
+          <Button variant="outline" onClick={() => logOutMutation.mutate()}>
             <LockIcon /> Log out
           </Button>
         </ItemActions>

@@ -32,3 +32,7 @@ export function getActiveSessions() {
 export function invalidateSession(request: InvalidateSessionRequest) {
   return api.del("/api/auth/sessions", z.any(), request);
 }
+
+export function logOut() {
+  return api.post("/api/auth/logout", z.any());
+}
