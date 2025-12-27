@@ -60,6 +60,7 @@ function RouteComponent() {
     useState<TransactionDialogState>("deposit");
 
   const logOutMutation = useMutation({
+    mutationKey: ["logout"],
     mutationFn: logOut,
     onSuccess: async () => {
       clearSession();
