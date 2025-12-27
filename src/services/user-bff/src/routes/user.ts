@@ -2,7 +2,10 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { jwt } from "hono/jwt";
 
-import { createUnexpectedError } from "@repo/validators/error";
+import {
+  apiErrorResponseSchema,
+  createUnexpectedError,
+} from "@repo/validators/error";
 import { userSchema } from "@repo/validators/user";
 
 import type { JwtPayload } from "..";
@@ -30,10 +33,10 @@ userRouter.get(
       },
       500: {
         description:
-          "Error has occurred, for security reasons details are omitted",
+          "An error has occurred. Refer to the response error object",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
