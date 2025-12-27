@@ -132,7 +132,7 @@ paymentRouter.post(
           "INVALID_INPUT",
           "You cannot send balance to yourself",
         ),
-        500,
+        400,
       );
     }
 
