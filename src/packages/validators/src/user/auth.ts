@@ -21,7 +21,7 @@ export type OTPAuthenticationRequest = z.infer<
 >;
 
 export const sessionSchema = z.object({
-  accessToken: z.string().nonempty(),
+  accessToken: z.string().min(1),
   accessTokenExpires: z.iso.datetime(),
 });
 export type Session = z.infer<typeof sessionSchema>;

@@ -20,9 +20,9 @@ export type GetUserRequest = z.infer<typeof getUserRequestSchema>;
 
 export const createUserRequestSchema = z.object({
   phoneNumber: z.e164(),
-  firstName: z.string().nonempty(),
-  lastName: z.string().nonempty(),
-  address: z.string().nonempty(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  address: z.string().min(1),
   birthDate: z.coerce.date().refine((birthDate) => isOverYears(18, birthDate)),
   isResident: z.literal(true),
   isTruth: z.literal(true),

@@ -5,12 +5,12 @@ import { isOverYears } from "../lib";
 
 export const signUpFormSchema = z
   .object({
-    firstName: z.string().nonempty(),
-    lastName: z.string().nonempty(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
     phoneNumber: z.e164(),
-    homeAddress: z.string().nonempty(),
+    homeAddress: z.string().min(1),
     postCode: z.string().length(5),
-    city: z.string().nonempty(),
+    city: z.string().min(1),
     birthDay: z.string().regex(/^\d+$/),
     birthMonth: z.string().regex(/^\d+$/),
     birthYear: z.string().regex(/^\d+$/),
