@@ -2,3 +2,7 @@
 @import "@repo/tailwind-config/theme";
 
 @source "../../../packages/web-ui/src/components/*.{ts,tsx}";
+
+body {
+  @apply bg-background;
+}

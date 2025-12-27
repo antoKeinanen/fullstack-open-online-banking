@@ -351,8 +351,8 @@ function SignUpForm() {
 
 function RouteComponent() {
   return (
-    <div className="m-auto max-h-10/12 w-full max-w-sm self-center md:max-h-2/3 md:max-w-4xl">
-      <Card className="flex h-full flex-row gap-0 overflow-clip p-0">
+    <div className="m-auto h-screen w-full max-w-sm self-center py-8 md:max-w-4xl">
+      <Card className="flex h-10/12 md:h-2/3 flex-row gap-0 overflow-clip p-0">
         <div className="flex w-full flex-col justify-around gap-8 px-4 py-6 md:w-1/2">
           <CardHeader className="w-full">
             <CardTitle className="text-center">Nice to meet you!</CardTitle>
