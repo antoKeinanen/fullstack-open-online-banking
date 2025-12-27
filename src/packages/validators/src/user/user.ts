@@ -16,7 +16,7 @@ export type User = z.infer<typeof userSchema>;
 export const getUserRequestSchema = z.object({
   userId: z.e164(),
 });
-export type GetUserRequest = z.infer<typeof userSchema>;
+export type GetUserRequest = z.infer<typeof getUserRequestSchema>;
 
 export const createUserRequestSchema = z.object({
   phoneNumber: z.e164(),
