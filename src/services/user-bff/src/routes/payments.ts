@@ -4,7 +4,6 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { jwt } from "hono/jwt";
 import Long from "long";
 
-import type { ApiErrorResponse } from "@repo/validators/error";
 import {
   apiErrorResponseSchema,
   createSingleError,
@@ -113,16 +112,13 @@ paymentRouter.post(
       await updateTransactionState(userId, idempotencyKey, "failed");
 
       if (toUserError.details == "NOT_FOUND") {
-        const errors: ApiErrorResponse = {
-          errors: [
-            {
-              code: "NOT_FOUND",
-              message: "User with the phone number does not exist.",
-              showUser: true,
-            },
-          ],
-        };
-        return c.json(errors, 404);
+        return c.json(
+          createSingleError(
+            "NOT_FOUND",
+            "User with the phone number does not exist.",
+          ),
+          404,
+        );
       }
       console.error(toUserError);
       return c.json(createUnexpectedError(), 500);
@@ -132,15 +128,10 @@ paymentRouter.post(
       await updateTransactionState(userId, idempotencyKey, "failed");
 
       return c.json(
-        {
-          errors: [
-            {
-              code: "INVALID_INPUT",
-              message: "You cannot send balance to yourself",
-              showUser: true,
-            },
-          ],
-        } as ApiErrorResponse,
+        createSingleError(
+          "INVALID_INPUT",
+          "You cannot send balance to yourself",
+        ),
         500,
       );
     }
@@ -155,16 +146,10 @@ paymentRouter.post(
       await updateTransactionState(userId, idempotencyKey, "failed");
 
       if (error.details === "NOT_ENOUGH_FUNDS") {
-        const errors: ApiErrorResponse = {
-          errors: [
-            {
-              code: "NOT_ENOUGH_FUNDS",
-              message: "Insufficient balance",
-              showUser: true,
-            },
-          ],
-        };
-        return c.json(errors, 500);
+        return c.json(
+          createSingleError("NOT_ENOUGH_FUNDS", "Insufficient balance"),
+          500,
+        );
       }
       console.error("Failed to create transaction", error.message);
       return c.json(createUnexpectedError(), 500);
