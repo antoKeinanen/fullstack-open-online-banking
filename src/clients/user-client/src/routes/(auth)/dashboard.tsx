@@ -44,6 +44,7 @@ export const Route = createFileRoute("/(auth)/dashboard")({
     console.error(err);
     toast.error("Failed to load page :(");
   },
+  errorComponent: () => <p>Something has went terribly wrong :&lpar;</p>,
 });
 
 function RouteComponent() {
