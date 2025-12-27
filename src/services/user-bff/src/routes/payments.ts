@@ -52,6 +52,15 @@ paymentRouter.post(
           },
         },
       },
+      422: {
+        description:
+          "An error has occurred. Refer to the response error object",
+        content: {
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
+          },
+        },
+      },
       500: {
         description:
           "An error has occurred. Refer to the response error object",
@@ -132,7 +141,7 @@ paymentRouter.post(
           "INVALID_INPUT",
           "You cannot send balance to yourself",
         ),
-        400,
+        422,
       );
     }
 
@@ -148,7 +157,7 @@ paymentRouter.post(
       if (error.details === "NOT_ENOUGH_FUNDS") {
         return c.json(
           createSingleError("NOT_ENOUGH_FUNDS", "Insufficient balance"),
-          500,
+          422,
         );
       }
       console.error("Failed to create transaction", error.message);
