@@ -1,12 +1,17 @@
 import { Hono } from "hono";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { jwt } from "hono/jwt";
+import Long from "long";
 
 import {
   apiErrorResponseSchema,
   createUnexpectedError,
 } from "@repo/validators/error";
-import { userSchema } from "@repo/validators/user";
+import {
+  getUserTransfersRequestSchema,
+  getUserTransfersResponseSchema,
+  userSchema,
+} from "@repo/validators/user";
 
 import type { JwtPayload } from "..";
 import { env } from "../env";
@@ -52,5 +57,62 @@ userRouter.get(
     }
 
     return c.json(data);
+  },
+);
+
+userRouter.get(
+  "/transfers",
+
+  describeRoute({
+    description:
+      "Returns a possibly empty list of transfers relating to the currently logged in user in a chronological order",
+
+    responses: {
+      200: {
+        description: "A successful response",
+        content: {
+          "application/json": {
+            schema: resolver(getUserTransfersResponseSchema),
+          },
+        },
+      },
+      500: {
+        description: "The request has failed",
+        content: {
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
+          },
+        },
+      },
+    },
+  }),
+
+  validator("query", getUserTransfersRequestSchema),
+
+  async (c) => {
+    const request = c.req.valid("query");
+    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+
+    const { data, error } = await userService.getUserTransfers({
+      userId: userId,
+      limit: request.limit,
+      maxTimestamp: request.maxTimestamp
+        ? new Long(request.maxTimestamp)
+        : undefined,
+      minTimestamp: request.minTimestamp
+        ? new Long(request.minTimestamp)
+        : undefined,
+    });
+
+    if (error != null) {
+      console.error(
+        "Failed to get transfers relating to user",
+        error.message,
+        error.metadata,
+      );
+      return c.json(createUnexpectedError(), 500);
+    }
+
+    return c.json(data, 200);
   },
 );

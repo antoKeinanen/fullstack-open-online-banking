@@ -12,6 +12,18 @@ service TigerbeetleService {
   rpc LookupTransfer(TransferId) returns (Transfer);
   rpc CreateTransfer(CreateTransferRequest) returns (TransferId);
   rpc EnsureSystemFloatAccountExists(Empty) returns (Empty);
+  rpc GetAccountTransfers(GetAccountTransfersRequest) returns (GetAccountTransfersResponse);
+}
+
+message GetAccountTransfersRequest {
+  string user_id = 1;
+  optional uint64 min_timestamp = 2;
+  optional uint64 max_timestamp = 3;
+  optional uint32 limit = 4;
+}
+
+message GetAccountTransfersResponse {
+  repeated Transfer transfers = 1;
 }
 
 message Empty {}

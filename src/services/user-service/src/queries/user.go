@@ -19,4 +19,9 @@ var (
 		from banking.users
 		where phone_number = $1
 	`
+
+	QueryMapUserIdsToNames = `
+		select first_name, last_name, user_id from banking.users
+		where user_id = any($1)
+	`
 )

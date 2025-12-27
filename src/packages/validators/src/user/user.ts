@@ -31,3 +31,35 @@ export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
 
 export const getUserResponseSchema = userSchema;
 export type GetUserResponse = z.infer<typeof getUserResponseSchema>;
+
+export const getUserTransfersRequestSchema = z.object({
+  minTimestamp: z.coerce
+    .number()
+    .multipleOf(1)
+    .min(0)
+    .max(Number.MAX_SAFE_INTEGER)
+    .optional(),
+  maxTimestamp: z.coerce
+    .number()
+    .multipleOf(1)
+    .min(0)
+    .max(Number.MAX_SAFE_INTEGER)
+    .optional(),
+  limit: z.coerce.number().multipleOf(1).min(1).max(100).optional().default(10),
+});
+export type GetUserTransfersRequest = z.infer<
+  typeof getUserTransfersRequestSchema
+>;
+
+export const getUserTransfersResponseSchema = z.object({
+  transfers: z.array(
+    z.object({
+      transferId: z.string(),
+      debitAccountId: z.string(),
+      creditAccountId: z.string(),
+      amount: z.string(),
+      debitUserFullName: z.string(),
+      creditAccountFullName: z.string(),
+    }),
+  ),
+});

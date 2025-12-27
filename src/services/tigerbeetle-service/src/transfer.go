@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	pb "protobufs/gen/go/tigerbeetle-service"
+	"time"
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
@@ -229,4 +230,55 @@ func (s *TigerbeetleServiceServer) LookupTransfer(_ context.Context, req *pb.Tra
 	}
 
 	return ToPbTransfer(transfers[0]), nil
+}
+
+func TbTransferToPbTransfer(transfer tbt.Transfer) *pb.Transfer {
+	return &pb.Transfer{
+		TransferId:      transfer.ID.String(),
+		Amount:          transfer.Amount.String(),
+		DebitAccountId:  transfer.DebitAccountID.String(),
+		CreditAccountId: transfer.CreditAccountID.String(),
+	}
+}
+
+func (s *TigerbeetleServiceServer) GetAccountTransfers(_ context.Context, req *pb.GetAccountTransfersRequest) (*pb.GetAccountTransfersResponse, error) {
+	accountIdUint128, err := tbt.HexStringToUint128(req.UserId)
+	if err != nil {
+		slog.Error("Failed to get account transfers, invalid accountId", "error", err)
+		return nil, ErrInvalidRequest
+	}
+	if req.MaxTimestamp == nil {
+		now := uint64(time.Now().UnixNano())
+		req.MaxTimestamp = &now
+	}
+	if req.MinTimestamp == nil {
+		minTime := uint64(0)
+		req.MinTimestamp = &minTime
+	}
+
+	filter := tbt.AccountFilter{
+		AccountID:    accountIdUint128,
+		TimestampMin: *req.MinTimestamp,
+		TimestampMax: *req.MaxTimestamp,
+		Limit:        *req.Limit,
+		Flags: tbt.AccountFilterFlags{
+			Debits:  true,
+			Credits: true,
+		}.ToUint32(),
+	}
+
+	transfers, err := s.tbClient.GetAccountTransfers(filter)
+	if err != nil {
+		slog.Error("Failed to get account transfers", "error", err)
+		return nil, ErrUnexpected
+	}
+
+	pbTransfers := make([]*pb.Transfer, len(transfers))
+	for i, transfer := range transfers {
+		pbTransfers[i] = TbTransferToPbTransfer(transfer)
+	}
+
+	return &pb.GetAccountTransfersResponse{
+		Transfers: pbTransfers,
+	}, nil
 }

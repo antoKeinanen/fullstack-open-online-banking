@@ -1,12 +1,16 @@
 package repo
 
 import (
+	"context"
 	"log/slog"
 	"math/big"
 	pb "protobufs/gen/go/user-service"
 	"time"
 	"user-service/src/lib"
+	"user-service/src/queries"
 
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 )
 
@@ -54,4 +58,38 @@ func DbUserToPbUser(dbUser User, credits, debits string) (*pb.User, error) {
 		CreatedAt:   dbUser.CreatedAt.UTC().Format(time.RFC3339),
 		Balance:     balance,
 	}, nil
+}
+
+type DbUserIdToNameMap struct {
+	FirstName string `db:"first_name"`
+	LastName  string `db:"last_name"`
+	UserId    string `db:"user_id"`
+}
+
+func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[string]string, error) {
+	result := make(map[string]string)
+
+	rows, err := db.QueryxContext(ctx, queries.QueryMapUserIdsToNames, pq.Array(ids))
+	if err != nil {
+		slog.Error("Failed to map user ids to names", "error", err)
+		return result, lib.ErrUnexpected
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user DbUserIdToNameMap
+		if err := rows.StructScan(&user); err != nil {
+			slog.Error("Failed to scan user row", "error", err)
+			return result, lib.ErrUnexpected
+		}
+		result[user.UserId] = lib.FormatName(user.FirstName, user.LastName)
+	}
+
+	if err := rows.Err(); err != nil {
+		slog.Error("Error iterating rows", "error", err)
+		return result, lib.ErrUnexpected
+	}
+
+	return result, nil
+
 }
