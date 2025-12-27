@@ -3,7 +3,7 @@ import { z } from "zod";
 import { userSchema } from "./user";
 
 export const requestAuthenticationRequestSchema = z.object({
-  phoneNumber: z.string().nonempty(),
+  phoneNumber: z.e164(),
 });
 export type RequestAuthenticationRequest = z.infer<
   typeof requestAuthenticationRequestSchema
