@@ -8,181 +8,175 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as authDashboardRouteImport } from "./routes/(auth)/dashboard";
-import { Route as authMeRouteImport } from "./routes/(auth)/me";
-import { Route as authRouteRouteImport } from "./routes/(auth)/route";
-import { Route as authTransactionsRouteImport } from "./routes/(auth)/transactions";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as SignupRouteImport } from "./routes/signup";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as authRouteRouteImport } from './routes/(auth)/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as authTransactionsRouteImport } from './routes/(auth)/transactions'
+import { Route as authMeRouteImport } from './routes/(auth)/me'
+import { Route as authDashboardRouteImport } from './routes/(auth)/dashboard'
 
 const SignupRoute = SignupRouteImport.update({
-  id: "/signup",
-  path: "/signup",
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const authRouteRoute = authRouteRouteImport.update({
-  id: "/(auth)",
+  id: '/(auth)',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const authTransactionsRoute = authTransactionsRouteImport.update({
-  id: "/transactions",
-  path: "/transactions",
+  id: '/transactions',
+  path: '/transactions',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 const authMeRoute = authMeRouteImport.update({
-  id: "/me",
-  path: "/me",
+  id: '/me',
+  path: '/me',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 const authDashboardRoute = authDashboardRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/login": typeof LoginRoute;
-  "/signup": typeof SignupRoute;
-  "/dashboard": typeof authDashboardRoute;
-  "/me": typeof authMeRoute;
-  "/transactions": typeof authTransactionsRoute;
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/dashboard': typeof authDashboardRoute
+  '/me': typeof authMeRoute
+  '/transactions': typeof authTransactionsRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/login": typeof LoginRoute;
-  "/signup": typeof SignupRoute;
-  "/dashboard": typeof authDashboardRoute;
-  "/me": typeof authMeRoute;
-  "/transactions": typeof authTransactionsRoute;
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/dashboard': typeof authDashboardRoute
+  '/me': typeof authMeRoute
+  '/transactions': typeof authTransactionsRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/(auth)": typeof authRouteRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/signup": typeof SignupRoute;
-  "/(auth)/dashboard": typeof authDashboardRoute;
-  "/(auth)/me": typeof authMeRoute;
-  "/(auth)/transactions": typeof authTransactionsRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/(auth)': typeof authRouteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/(auth)/dashboard': typeof authDashboardRoute
+  '/(auth)/me': typeof authMeRoute
+  '/(auth)/transactions': typeof authTransactionsRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths:
-    | "/"
-    | "/login"
-    | "/signup"
-    | "/dashboard"
-    | "/me"
-    | "/transactions";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/login" | "/signup" | "/dashboard" | "/me" | "/transactions";
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/login' | '/signup' | '/dashboard' | '/me' | '/transactions'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/login' | '/signup' | '/dashboard' | '/me' | '/transactions'
   id:
-    | "__root__"
-    | "/"
-    | "/(auth)"
-    | "/login"
-    | "/signup"
-    | "/(auth)/dashboard"
-    | "/(auth)/me"
-    | "/(auth)/transactions";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/(auth)'
+    | '/login'
+    | '/signup'
+    | '/(auth)/dashboard'
+    | '/(auth)/me'
+    | '/(auth)/transactions'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  authRouteRoute: typeof authRouteRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
-  SignupRoute: typeof SignupRoute;
+  IndexRoute: typeof IndexRoute
+  authRouteRoute: typeof authRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/signup": {
-      id: "/signup";
-      path: "/signup";
-      fullPath: "/signup";
-      preLoaderRoute: typeof SignupRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/(auth)": {
-      id: "/(auth)";
-      path: "";
-      fullPath: "";
-      preLoaderRoute: typeof authRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/(auth)/transactions": {
-      id: "/(auth)/transactions";
-      path: "/transactions";
-      fullPath: "/transactions";
-      preLoaderRoute: typeof authTransactionsRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
-    "/(auth)/me": {
-      id: "/(auth)/me";
-      path: "/me";
-      fullPath: "/me";
-      preLoaderRoute: typeof authMeRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
-    "/(auth)/dashboard": {
-      id: "/(auth)/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof authDashboardRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)': {
+      id: '/(auth)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof authRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/transactions': {
+      id: '/(auth)/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof authTransactionsRouteImport
+      parentRoute: typeof authRouteRoute
+    }
+    '/(auth)/me': {
+      id: '/(auth)/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof authMeRouteImport
+      parentRoute: typeof authRouteRoute
+    }
+    '/(auth)/dashboard': {
+      id: '/(auth)/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof authDashboardRouteImport
+      parentRoute: typeof authRouteRoute
+    }
   }
 }
 
 interface authRouteRouteChildren {
-  authDashboardRoute: typeof authDashboardRoute;
-  authMeRoute: typeof authMeRoute;
-  authTransactionsRoute: typeof authTransactionsRoute;
+  authDashboardRoute: typeof authDashboardRoute
+  authMeRoute: typeof authMeRoute
+  authTransactionsRoute: typeof authTransactionsRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authDashboardRoute: authDashboardRoute,
   authMeRoute: authMeRoute,
   authTransactionsRoute: authTransactionsRoute,
-};
+}
 
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
-);
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

@@ -380,3 +380,26 @@ authRouter.delete(
     return c.text("Success", 200);
   },
 );
+
+authRouter.post(
+  "/logout",
+  describeRoute({
+    description: "Removes the refresh token cookie",
+    responses: {
+      200: {
+        description: "A successful response",
+      },
+    },
+  }),
+
+  (c) => {
+    setCookie(c, "refreshToken", "", {
+      sameSite: "Strict",
+      httpOnly: true,
+      secure: process.env.NODE_ENV?.toUpperCase() === "PRODUCTION",
+      expires: new Date(0),
+    });
+
+    return c.text("Success", 200);
+  },
+);

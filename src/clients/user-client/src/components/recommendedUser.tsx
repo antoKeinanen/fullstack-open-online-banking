@@ -9,7 +9,7 @@ import {
 
 export function RecommendedUserCard() {
   return (
-    <Item variant="muted" className="justify flex gap-1.5 p-0">
+    <Item className="justify flex gap-1.5 p-0">
       <ItemHeader className="flex justify-center">
         <ItemMedia>
           <Avatar className="size-12">
@@ -19,7 +19,7 @@ export function RecommendedUserCard() {
         </ItemMedia>
       </ItemHeader>
       <ItemContent>
-        <ItemTitle className="text-center">Example User</ItemTitle>
+        <ItemTitle className="w-full justify-center">Example User</ItemTitle>
       </ItemContent>
     </Item>
   );

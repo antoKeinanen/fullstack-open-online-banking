@@ -78,9 +78,9 @@ const itemMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "bg-muted size-8 rounded-sm border [&_svg:not([class*='size-'])]:size-4",
+        icon: "size-8 rounded-sm border bg-transparent [&_svg:not([class*='size-'])]:size-4",
         image:
-          "size-10 overflow-hidden rounded-sm [&_img]:size-full [&_img]:object-cover",
+          "size-10 overflow-hidden rounded-sm bg-transparent [&_img]:size-full [&_img]:object-cover",
       },
     },
     defaultVariants: {
@@ -122,7 +122,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
+        "text-foreground flex w-fit items-center gap-2 text-sm leading-snug font-medium",
         className,
       )}
       {...props}
