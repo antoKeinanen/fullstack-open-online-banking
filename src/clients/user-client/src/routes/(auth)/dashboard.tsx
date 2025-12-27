@@ -33,6 +33,7 @@ import { TransactionCard } from "../../components/transactionCard";
 import { getUserDetails } from "../../services/userService";
 import { useAuthStore } from "../../stores/authStore";
 import { formatBalance } from "../../util/formatters";
+import { useInvalidateRouteDataOnRefocus } from "../../util/useInvalidateRouteDataOnRefocus";
 
 export const Route = createFileRoute("/(auth)/dashboard")({
   component: RouteComponent,
@@ -46,6 +47,8 @@ export const Route = createFileRoute("/(auth)/dashboard")({
 });
 
 function RouteComponent() {
+  useInvalidateRouteDataOnRefocus();
+
   const { user } = useLoaderData({ from: Route.id });
   const { clearSession } = useAuthStore();
   const { navigate } = useRouter();
