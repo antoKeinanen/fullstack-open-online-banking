@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ItemGroup } from "@repo/web-ui/item";
 
-import { TransactionCard } from "../../components/transactionCard";
+import { TransferCard } from "../../components/transferCard";
 
 export const Route = createFileRoute("/(auth)/transactions")({
   component: RouteComponent,
@@ -17,7 +17,7 @@ function TransactionGroup({ label }: TransactionGroupProps) {
     <ItemGroup>
       <p className="text-foreground py-2 first:pt-0">{label}</p>
       {[0, 1, 2].map((_, i) => (
-        <TransactionCard key={`transaction-card-${i}`} />
+        <TransferCard key={`transaction-card-${i}`} />
       ))}
     </ItemGroup>
   );

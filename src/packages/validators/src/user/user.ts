@@ -51,15 +51,17 @@ export type GetUserTransfersRequest = z.infer<
   typeof getUserTransfersRequestSchema
 >;
 
+export const transferSchema = z.object({
+  transferId: z.string(),
+  debitAccountId: z.string(),
+  creditAccountId: z.string(),
+  amount: z.string(),
+  debitUserFullName: z.string(),
+  creditUserFullName: z.string(),
+  timestamp: z.string(),
+});
+export type Transfer = z.infer<typeof transferSchema>;
+
 export const getUserTransfersResponseSchema = z.object({
-  transfers: z.array(
-    z.object({
-      transferId: z.string(),
-      debitAccountId: z.string(),
-      creditAccountId: z.string(),
-      amount: z.string(),
-      debitUserFullName: z.string(),
-      creditAccountFullName: z.string(),
-    }),
-  ),
+  transfers: z.array(transferSchema),
 });

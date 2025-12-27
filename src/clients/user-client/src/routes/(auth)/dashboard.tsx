@@ -9,6 +9,7 @@ import {
 import {
   BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
+  BanknoteXIcon,
   LockIcon,
   WalletIcon,
 } from "lucide-react";
@@ -17,6 +18,14 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Button } from "@repo/web-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@repo/web-ui/empty";
 import {
   Item,
   ItemActions,
@@ -30,18 +39,25 @@ import {
 import type { TransactionDialogState } from "../../components/dialog/transactionDialog";
 import { TransactionDialog } from "../../components/dialog/transactionDialog";
 import { RecommendedUserCard } from "../../components/recommendedUser";
-import { TransactionCard } from "../../components/transactionCard";
+import { TransferCard } from "../../components/transferCard";
 import { logOut } from "../../services/authService";
-import { getUserDetails } from "../../services/userService";
+import { getUserDetails, getUserTransfers } from "../../services/userService";
 import { useAuthStore } from "../../stores/authStore";
 import { formatBalance } from "../../util/formatters";
 import { useInvalidateRouteDataOnRefocus } from "../../util/useInvalidateRouteDataOnRefocus";
 
 export const Route = createFileRoute("/(auth)/dashboard")({
   component: RouteComponent,
-  loader: async () => ({
-    user: await getUserDetails(),
-  }),
+  loader: async () => {
+    const [user, transfers] = await Promise.all([
+      getUserDetails(),
+      getUserTransfers({ limit: 3 }),
+    ]);
+    return {
+      user: user,
+      transfers: transfers.transfers,
+    };
+  },
   onError: (err) => {
     console.error(err);
     toast.error("Failed to load page :(");
@@ -52,7 +68,7 @@ export const Route = createFileRoute("/(auth)/dashboard")({
 function RouteComponent() {
   useInvalidateRouteDataOnRefocus();
 
-  const { user } = useLoaderData({ from: Route.id });
+  const { user, transfers } = useLoaderData({ from: Route.id });
   const { clearSession } = useAuthStore();
   const { navigate } = useRouter();
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
@@ -137,11 +153,46 @@ function RouteComponent() {
           </Link>
         </div>
 
-        <ItemGroup>
-          {[0, 1, 2].map((_, i) => (
-            <TransactionCard key={`transaction-card-${i}`} />
-          ))}
-        </ItemGroup>
+        {transfers.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BanknoteXIcon />
+              </EmptyMedia>
+              <EmptyTitle>No recent transfers</EmptyTitle>
+              <EmptyDescription>
+                You don't have any recent transfers. Get started by depositing
+                or requesting balance.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent className="flex flex-row justify-center space-x-2">
+              <Button
+                className="col-span-2"
+                onClick={() => openTransactionDialog("deposit")}
+              >
+                <WalletIcon />
+                Deposit
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={() => openTransactionDialog("request")}
+              >
+                <BanknoteArrowDownIcon /> Request
+              </Button>
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <ItemGroup>
+            {transfers.map((transfer) => (
+              <TransferCard
+                key={transfer.transferId}
+                transfer={transfer}
+                user={user}
+              />
+            ))}
+          </ItemGroup>
+        )}
       </section>
 
       <div className="text-foreground flex items-center justify-between">

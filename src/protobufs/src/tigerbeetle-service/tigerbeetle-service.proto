@@ -43,6 +43,7 @@ message Transfer {
   // optional string userData128 = 5;
   // optional uint64 userData64 = 6;
   // optional uint32 userData32 = 7;
+  string timestamp = 8;
 }
 
 message PostPendingTransferRequest {

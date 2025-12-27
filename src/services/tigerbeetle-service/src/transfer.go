@@ -233,11 +233,15 @@ func (s *TigerbeetleServiceServer) LookupTransfer(_ context.Context, req *pb.Tra
 }
 
 func TbTransferToPbTransfer(transfer tbt.Transfer) *pb.Transfer {
+	timestampSeconds := int64(transfer.Timestamp / uint64(time.Second.Nanoseconds()))
+	timestampNanoSeconds := int64(transfer.Timestamp % uint64(time.Second.Nanoseconds()))
+
 	return &pb.Transfer{
 		TransferId:      transfer.ID.String(),
 		Amount:          transfer.Amount.String(),
 		DebitAccountId:  transfer.DebitAccountID.String(),
 		CreditAccountId: transfer.CreditAccountID.String(),
+		Timestamp:       time.Unix(timestampSeconds, timestampNanoSeconds).UTC().Format(time.RFC3339),
 	}
 }
 
@@ -262,8 +266,9 @@ func (s *TigerbeetleServiceServer) GetAccountTransfers(_ context.Context, req *p
 		TimestampMax: *req.MaxTimestamp,
 		Limit:        *req.Limit,
 		Flags: tbt.AccountFilterFlags{
-			Debits:  true,
-			Credits: true,
+			Debits:   true,
+			Credits:  true,
+			Reversed: true,
 		}.ToUint32(),
 	}
 

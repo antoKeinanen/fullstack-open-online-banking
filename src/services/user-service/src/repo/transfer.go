@@ -13,5 +13,6 @@ func TbTransferToPbTransfer(transfer *tbPb.Transfer, debitUserName, creditUserNa
 		CreditAccountId:    transfer.CreditAccountId,
 		DebitUserFullName:  debitUserName,
 		CreditUserFullName: creditUserName,
+		Timestamp:          transfer.Timestamp,
 	}
 }

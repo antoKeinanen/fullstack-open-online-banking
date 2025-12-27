@@ -33,6 +33,7 @@ message Transfer {
   string amount = 4;
   string debit_user_full_name = 5;
   string credit_user_full_name = 6;
+  string timestamp = 7;
 }
 
 message GetUserByPhoneNumberRequest {
