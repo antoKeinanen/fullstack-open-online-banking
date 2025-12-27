@@ -23,7 +23,7 @@ export class PaymentService {
     const deadline = new Date();
     deadline.setSeconds(deadline.getSeconds() + 5);
     this.client.waitForReady(deadline, (error) => {
-      if (error != undefined) {
+      if (error !== undefined) {
         console.error("Failed to connect grpc", error);
         throw new Error("Failed to connect to grpc");
       }
