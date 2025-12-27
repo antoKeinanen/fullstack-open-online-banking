@@ -24,7 +24,6 @@ type PaymentServiceServer struct {
 
 func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.CreatePaymentRequest) (*pb.CreatePaymentResponse, error) {
 	amount := tbt.ToUint128(req.Amount).String()
-	slog.Info("TODO remove", "amount", amount, "req", req)
 
 	_, err := s.tigerbeetleServiceClient.CreateTransfer(
 		ctx,
