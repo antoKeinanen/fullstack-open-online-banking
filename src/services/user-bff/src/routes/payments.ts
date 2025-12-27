@@ -73,7 +73,7 @@ paymentRouter.post(
     const transaction = await getTransaction(userId, idempotencyKey);
     if (transaction) {
       console.warn("Duplicated transaction occurred", transaction);
-      if (transaction.state == "pending") {
+      if (transaction.state === "pending") {
         return c.json(
           createSingleError(
             "IDEMPOTENCY_ERROR",
