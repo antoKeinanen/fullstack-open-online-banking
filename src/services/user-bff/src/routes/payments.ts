@@ -129,7 +129,6 @@ paymentRouter.post(
           404,
         );
       }
-      console.error(toUserError);
       return c.json(createUnexpectedError(), 500);
     }
 
