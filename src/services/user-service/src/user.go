@@ -49,7 +49,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user), nil
+	return repo.DbUserToPbUser(user, "0", "0")
 }
 
 func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
@@ -65,28 +65,41 @@ func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserById
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user), nil
-}
-
-func (s *UserServiceServer) GetUsersPaginated(ctx context.Context, req *pb.GetUsersPaginatedRequest) (*pb.GetUsersPaginatedResponse, error) {
-	rows, err := s.db.QueryxContext(ctx, queries.QueryGetAllUsersPaginated, req.Offset, req.Take)
+	account, err := s.tigerbeetleService.LookupAccount(ctx, &tbPb.AccountId{AccountId: req.UserId})
 	if err != nil {
-		slog.Error("Failed to get users from the database", "error", err)
+		if err == lib.ErrNotFound {
+			slog.Info("Account not found", "error", err)
+			return nil, lib.ErrNotFound
+		}
+		slog.Error("Failed to get account for user", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
-	var users []*pb.User
-	for rows.Next() {
-		user := repo.User{}
-		if err := rows.StructScan(&user); err != nil {
-			slog.Error("Failed to get users from the database", "error", err)
-			return nil, lib.ErrUnexpected
+	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
+}
+
+func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.GetUserByPhoneNumberRequest) (*pb.User, error) {
+	user := repo.User{}
+	err := s.db.GetContext(ctx, &user, queries.QueryGetUserByPhoneNumber, req.PhoneNumber)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			slog.Info("User not found", "error", err)
+			return nil, lib.ErrNotFound
 		}
-		users = append(users, repo.DbUserToPbUser(user))
+
+		slog.Error("Failed to get user from the database", "error", err)
+		return nil, lib.ErrUnexpected
 	}
 
-	return &pb.GetUsersPaginatedResponse{
-		Users: users,
-		Count: 0,
-	}, nil
+	account, err := s.tigerbeetleService.LookupAccount(ctx, &tbPb.AccountId{AccountId: user.UserId})
+	if err != nil {
+		if err == lib.ErrNotFound {
+			slog.Info("Account not found", "error", err)
+			return nil, lib.ErrNotFound
+		}
+		slog.Error("Failed to get account for user", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+
+	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
 }

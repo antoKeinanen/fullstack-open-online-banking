@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { BanknoteIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import type {
   OTPAuthenticationRequest,
@@ -37,6 +36,7 @@ import {
   requestAuthentication,
 } from "../services/authService";
 import { useAuthStore } from "../stores/authStore";
+import { toastErrors } from "../util/errorToaster";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -163,10 +163,7 @@ function RouteComponent() {
     mutationKey: ["request-authentication"],
     mutationFn: requestAuthentication,
     onSuccess: (_, request) => setSavedPhoneNumber(request.phoneNumber),
-    onError: (error) => {
-      console.error(error);
-      toast.error("Failed to login, try again later");
-    },
+    onError: toastErrors,
   });
 
   const authenticateWithOTPMutation = useMutation({
@@ -176,10 +173,7 @@ function RouteComponent() {
       setSession(session);
       await navigate({ to: "/dashboard" });
     },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Failed to login, try again later");
-    },
+    onError: toastErrors,
   });
 
   return (

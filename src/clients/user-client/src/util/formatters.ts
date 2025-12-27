@@ -25,3 +25,14 @@ export function formatDateTime(
   }
   return new Intl.DateTimeFormat("en-CA", options).format(d);
 }
+
+export function formatBalance(hex: string): string {
+  const balance = BigInt(`0x${hex}`);
+  const balanceInDecimals = Number(balance) / 100;
+  return new Intl.NumberFormat("fi-FI", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(balanceInDecimals);
+}

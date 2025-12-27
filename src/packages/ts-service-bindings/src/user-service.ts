@@ -7,8 +7,7 @@ import type {
   GetActiveSessionsRequest,
   GetActiveSessionsResponse,
   GetUserByIdRequest,
-  GetUsersPaginatedRequest,
-  GetUsersPaginatedResponse,
+  GetUserByPhoneNumberRequest,
   InvalidateSessionRequest,
   OTPAuthenticationRequest,
   RefreshTokenRequest,
@@ -19,9 +18,8 @@ import type {
 import { UserServiceClient } from "@repo/protobufs/user-service";
 
 import type { Result } from "./try-catch";
+import type { GrpcResponse } from "./types";
 import { tryCatch } from "./try-catch";
-
-export type GrpcResponse<T> = Promise<Result<T, grpc.ServiceError>>;
 
 export class UserService {
   private client: UserServiceClient;
@@ -103,15 +101,12 @@ export class UserService {
     >;
   }
 
-  async getUserPaginated(
-    request: GetUsersPaginatedRequest,
-  ): GrpcResponse<GetUsersPaginatedResponse> {
-    const getUsersPaginated = promisify(
-      this.client.getUsersPaginated.bind(this.client),
+  async getUserByPhoneNumber(
+    request: GetUserByPhoneNumberRequest,
+  ): GrpcResponse<User> {
+    const getUserByPhoneNumber = promisify(
+      this.client.getUserByPhoneNumber.bind(this.client),
     );
-
-    return tryCatch(getUsersPaginated(request)) as Promise<
-      Result<GetUsersPaginatedResponse, grpc.ServiceError>
-    >;
+    return tryCatch(getUserByPhoneNumber(request)) as GrpcResponse<User>;
   }
 }

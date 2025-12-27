@@ -5,11 +5,16 @@ import { jwt } from "hono/jwt";
 import { UAParser } from "ua-parser-js";
 
 import {
+  apiErrorResponseSchema,
+  createSingleError,
+  createUnexpectedError,
+} from "@repo/validators/error";
+import {
   createUserRequestSchema,
   getActiveSessionsResponseSchema,
   invalidateSessionRequestSchema,
   OTPAuthenticationRequestSchema,
-  refreshTokenRequestCookies,
+  refreshTokenRequestCookiesSchema,
   requestAuthenticationRequestSchema,
   sessionSchema,
 } from "@repo/validators/user";
@@ -37,8 +42,8 @@ authRouter.post(
       500: {
         description: "Unexpected error has occurred",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
@@ -52,7 +57,7 @@ authRouter.post(
 
     const { error } = await userService.requestAuthentication(body);
     if (error != null) {
-      if (error.details == "user_not_found") {
+      if (error.details === "NOT_FOUND") {
         console.warn(
           "Failed to create authentication request: user does not exist",
           body,
@@ -64,7 +69,7 @@ authRouter.post(
         body,
         error,
       );
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     return c.text("Success", 200);
@@ -94,16 +99,16 @@ authRouter.post(
         description:
           "Error has occurred, for security reasons details are omitted",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
       406: {
         description: "Invalid phone number and/or authentication code",
         content: {
-          "text/plain": {
-            example: "Invalid number and/or code",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
@@ -118,14 +123,14 @@ authRouter.post(
     const userAgent = c.req.header("User-Agent");
     if (!userAgent) {
       console.info("Failed to login, missing useragent header");
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
     const userAgentParser = UAParser(userAgent);
 
     const ipAddress = c.req.header("x-forwarded-for");
     if (!ipAddress) {
       console.error("Failed to login, missing x-forwarded-for");
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     const { data, error } = await userService.authenticateWithOTP({
@@ -136,21 +141,21 @@ authRouter.post(
     });
     if (error != null) {
       console.log(error);
-      if (
-        error.details == "user_not_found" ||
-        error.details == "codes_do_not_match"
-      ) {
-        return c.text("Invalid number and/or code", 406);
+      if (error.details === "NOT_FOUND" || error.details === "OTP_MISMATCH") {
+        return c.json(
+          createSingleError("INVALID_INPUT", "Invalid number and/or code"),
+          406,
+        );
       }
 
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     if (!Object.values(data).every((v) => v !== undefined)) {
       console.error(
         "OTP authentication failed: user service data null check failed",
       );
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -194,15 +199,15 @@ authRouter.post(
         description:
           "Error has occurred, for security reasons details are omitted",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
     },
   }),
 
-  validator("cookie", refreshTokenRequestCookies),
+  validator("cookie", refreshTokenRequestCookiesSchema),
 
   async (c) => {
     const cookies = c.req.valid("cookie");
@@ -210,14 +215,14 @@ authRouter.post(
     const { data, error } = await userService.refreshToken(cookies);
     if (error != null) {
       console.error("Failed to refresh session", error);
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     if (!Object.values(data).every((v) => v !== undefined)) {
       console.error(
         "OTP authentication failed: user service data null check failed",
       );
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -256,8 +261,8 @@ authRouter.post(
         description:
           "Error has occurred, for security reasons details are omitted",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
@@ -274,10 +279,10 @@ authRouter.post(
       birthDate: request.birthDate.toISOString(),
     });
     if (error !== null) {
-      if (error.details == "user_already_exists") {
+      if (error.details === "CONFLICT") {
         return c.text("Created", 201);
       }
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
     return c.text("Created", 201);
   },
@@ -306,8 +311,8 @@ authRouter.get(
         description:
           "Error has occurred, for security reasons details are omitted",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
@@ -326,7 +331,7 @@ authRouter.get(
 
     if (error != null) {
       console.error("Failed to get active sessions", error);
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     return c.json(data);
@@ -346,8 +351,8 @@ authRouter.delete(
         description:
           "Error has occurred, for security reasons details are omitted",
         content: {
-          "text/plain": {
-            example: "Action failed",
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
           },
         },
       },
@@ -369,7 +374,7 @@ authRouter.delete(
     });
     if (error != null) {
       console.error("Failed to invalidate session", error);
-      return c.text("Action failed", 500);
+      return c.json(createUnexpectedError(), 500);
     }
 
     return c.text("Success", 200);

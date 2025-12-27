@@ -9,7 +9,9 @@ export const env = createEnv({
       .regex(/^[0-9]+$/)
       .transform((s) => Number.parseInt(s)),
     USER_BFF_USER_SERVICE_URL: z.url(),
+    USER_BFF_PAYMENT_SERVICE_URL: z.url(),
     USER_BFF_JWT_SECRET: z.string(),
+    USER_BFF_REDIS_CONNECTION_STRING: z.string(),
     USER_BFF_JWT_ALG: z
       .enum([
         "HS256",

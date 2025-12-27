@@ -6,15 +6,10 @@ import type {
 } from "@repo/validators/user";
 import {
   createUserResponseSchema,
-  getAllUsersResponseSchema,
   getUserResponseSchema,
 } from "@repo/validators/user";
 
 import * as api from "../util/server";
-
-export async function getAllUsersPaginated() {
-  return api.get("/api/users", getAllUsersResponseSchema);
-}
 
 export async function createUser(
   request: CreateUserRequest,

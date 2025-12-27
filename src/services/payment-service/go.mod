@@ -2,7 +2,10 @@ module payment-service
 
 go 1.25.4
 
-require google.golang.org/grpc v1.77.0
+require (
+	github.com/tigerbeetle/tigerbeetle-go v0.16.62
+	google.golang.org/grpc v1.77.0
+)
 
 require (
 	golang.org/x/net v0.46.1-0.20251013234738-63d1a5100f82 // indirect

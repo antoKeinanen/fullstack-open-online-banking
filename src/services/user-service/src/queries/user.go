@@ -14,11 +14,9 @@ var (
 		where user_id = $1
 	`
 
-	QueryGetAllUsersPaginated = `
+	QueryGetUserByPhoneNumber = `
 		select user_id, phone_number, first_name, last_name, address, created_at, birth_date
 		from banking.users
-		order by user_id
-		offset $1
-		limit $2
+		where phone_number = $1
 	`
 )

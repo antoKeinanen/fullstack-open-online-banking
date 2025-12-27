@@ -18,6 +18,7 @@ import {
   getActiveSessions,
   invalidateSession,
 } from "../../services/authService";
+import { toastErrors } from "../../util/errorToaster";
 import { formatDateTime } from "../../util/formatters";
 
 export const Route = createFileRoute("/(auth)/me")({
@@ -45,9 +46,7 @@ export function SessionCard({
       toast.success("Successfully logged out");
       await navigate({ reloadDocument: true });
     },
-    onError: () => {
-      toast.error("Failed to log out");
-    },
+    onError: toastErrors,
   });
 
   return (
@@ -57,8 +56,8 @@ export function SessionCard({
           {application}, {device}
         </ItemTitle>
         <ItemDescription>
-          <p>From: {ipAddress}</p>
-          <p>Created: {formatDateTime(createdAt)}</p>
+          From: {ipAddress} <br />
+          Created: {formatDateTime(createdAt)}
         </ItemDescription>
       </ItemContent>
       <ItemActions>

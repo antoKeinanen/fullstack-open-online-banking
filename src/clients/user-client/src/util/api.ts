@@ -1,12 +1,27 @@
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type { z } from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 
+import type { ApiErrorResponse } from "@repo/validators/error";
+import {
+  apiErrorResponseSchema,
+  createUnexpectedError,
+} from "@repo/validators/error";
 import { sessionSchema } from "@repo/validators/user";
 
 import { useAuthStore } from "../stores/authStore";
 import { tryCatch } from "./tryCatch";
+
+export class ApiError extends Error {
+  public readonly errors: ApiErrorResponse["errors"];
+
+  constructor(errors: ApiErrorResponse["errors"] = []) {
+    super("API Error");
+    this.errors = errors;
+    this.name = "ApiError";
+  }
+}
 
 type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 
@@ -25,9 +40,26 @@ async function request<T extends z.ZodTypeAny>(
     data: data ?? {},
   };
 
-  const response = await axios.request(config);
-  const validated = schema.parse(response.data);
-  return validated;
+  try {
+    const response = await axios.request(config);
+    const validated = schema.parse(response.data);
+    return validated;
+  } catch (err: unknown) {
+    console.error(err);
+    if (err instanceof AxiosError && err.response?.data) {
+      const parsedApiError = apiErrorResponseSchema.safeParse(
+        err.response.data,
+      );
+      if (!parsedApiError.success) {
+        console.error("Failed to parse api error", parsedApiError);
+        throw new ApiError(createUnexpectedError().errors);
+      }
+
+      throw new ApiError(parsedApiError.data.errors);
+    }
+
+    throw new ApiError(createUnexpectedError().errors);
+  }
 }
 
 export function get<T extends z.ZodTypeAny>(url: string, schema: T) {
