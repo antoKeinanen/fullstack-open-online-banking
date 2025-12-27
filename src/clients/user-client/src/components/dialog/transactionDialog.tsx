@@ -195,7 +195,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
             />
 
             <Field>
-              <Button>
+              <Button disabled={createPaymentMutation.isPending}>
                 <WalletIcon /> Send
               </Button>
             </Field>
