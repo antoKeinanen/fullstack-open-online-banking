@@ -12,11 +12,11 @@ function dateGrouper(transfer: Transfer) {
   dateToCheck.setHours(0, 0, 0, 0);
 
   const diffTime = today.getTime() - dateToCheck.getTime();
-  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  const diffDaysRounded = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays > 1 && diffDays < 7) return "This week";
+  if (diffDaysRounded === 0) return "Today";
+  if (diffDaysRounded === 1) return "Yesterday";
+  if (diffDaysRounded > 1 && diffDaysRounded <= 7) return "This week";
 
   const monthName = date.toLocaleString("en-CA", { month: "long" });
   const year = date.getFullYear();
