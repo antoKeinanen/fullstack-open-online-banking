@@ -3,12 +3,12 @@ import { ItemGroup } from "@repo/web-ui/item";
 
 import { TransferCard } from "./transferCard";
 
-export interface TransactionGroupProps {
+export interface TransferGroupProps {
   label: string;
   transfers: Transfer[];
 }
 
-export function TransferGroup({ label, transfers }: TransactionGroupProps) {
+export function TransferGroup({ label, transfers }: TransferGroupProps) {
   return (
     <ItemGroup>
       <p className="text-foreground py-2 first:pt-0">{label}</p>
