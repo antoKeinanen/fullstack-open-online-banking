@@ -24,7 +24,7 @@ const mobileNavigationItems: MobileNavigationItem[] = [
   },
   {
     label: "Transfers",
-    id: "Transfers",
+    id: "transfers",
     urlRegex: /^\/transfers(\/)?$/,
     to: "/transfers",
     icon: <ArrowLeftRightIcon size={ICON_SIZE} />,
