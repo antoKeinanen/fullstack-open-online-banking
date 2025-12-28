@@ -185,11 +185,7 @@ function RouteComponent() {
         ) : (
           <ItemGroup>
             {transfers.map((transfer) => (
-              <TransferCard
-                key={transfer.transferId}
-                transfer={transfer}
-                user={user}
-              />
+              <TransferCard key={transfer.transferId} transfer={transfer} />
             ))}
           </ItemGroup>
         )}

@@ -1,6 +1,6 @@
 import { UserRoundCogIcon } from "lucide-react";
 
-import type { Transfer, User } from "@repo/validators/user";
+import type { Transfer } from "@repo/validators/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import { Badge } from "@repo/web-ui/badge";
 import {
@@ -16,39 +16,48 @@ import { formatBalance, formatDateTime } from "../util/formatters";
 
 interface TransferCardProps {
   transfer: Transfer;
-  user: User;
 }
 
-export function TransferCard({ transfer, user }: TransferCardProps) {
-  const isCreditTransfer = transfer.creditAccountId == user.userId;
-  const isSystemTransfer =
-    transfer.creditAccountId == "1" || transfer.debitAccountId == "1";
+function formatLabel(isIncreasing: boolean, isSystem: boolean) {
+  return isSystem
+    ? isIncreasing
+      ? "Deposited"
+      : "Withdrew"
+    : isIncreasing
+      ? "Sent you"
+      : "You sent";
+}
 
+export function TransferCard({ transfer }: TransferCardProps) {
   return (
     <Item className="not-last:border-b-border rounded-none">
       <ItemMedia>
         <Avatar className="size-12">
           <AvatarImage src="TODO" />
           <AvatarFallback>
-            {isSystemTransfer ? <UserRoundCogIcon /> : "AK"}
+            {transfer.isSystemTransfer ? <UserRoundCogIcon /> : "AK"}
           </AvatarFallback>
         </Avatar>
       </ItemMedia>
       <ItemContent>
         <ItemTitle>
-          {isCreditTransfer
-            ? transfer.debitUserFullName
-            : transfer.creditUserFullName}
-          {isSystemTransfer ? transfer.transferId : ""}
+          {transfer.isIncreasingTransfer
+            ? transfer.creditUserFullName
+            : transfer.debitUserFullName}
+          {transfer.isSystemTransfer && "System float account"}
         </ItemTitle>
         <ItemDescription>
-          {isCreditTransfer ? "You sent" : "Sent you"} •{" "}
-          {formatDateTime(transfer.timestamp)}
+          {}
+          {formatLabel(
+            transfer.isIncreasingTransfer,
+            transfer.isSystemTransfer,
+          )}{" "}
+          • {formatDateTime(transfer.timestamp)}
         </ItemDescription>
       </ItemContent>
       <ItemActions>
         <Badge variant="secondary">
-          {isCreditTransfer ? "-" : "+"}
+          {transfer.isIncreasingTransfer ? "+" : "-"}
           {formatBalance(transfer.amount)}
         </Badge>
       </ItemActions>

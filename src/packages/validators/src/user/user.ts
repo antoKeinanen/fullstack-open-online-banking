@@ -49,6 +49,8 @@ export const transferSchema = z.object({
   debitUserFullName: z.string(),
   creditUserFullName: z.string(),
   timestamp: z.iso.datetime(),
+  isIncreasingTransfer: z.boolean(),
+  isSystemTransfer: z.boolean(),
 });
 export type Transfer = z.infer<typeof transferSchema>;
 

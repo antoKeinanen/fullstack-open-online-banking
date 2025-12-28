@@ -135,7 +135,7 @@ func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUse
 		debitUserName := userIdToName[transfer.DebitAccountId]
 		creditUserName := userIdToName[transfer.CreditAccountId]
 
-		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUserName, creditUserName)
+		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUserName, creditUserName, req.UserId)
 	}
 
 	return &pb.GetUserTransfersResponse{

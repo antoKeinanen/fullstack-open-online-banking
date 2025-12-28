@@ -23,10 +23,10 @@ const mobileNavigationItems: MobileNavigationItem[] = [
     icon: <HomeIcon size={ICON_SIZE} />,
   },
   {
-    label: "Transactions",
-    id: "transactions",
-    urlRegex: /^\/transactions(\/)?$/,
-    to: "/transactions",
+    label: "Transfers",
+    id: "Transfers",
+    urlRegex: /^\/transfers(\/)?$/,
+    to: "/transfers",
     icon: <ArrowLeftRightIcon size={ICON_SIZE} />,
   },
   {

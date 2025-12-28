@@ -6,25 +6,18 @@ import type { GetUserTransfersResponse } from "@repo/validators/user";
 import { Spinner } from "@repo/web-ui/spinner";
 
 import { TransferGroup } from "../../components/transferGroup";
-import { getUserDetails, getUserTransfers } from "../../services/userService";
+import { getUserTransfers } from "../../services/userService";
 import { processTransfers } from "../../util/transfers";
 
 export const Route = createFileRoute("/(auth)/transfers")({
   component: RouteComponent,
-  loader: async () => {
-    const [user, transfers] = await Promise.all([
-      getUserDetails(),
-      getUserTransfers({ limit: 100 }),
-    ]);
-    return {
-      user: user,
-      initialTransfers: transfers.transfers,
-    };
-  },
+  loader: async () => ({
+    initialTransfers: (await getUserTransfers({ limit: 100 })).transfers,
+  }),
 });
 
 function InfiniteTransferList() {
-  const { user, initialTransfers } = useLoaderData({ from: Route.id });
+  const { initialTransfers } = useLoaderData({ from: Route.id });
   const transferQuery = useInfiniteQuery({
     queryKey: ["infinite-transfers"],
     initialData: {
@@ -72,7 +65,6 @@ function InfiniteTransferList() {
           key={group.label}
           label={group.label}
           transfers={group.items}
-          user={user}
         />
       ))}
     </InfiniteScroll>

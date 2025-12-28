@@ -34,6 +34,8 @@ message Transfer {
   string debit_user_full_name = 5;
   string credit_user_full_name = 6;
   string timestamp = 7;
+  bool is_system_transfer = 8;
+  bool is_increasing_transfer = 9;
 }
 
 message GetUserByPhoneNumberRequest {
