@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { toast } from "sonner";
 
 import type { GetUserTransfersResponse } from "@repo/validators/user";
 import { Spinner } from "@repo/web-ui/spinner";
@@ -8,7 +9,6 @@ import { Spinner } from "@repo/web-ui/spinner";
 import { TransferGroup } from "../../components/transferGroup";
 import { getUserTransfers } from "../../services/userService";
 import { processTransfers } from "../../util/transfers";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/(auth)/transfers")({
   component: RouteComponent,
