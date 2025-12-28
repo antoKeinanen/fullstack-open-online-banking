@@ -8,12 +8,18 @@ import { Spinner } from "@repo/web-ui/spinner";
 import { TransferGroup } from "../../components/transferGroup";
 import { getUserTransfers } from "../../services/userService";
 import { processTransfers } from "../../util/transfers";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/(auth)/transfers")({
   component: RouteComponent,
   loader: async () => ({
     initialTransfers: (await getUserTransfers({ limit: 100 })).transfers,
   }),
+  onError: (err) => {
+    console.error(err);
+    toast.error("Failed to load page :(");
+  },
+  errorComponent: () => <p>Something has went terribly wrong :(</p>,
 });
 
 function InfiniteTransferList() {
