@@ -147,7 +147,7 @@ function RouteComponent() {
 
       <section className="space-y-1.5">
         <div className="text-foreground flex items-center justify-between">
-          <p>Recent transactions</p>
+          <p>Recent transfers</p>
           <Link to="/transfers">
             <Button variant="link">View all</Button>
           </Link>
