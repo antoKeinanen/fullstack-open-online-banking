@@ -8,6 +8,8 @@ import type {
   GetActiveSessionsResponse,
   GetUserByIdRequest,
   GetUserByPhoneNumberRequest,
+  GetUserTransfersRequest,
+  GetUserTransfersResponse,
   InvalidateSessionRequest,
   OTPAuthenticationRequest,
   RefreshTokenRequest,
@@ -108,5 +110,17 @@ export class UserService {
       this.client.getUserByPhoneNumber.bind(this.client),
     );
     return tryCatch(getUserByPhoneNumber(request)) as GrpcResponse<User>;
+  }
+
+  async getUserTransfers(
+    request: GetUserTransfersRequest,
+  ): GrpcResponse<GetUserTransfersResponse> {
+    const getUserTransfers = promisify(
+      this.client.getUserTransfers.bind(this.client),
+    );
+
+    return tryCatch(
+      getUserTransfers(request),
+    ) as GrpcResponse<GetUserTransfersResponse>;
   }
 }

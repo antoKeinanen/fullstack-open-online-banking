@@ -21,7 +21,9 @@
     "./dialog": "./src/components/dialog.tsx",
     "./tabs": "./src/components/tabs.tsx",
     "./item": "./src/components/item.tsx",
-    "./sonner": "./src/components/sonner.tsx"
+    "./sonner": "./src/components/sonner.tsx",
+    "./empty": "./src/components/empty.tsx",
+    "./spinner": "./src/components/spinner.tsx"
   },
   "files": [
     "src"

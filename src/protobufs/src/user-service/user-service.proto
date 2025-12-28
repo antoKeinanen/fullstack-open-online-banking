@@ -12,6 +12,30 @@ service UserService {
   rpc GetActiveSessions(GetActiveSessionsRequest) returns (GetActiveSessionsResponse);
   rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
   rpc GetUserByPhoneNumber(GetUserByPhoneNumberRequest) returns (User);
+  rpc GetUserTransfers(GetUserTransfersRequest) returns (GetUserTransfersResponse);
+}
+
+message GetUserTransfersRequest {
+  string user_id = 1;
+  optional string min_timestamp = 2;
+  optional string max_timestamp = 3;
+  optional uint32 limit = 4;
+}
+
+message GetUserTransfersResponse {
+  repeated Transfer transfers = 1;
+}
+
+message Transfer {
+  string transfer_id = 1;
+  string debit_account_id = 2;
+  string credit_account_id = 3;
+  string amount = 4;
+  string debit_user_full_name = 5;
+  string credit_user_full_name = 6;
+  string timestamp = 7;
+  bool is_system_transfer = 8;
+  bool is_increasing_transfer = 9;
 }
 
 message GetUserByPhoneNumberRequest {

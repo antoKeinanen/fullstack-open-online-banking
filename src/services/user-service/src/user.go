@@ -103,3 +103,42 @@ func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.Ge
 
 	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
 }
+
+func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUserTransfersRequest) (*pb.GetUserTransfersResponse, error) {
+	tbReq := tbPb.GetAccountTransfersRequest{
+		UserId:       req.UserId,
+		MinTimestamp: req.MinTimestamp,
+		MaxTimestamp: req.MaxTimestamp,
+		Limit:        req.Limit,
+	}
+
+	transfers, err := s.tigerbeetleService.GetAccountTransfers(ctx, &tbReq)
+	if err != nil {
+		slog.Error("Failed to get user transactions", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+
+	userIds := make([]string, len(transfers.Transfers)*2)
+	for i, transfer := range transfers.Transfers {
+		userIds[i*2] = transfer.DebitAccountId
+		userIds[i*2+1] = transfer.CreditAccountId
+	}
+	userIds = lib.RemoveDuplicates(userIds)
+
+	userIdToName, err := repo.MapUserIdsToUsernames(ctx, s.db, userIds)
+	if err != nil {
+		return nil, err
+	}
+
+	pbTransfers := make([]*pb.Transfer, len(transfers.Transfers))
+	for i, transfer := range transfers.Transfers {
+		debitUserName := userIdToName[transfer.DebitAccountId]
+		creditUserName := userIdToName[transfer.CreditAccountId]
+
+		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUserName, creditUserName, req.UserId)
+	}
+
+	return &pb.GetUserTransfersResponse{
+		Transfers: pbTransfers,
+	}, nil
+}
