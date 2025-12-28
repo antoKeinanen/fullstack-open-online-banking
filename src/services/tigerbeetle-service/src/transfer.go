@@ -255,14 +255,11 @@ func (s *TigerbeetleServiceServer) GetAccountTransfers(_ context.Context, req *p
 	if req.MaxTimestamp == nil {
 		now := time.Now().UTC().Format(time.RFC3339Nano)
 		req.MaxTimestamp = &now
-		slog.Info("Setting max")
 	}
 	if req.MinTimestamp == nil {
 		minTime := time.Unix(0, 0).UTC().Format(time.RFC3339Nano)
 		req.MinTimestamp = &minTime
 	}
-
-	slog.Info("", "max", *req.MaxTimestamp)
 
 	minTimestamp, err := time.Parse(time.RFC3339Nano, *req.MinTimestamp)
 	if err != nil {
