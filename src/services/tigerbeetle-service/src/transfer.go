@@ -241,7 +241,7 @@ func TbTransferToPbTransfer(transfer tbt.Transfer) *pb.Transfer {
 		Amount:          transfer.Amount.String(),
 		DebitAccountId:  transfer.DebitAccountID.String(),
 		CreditAccountId: transfer.CreditAccountID.String(),
-		Timestamp:       time.Unix(timestampSeconds, timestampNanoSeconds).UTC().Format(time.RFC3339),
+		Timestamp:       time.Unix(timestampSeconds, timestampNanoSeconds).UTC().Format(time.RFC3339Nano),
 	}
 }
 
@@ -251,19 +251,34 @@ func (s *TigerbeetleServiceServer) GetAccountTransfers(_ context.Context, req *p
 		slog.Error("Failed to get account transfers, invalid accountId", "error", err)
 		return nil, ErrInvalidRequest
 	}
+
 	if req.MaxTimestamp == nil {
-		now := uint64(time.Now().UnixNano())
+		now := time.Now().UTC().Format(time.RFC3339Nano)
 		req.MaxTimestamp = &now
+		slog.Info("Setting max")
 	}
 	if req.MinTimestamp == nil {
-		minTime := uint64(0)
+		minTime := time.Unix(0, 0).UTC().Format(time.RFC3339Nano)
 		req.MinTimestamp = &minTime
+	}
+
+	slog.Info("", "max", *req.MaxTimestamp)
+
+	minTimestamp, err := time.Parse(time.RFC3339Nano, *req.MinTimestamp)
+	if err != nil {
+		slog.Error("Failed to parse minTimestamp", "error", err)
+		return nil, ErrInvalidRequest
+	}
+	maxTimestamp, err := time.Parse(time.RFC3339Nano, *req.MaxTimestamp)
+	if err != nil {
+		slog.Error("Failed to parse maxTimestamp", "error", err)
+		return nil, ErrInvalidRequest
 	}
 
 	filter := tbt.AccountFilter{
 		AccountID:    accountIdUint128,
-		TimestampMin: *req.MinTimestamp,
-		TimestampMax: *req.MaxTimestamp,
+		TimestampMin: uint64(minTimestamp.UnixNano()),
+		TimestampMax: uint64(maxTimestamp.UnixNano()),
 		Limit:        *req.Limit,
 		Flags: tbt.AccountFilterFlags{
 			Debits:   true,

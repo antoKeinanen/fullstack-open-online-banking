@@ -39,6 +39,7 @@ export function TransferCard({ transfer, user }: TransferCardProps) {
           {isCreditTransfer
             ? transfer.debitUserFullName
             : transfer.creditUserFullName}
+          {isSystemTransfer ? transfer.transferId : ""}
         </ItemTitle>
         <ItemDescription>
           {isCreditTransfer ? "You sent" : "Sent you"} •{" "}

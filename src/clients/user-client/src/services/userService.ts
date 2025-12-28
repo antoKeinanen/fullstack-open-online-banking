@@ -13,9 +13,12 @@ export async function getUserDetails() {
 export async function getUserTransfers(req: GetUserTransfersRequest) {
   const query = new URLSearchParams();
 
-  Object.entries(req).forEach(([key, value]) => {
-    query.append(key, String(value));
-  });
+  Object.entries(req)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    .filter(([_key, value]) => value !== undefined)
+    .forEach(([key, value]) => {
+      query.append(key, String(value));
+    });
 
   return api.get(
     "/api/user/transfers?" + query.toString(),

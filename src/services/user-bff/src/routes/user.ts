@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { jwt } from "hono/jwt";
-import Long from "long";
 
 import {
   apiErrorResponseSchema,
@@ -96,12 +95,8 @@ userRouter.get(
     const { data, error } = await userService.getUserTransfers({
       userId: userId,
       limit: request.limit,
-      maxTimestamp: request.maxTimestamp
-        ? new Long(request.maxTimestamp)
-        : undefined,
-      minTimestamp: request.minTimestamp
-        ? new Long(request.minTimestamp)
-        : undefined,
+      maxTimestamp: request.maxTimestamp,
+      minTimestamp: request.minTimestamp,
     });
 
     if (error != null) {
