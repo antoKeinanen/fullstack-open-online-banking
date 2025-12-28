@@ -47,7 +47,6 @@ export function TransferCard({ transfer }: TransferCardProps) {
           {transfer.isSystemTransfer && "System float account"}
         </ItemTitle>
         <ItemDescription>
-          {}
           {formatLabel(
             transfer.isIncreasingTransfer,
             transfer.isSystemTransfer,
