@@ -11,4 +11,9 @@ var (
 		from banking.users
 		where user_id = $1
 	`
+	QueryGetUserId = `
+		select user_id
+		from banking.users
+		where stripe_customer_id = $1
+	`
 )

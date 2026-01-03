@@ -5,7 +5,8 @@
   "exports": {
     "./user": "./src/user/index.ts",
     "./payment": "./src/payment/index.ts",
-    "./error": "./src/error.ts"
+    "./error": "./src/error.ts",
+    "./stripe": "./src/stripe/index.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo build node_modules",

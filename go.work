@@ -6,4 +6,6 @@ use src/services/user-service/
 
 use src/services/payment-service/
 
+use src/services/stripe-service/
+
 use src/protobufs

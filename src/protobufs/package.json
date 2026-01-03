@@ -4,7 +4,8 @@
   "type": "module",
   "exports": {
     "./user-service": "./gen/ts/user-service/user-service.ts",
-    "./payment-service": "./gen/ts/payment-service/payment-service.ts"
+    "./payment-service": "./gen/ts/payment-service/payment-service.ts",
+    "./stripe-service": "./gen/ts/stripe-service/stripe-service.ts"
   },
   "scripts": {
     "generate-protobuf": "buf generate",

@@ -13,21 +13,6 @@ service UserService {
   rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
   rpc GetUserByPhoneNumber(GetUserByPhoneNumberRequest) returns (User);
   rpc GetUserTransfers(GetUserTransfersRequest) returns (GetUserTransfersResponse);
-  rpc GetStripeCustomerId(GetStripeCustomerIdRequest) returns (GetStripeCustomerIdReponse);
-  rpc SetStripeCustomerId(SetStripeCustomerIdRequest) returns (Empty);
-}
-
-message SetStripeCustomerIdRequest {
-  string user_id = 1;
-  string stripe_customer_id = 2;
-}
-
-message GetStripeCustomerIdRequest {
-  string user_id = 1;
-}
-
-message GetStripeCustomerIdReponse {
-  string stripe_customer_id = 1;
 }
 
 message GetUserTransfersRequest {
