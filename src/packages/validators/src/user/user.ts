@@ -10,6 +10,8 @@ export const userSchema = z.object({
   address: z.string(),
   createdAt: z.iso.datetime(),
   balance: z.string(),
+  pendingDebits: z.string(),
+  pendingCredits: z.string(),
 });
 export type User = z.infer<typeof userSchema>;
 
@@ -51,6 +53,9 @@ export const transferSchema = z.object({
   timestamp: z.iso.datetime(),
   isIncreasingTransfer: z.boolean(),
   isSystemTransfer: z.boolean(),
+  pending: z.boolean(),
+  posted: z.boolean(),
+  voided: z.boolean(),
 });
 export type Transfer = z.infer<typeof transferSchema>;
 

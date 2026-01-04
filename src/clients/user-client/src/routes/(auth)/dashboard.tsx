@@ -51,7 +51,7 @@ export const Route = createFileRoute("/(auth)/dashboard")({
   loader: async () => {
     const [user, transfers] = await Promise.all([
       getUserDetails(),
-      getUserTransfers({ limit: 3 }),
+      getUserTransfers({ limit: 5 }),
     ]);
     return {
       user: user,
@@ -118,6 +118,16 @@ function RouteComponent() {
         <CardHeader>
           <CardTitle className="text-xl">
             {formatBalance(user.balance)}
+            {user.pendingDebits !== "0" && (
+              <p className="text-muted-foreground text-sm">
+                Pending deposits: {formatBalance(user.pendingDebits)}
+              </p>
+            )}
+            {user.pendingCredits !== "0" && (
+              <p className="text-muted-foreground text-sm">
+                Pending withdraws: {formatBalance(user.pendingCredits)}
+              </p>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -184,9 +194,11 @@ function RouteComponent() {
           </Empty>
         ) : (
           <ItemGroup>
-            {transfers.map((transfer) => (
-              <TransferCard key={transfer.transferId} transfer={transfer} />
-            ))}
+            {transfers
+              .filter((t) => !t.pending)
+              .map((transfer) => (
+                <TransferCard key={transfer.transferId} transfer={transfer} />
+              ))}
           </ItemGroup>
         )}
       </section>

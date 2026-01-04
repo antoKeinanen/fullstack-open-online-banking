@@ -1,4 +1,10 @@
-import { UserRoundCogIcon } from "lucide-react";
+import {
+  ArrowLeftRightIcon,
+  ClockIcon,
+  UserIcon,
+  UserRoundCogIcon,
+  XCircleIcon,
+} from "lucide-react";
 
 import type { Transfer } from "@repo/validators/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
@@ -18,46 +24,88 @@ interface TransferCardProps {
   transfer: Transfer;
 }
 
-function formatLabel(isIncreasing: boolean, isSystem: boolean) {
-  return isSystem
-    ? isIncreasing
-      ? "Deposited"
-      : "Withdrew"
-    : isIncreasing
-      ? "Sent you"
-      : "You sent";
+function formatTransfer({
+  voided,
+  pending,
+  isSystemTransfer,
+  isIncreasingTransfer,
+  creditUserFullName,
+  debitUserFullName,
+}: Transfer) {
+  const conditions = [
+    {
+      check: () => voided && isSystemTransfer,
+      label: "Failed",
+      avatar: <XCircleIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: "System Float Account",
+    },
+    {
+      check: () => voided,
+      label: "Failed",
+      avatar: <XCircleIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+    },
+    {
+      check: () => pending && isSystemTransfer,
+      label: "Pending",
+      avatar: <ClockIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: "System Float Account",
+    },
+    {
+      check: () => pending,
+      label: "Pending",
+      avatar: <ClockIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+    },
+    {
+      check: () => isSystemTransfer,
+      label: isIncreasingTransfer ? "Deposited" : "Withdrew",
+      avatar: <UserRoundCogIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: "System Float Account",
+    },
+    {
+      check: () => !isSystemTransfer,
+      label: isIncreasingTransfer ? "Sent You" : "You Sent",
+      avatar: <UserIcon />,
+      symbol: isIncreasingTransfer ? "+" : "-",
+      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+    },
+  ];
+
+  return (
+    conditions.find((c) => c.check()) ?? {
+      avatar: <ArrowLeftRightIcon />,
+      label: "Transfer",
+      symbol: "",
+      recipient: "Unexpected",
+    }
+  );
 }
 
 export function TransferCard({ transfer }: TransferCardProps) {
+  const format = formatTransfer(transfer);
   return (
     <Item className="not-last:border-b-border rounded-none">
       <ItemMedia>
         <Avatar className="size-12">
           <AvatarImage src="TODO" />
-          <AvatarFallback>
-            {transfer.isSystemTransfer ? <UserRoundCogIcon /> : "AK"}
-          </AvatarFallback>
+          <AvatarFallback>{format.avatar}</AvatarFallback>
         </Avatar>
       </ItemMedia>
       <ItemContent>
-        <ItemTitle>
-          {transfer.isIncreasingTransfer
-            ? transfer.creditUserFullName
-            : transfer.debitUserFullName}
-          {transfer.isSystemTransfer && "System float account"}
-        </ItemTitle>
+        <ItemTitle>{format.recipient}</ItemTitle>
         <ItemDescription>
-          {formatLabel(
-            transfer.isIncreasingTransfer,
-            transfer.isSystemTransfer,
-          )}{" "}
-          • {formatDateTime(transfer.timestamp)}
+          {format.label} • {formatDateTime(transfer.timestamp)}
         </ItemDescription>
       </ItemContent>
       <ItemActions>
         <Badge variant="secondary">
-          {transfer.isIncreasingTransfer ? "+" : "-"}
-          {formatBalance(transfer.amount)}
+          {format.symbol} {formatBalance(transfer.amount)}
         </Badge>
       </ItemActions>
     </Item>
