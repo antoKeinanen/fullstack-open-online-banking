@@ -196,6 +196,7 @@ function RouteComponent() {
           <ItemGroup>
             {transfers
               .filter((t) => !t.pending)
+              .slice(0, 3)
               .map((transfer) => (
                 <TransferCard key={transfer.transferId} transfer={transfer} />
               ))}
