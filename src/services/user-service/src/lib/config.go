@@ -14,10 +14,11 @@ const (
 )
 
 type Configuration struct {
-	UserServicePort        string
-	TigerbeetleServiceUrl  string
-	UserServiceDatabaseDsn string
-	UserServiceJWTSecret   string
+	UserServicePort          string
+	TigerbeetleServiceUrl    string
+	UserServiceDatabaseDsn   string
+	UserServiceJWTSecret     string
+	OtelExporterOtlpEndpoint string
 }
 
 func GetEnv(envName string) string {
@@ -31,9 +32,10 @@ func GetEnv(envName string) string {
 
 func ParseConfiguration() *Configuration {
 	return &Configuration{
-		UserServicePort:        GetEnv("USER_SERVICE_PORT"),
-		TigerbeetleServiceUrl:  GetEnv("USER_SERVICE_TIGERBEETLE_SERVICE_URL"),
-		UserServiceDatabaseDsn: GetEnv("USER_SERVICE_DATABASE_DSN"),
-		UserServiceJWTSecret:   GetEnv("USER_SERVICE_JWT_SECRET"),
+		UserServicePort:          GetEnv("USER_SERVICE_PORT"),
+		TigerbeetleServiceUrl:    GetEnv("USER_SERVICE_TIGERBEETLE_SERVICE_URL"),
+		UserServiceDatabaseDsn:   GetEnv("USER_SERVICE_DATABASE_DSN"),
+		UserServiceJWTSecret:     GetEnv("USER_SERVICE_JWT_SECRET"),
+		OtelExporterOtlpEndpoint: GetEnv("USER_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
 }

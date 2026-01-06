@@ -17,16 +17,17 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.0",
+    "@opentelemetry/api": "^1.9.0",
     "@repo/protobufs": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
-    "typescript": "catalog:",
-    "@types/node": "catalog:"
+    "typescript": "catalog:"
   },
   "prettier": "@repo/prettier-config"
 }

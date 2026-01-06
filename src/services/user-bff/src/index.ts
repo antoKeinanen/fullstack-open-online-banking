@@ -1,5 +1,6 @@
 import "./util/otel";
 
+import type { Span } from "@opentelemetry/api";
 import type { JwtVariables } from "hono/jwt";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
@@ -20,9 +21,13 @@ export interface JwtPayload {
   sid: string;
 }
 
-const app = new Hono<{ Variables: JwtVariables<JwtPayload> }>().basePath(
-  "/api",
-);
+export interface Env {
+  Variables: {
+    span: Span;
+  } & JwtVariables<JwtPayload>;
+}
+
+const app = new Hono<Env>().basePath("/api");
 app.use(logger());
 
 app.use("*", tracingMiddleware);
