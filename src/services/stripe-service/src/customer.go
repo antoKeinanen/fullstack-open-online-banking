@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 	pb "protobufs/gen/go/stripe-service"
 	"stripe-service/src/lib"
@@ -23,14 +24,14 @@ func (s *StripeServiceServer) GetStripeCustomerId(ctx context.Context, req *pb.G
 	stripeCustomerId := repo.StripeCustomerId{}
 	err := s.db.GetContext(ctx, &stripeCustomerId, queries.QueryGetStripeCustomerId, req.UserId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return &pb.GetStripeCustomerIdResponse{
+				StripeCustomerId: "",
+			}, nil
+		}
+
 		slog.Error("Failed to get stripe customer id", "error", err)
 		return nil, lib.ErrUnexpected
-	}
-
-	if stripeCustomerId.StripeCustomerId == nil {
-		return &pb.GetStripeCustomerIdResponse{
-			StripeCustomerId: "",
-		}, nil
 	}
 
 	return &pb.GetStripeCustomerIdResponse{
@@ -42,14 +43,14 @@ func (s *StripeServiceServer) GetUserId(ctx context.Context, req *pb.GetUserIdRe
 	userId := repo.UserId{}
 	err := s.db.GetContext(ctx, &userId, queries.QueryGetUserId, req.StripeCustomerId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return &pb.GetUserIdResponse{
+				UserId: "",
+			}, nil
+		}
+
 		slog.Error("Failed to get user id", "error", err)
 		return nil, lib.ErrUnexpected
-	}
-
-	if userId.UserId == nil {
-		return &pb.GetUserIdResponse{
-			UserId: "",
-		}, nil
 	}
 
 	return &pb.GetUserIdResponse{
