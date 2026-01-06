@@ -34,5 +34,5 @@ var (
 		insert into banking.deposits
 			(stripe_payment_intent_id, tigerbeetle_transfer_id, stripe_customer_id, user_id, payment_status)
 		values ($1, $2, $3, $4, 'pending')
-	`;
+	`
 )
