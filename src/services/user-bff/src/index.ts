@@ -1,3 +1,5 @@
+import "./util/otel";
+
 import type { JwtVariables } from "hono/jwt";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
@@ -8,6 +10,7 @@ import { authRouter } from "./routes/auth";
 import { paymentRouter } from "./routes/payments";
 import { stripeRouter } from "./routes/stripe";
 import { userRouter } from "./routes/user";
+import { tracingMiddleware } from "./util/traceMiddleware";
 
 export interface JwtPayload {
   iss: string;
@@ -21,6 +24,8 @@ const app = new Hono<{ Variables: JwtVariables<JwtPayload> }>().basePath(
   "/api",
 );
 app.use(logger());
+
+app.use("*", tracingMiddleware);
 
 app.route("/auth", authRouter);
 app.route("/user", userRouter);

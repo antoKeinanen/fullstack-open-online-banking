@@ -16,6 +16,8 @@ export const env = createEnv({
     USER_BFF_STRIPE_SUCCESS_ENDPOINT: z.string(),
     USER_BFF_STRIPE_SERVICE_URL: z.url(),
     USER_BFF_STRIPE_WEBHOOK_SECRET: z.string(),
+    USER_BFF_OTEL_EXPORTER_OTLP_ENDPOINT: z.string(),
+    NODE_ENV: z.enum(["development", "production"]),
     USER_BFF_JWT_ALG: z
       .enum([
         "HS256",

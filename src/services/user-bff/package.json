@@ -15,6 +15,13 @@
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
     "@hono/standard-validator": "^0.1.5",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.3",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.208.0",
+    "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "@opentelemetry/sdk-trace-base": "^2.2.0",
+    "@opentelemetry/semantic-conventions": "^1.38.0",
     "@repo/service-bindings": "workspace:*",
     "@repo/validators": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
