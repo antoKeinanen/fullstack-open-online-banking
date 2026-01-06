@@ -16,5 +16,8 @@ func TbTransferToPbTransfer(transfer *tbPb.Transfer, debitUserName, creditUserNa
 		Timestamp:            transfer.Timestamp,
 		IsIncreasingTransfer: transfer.DebitAccountId == requestUserId,
 		IsSystemTransfer:     transfer.CreditAccountId == "1" || transfer.DebitAccountId == "1",
+		Pending:              transfer.Pending,
+		Posted:               transfer.Posted,
+		Voided:               transfer.Voided,
 	}
 }

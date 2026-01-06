@@ -236,12 +236,17 @@ func TbTransferToPbTransfer(transfer tbt.Transfer) *pb.Transfer {
 	timestampSeconds := int64(transfer.Timestamp / uint64(time.Second.Nanoseconds()))
 	timestampNanoSeconds := int64(transfer.Timestamp % uint64(time.Second.Nanoseconds()))
 
+	flags := transfer.TransferFlags()
+
 	return &pb.Transfer{
 		TransferId:      transfer.ID.String(),
 		Amount:          transfer.Amount.String(),
 		DebitAccountId:  transfer.DebitAccountID.String(),
 		CreditAccountId: transfer.CreditAccountID.String(),
 		Timestamp:       time.Unix(timestampSeconds, timestampNanoSeconds).UTC().Format(time.RFC3339Nano),
+		Pending:         flags.Pending,
+		Posted:          flags.PostPendingTransfer,
+		Voided:          flags.VoidPendingTransfer,
 	}
 }
 

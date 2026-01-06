@@ -1,5 +1,5 @@
 syntax = "proto3";
-package service.tigerbeetle;
+package service.payment;
 
 option go_package = "generated/payment-service";
 

@@ -18,6 +18,8 @@
     "@hookform/resolvers": "^5.2.2",
     "@repo/validators": "workspace:*",
     "@repo/web-ui": "workspace:*",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
     "@tailwindcss/postcss": "catalog:",
     "@tanstack/react-query": "^5.90.7",
     "@tanstack/react-router": "^1.135.0",

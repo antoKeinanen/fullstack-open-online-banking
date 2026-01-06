@@ -16,10 +16,10 @@ service TigerbeetleService {
 }
 
 message GetAccountTransfersRequest {
-  string user_id = 1;
+  string          user_id       = 1;
   optional string min_timestamp = 2;
   optional string max_timestamp = 3;
-  optional uint32 limit = 4;
+  optional uint32 limit         = 4;
 }
 
 message GetAccountTransfersResponse {
@@ -29,34 +29,37 @@ message GetAccountTransfersResponse {
 message Empty {}
 
 message CreateTransferRequest {
-  string debit_account_id = 1;
+  string debit_account_id  = 1;
   string credit_account_id = 2;
-  string amount = 3;
+  string amount            = 3;
 }
 
 message Transfer {
   reserved 5, 6, 7;
-  string transfer_id = 1;
-  string debit_account_id = 2;
+  string transfer_id       = 1;
+  string debit_account_id  = 2;
   string credit_account_id = 3;
-  string amount = 4;
+  string amount            = 4;
   // optional string userData128 = 5;
   // optional uint64 userData64 = 6;
   // optional uint32 userData32 = 7;
   string timestamp = 8;
+  bool   pending   = 9;
+  bool   posted    = 10;
+  bool   voided    = 11;
 }
 
 message PostPendingTransferRequest {
-  string debit_account_id = 1;
-  string credit_account_id = 2;
-  string amount = 3;
+  string debit_account_id    = 1;
+  string credit_account_id   = 2;
+  string amount              = 3;
   string pending_transfer_id = 4;
 }
 
 message VoidPendingTransferRequest {
-  string debit_account_id = 1;
-  string credit_account_id = 2;
-  string amount = 3;
+  string debit_account_id    = 1;
+  string credit_account_id   = 2;
+  string amount              = 3;
   string pending_transfer_id = 4;
 }
 
@@ -65,9 +68,9 @@ message TransferId {
 }
 
 message CreatePendingRequest {
-  string debit_account_id = 1;
+  string debit_account_id  = 1;
   string credit_account_id = 2;
-  string amount = 3;
+  string amount            = 3;
   // optional string userData128 = 4;
   // optional uint64 userData64 = 5;
   // optional uint32 userData32 = 6;
@@ -78,16 +81,16 @@ message AccountId {
 }
 
 message Account {
-  string account_id = 1;
-  string debits_pending = 2;
-  string debits_posted = 3;
-  string credits_pending = 4;
-  string credits_posted = 5;
-  uint32 code = 6;
-  uint64 timestamp = 7;
-  uint32 flags = 8;
-  uint32 ledger = 9;
-  optional string user_data128 = 10;
-  optional uint64 user_data64 = 11;
-  optional uint32 user_data32 = 12;
+  string          account_id      = 1;
+  string          debits_pending  = 2;
+  string          debits_posted   = 3;
+  string          credits_pending = 4;
+  string          credits_posted  = 5;
+  uint32          code            = 6;
+  uint64          timestamp       = 7;
+  uint32          flags           = 8;
+  uint32          ledger          = 9;
+  optional string user_data128    = 10;
+  optional uint64 user_data64     = 11;
+  optional uint32 user_data32     = 12;
 }

@@ -51,7 +51,9 @@ function dedupeTransfers(pages: GetUserTransfersResponse[]) {
   if (pages.length === 0) return [];
   if (pages.length === 1) return pages[0].transfers;
 
-  const transfers = pages.flatMap((page) => page.transfers);
+  const transfers = pages
+    .flatMap((page) => page.transfers)
+    .filter((t) => !t.pending);
 
   const seen = new Set<string>();
   const result: (typeof transfers)[number][] = [];

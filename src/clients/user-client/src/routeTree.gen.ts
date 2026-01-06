@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authTransfersRouteImport } from './routes/(auth)/transfers'
+import { Route as authSuccessRouteImport } from './routes/(auth)/success'
 import { Route as authMeRouteImport } from './routes/(auth)/me'
 import { Route as authDashboardRouteImport } from './routes/(auth)/dashboard'
 
@@ -41,6 +42,11 @@ const authTransfersRoute = authTransfersRouteImport.update({
   path: '/transfers',
   getParentRoute: () => authRouteRoute,
 } as any)
+const authSuccessRoute = authSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => authRouteRoute,
+} as any)
 const authMeRoute = authMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/dashboard': typeof authDashboardRoute
   '/me': typeof authMeRoute
+  '/success': typeof authSuccessRoute
   '/transfers': typeof authTransfersRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/dashboard': typeof authDashboardRoute
   '/me': typeof authMeRoute
+  '/success': typeof authSuccessRoute
   '/transfers': typeof authTransfersRoute
 }
 export interface FileRoutesById {
@@ -76,13 +84,28 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/(auth)/dashboard': typeof authDashboardRoute
   '/(auth)/me': typeof authMeRoute
+  '/(auth)/success': typeof authSuccessRoute
   '/(auth)/transfers': typeof authTransfersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup' | '/dashboard' | '/me' | '/transfers'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/dashboard'
+    | '/me'
+    | '/success'
+    | '/transfers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/dashboard' | '/me' | '/transfers'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/dashboard'
+    | '/me'
+    | '/success'
+    | '/transfers'
   id:
     | '__root__'
     | '/'
@@ -91,6 +114,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/(auth)/dashboard'
     | '/(auth)/me'
+    | '/(auth)/success'
     | '/(auth)/transfers'
   fileRoutesById: FileRoutesById
 }
@@ -138,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authTransfersRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(auth)/success': {
+      id: '/(auth)/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof authSuccessRouteImport
+      parentRoute: typeof authRouteRoute
+    }
     '/(auth)/me': {
       id: '/(auth)/me'
       path: '/me'
@@ -158,12 +189,14 @@ declare module '@tanstack/react-router' {
 interface authRouteRouteChildren {
   authDashboardRoute: typeof authDashboardRoute
   authMeRoute: typeof authMeRoute
+  authSuccessRoute: typeof authSuccessRoute
   authTransfersRoute: typeof authTransfersRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authDashboardRoute: authDashboardRoute,
   authMeRoute: authMeRoute,
+  authSuccessRoute: authSuccessRoute,
   authTransfersRoute: authTransfersRoute,
 }
 

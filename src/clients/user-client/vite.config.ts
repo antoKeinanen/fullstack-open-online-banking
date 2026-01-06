@@ -13,6 +13,7 @@ export default defineConfig({
   ],
   server: {
     port: 5174,
+    allowedHosts: ["fso-banking-dev.antok.dev"],
     proxy: {
       "/api": {
         target: "http://localhost:3002",

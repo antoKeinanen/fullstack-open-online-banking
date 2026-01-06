@@ -33,7 +33,7 @@ func HexStringToBigInt(str string) (*big.Int, error) {
 	return &bigInt, nil
 }
 
-func DbUserToPbUser(dbUser User, credits, debits string) (*pb.User, error) {
+func DbUserToPbUser(dbUser User, credits, debits, pendingDebits, pendingCredits string) (*pb.User, error) {
 
 	creditsBig, err := HexStringToBigInt(credits)
 	if err != nil {
@@ -49,14 +49,16 @@ func DbUserToPbUser(dbUser User, credits, debits string) (*pb.User, error) {
 	balance := big.NewInt(0).Sub(debitsBig, creditsBig).Text(16)
 
 	return &pb.User{
-		UserId:      dbUser.UserId,
-		PhoneNumber: dbUser.PhoneNumber,
-		FirstName:   dbUser.FirstName,
-		LastName:    dbUser.LastName,
-		Address:     dbUser.Address,
-		BirthDate:   dbUser.BirthDate.UTC().Format(time.RFC3339),
-		CreatedAt:   dbUser.CreatedAt.UTC().Format(time.RFC3339),
-		Balance:     balance,
+		UserId:         dbUser.UserId,
+		PhoneNumber:    dbUser.PhoneNumber,
+		FirstName:      dbUser.FirstName,
+		LastName:       dbUser.LastName,
+		Address:        dbUser.Address,
+		BirthDate:      dbUser.BirthDate.UTC().Format(time.RFC3339),
+		CreatedAt:      dbUser.CreatedAt.UTC().Format(time.RFC3339),
+		Balance:        balance,
+		PendingDebits:  pendingDebits,
+		PendingCredits: pendingCredits,
 	}, nil
 }
 

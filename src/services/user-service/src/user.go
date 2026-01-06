@@ -49,7 +49,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user, "0", "0")
+	return repo.DbUserToPbUser(user, "0", "0", "0", "0")
 }
 
 func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
@@ -75,7 +75,7 @@ func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserById
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
+	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted, account.DebitsPending, account.CreditsPending)
 }
 
 func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.GetUserByPhoneNumberRequest) (*pb.User, error) {
@@ -101,7 +101,7 @@ func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.Ge
 		return nil, lib.ErrUnexpected
 	}
 
-	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted)
+	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted, account.DebitsPending, account.CreditsPending)
 }
 
 func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUserTransfersRequest) (*pb.GetUserTransfersResponse, error) {
