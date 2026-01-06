@@ -17,7 +17,7 @@ var (
 	`
 
 	QueryPostPendingTransfer = `
-			update banking.deposits
+		update banking.deposits
 		set posted_at = now(),
 				payment_status = 'posted'
 		where tigerbeetle_transfer_id = $1
