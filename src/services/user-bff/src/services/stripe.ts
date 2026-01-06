@@ -111,14 +111,3 @@ export async function stripeConstructWebhookEvent(
     ),
   );
 }
-
-export function createStripeCustomer(phoneNumber: string, userId: string) {
-  return tryCatch<StripeSDK.Customer>(
-    stripe.customers.create({
-      phone: phoneNumber,
-      metadata: {
-        userId: userId,
-      },
-    }),
-  );
-}
