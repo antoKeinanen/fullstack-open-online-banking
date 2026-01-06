@@ -4,15 +4,16 @@ import * as grpc from "@grpc/grpc-js";
 import type {
   CreateAndPostTransferRequest,
   CreatePendingTransferRequest,
+  Empty,
   GetPendingTransferRequest,
   GetPendingTransferResponse,
+  GetStripeCustomerIdRequest,
   GetStripeCustomerIdResponse,
   GetUserIdRequest,
   GetUserIdResponse,
   PostPendingTransferRequest,
   VoidPendingTransferRequest,
 } from "@repo/protobufs/stripe-service";
-import type { Empty, GetUserByIdRequest } from "@repo/protobufs/user-service";
 import { StripeServiceClient } from "@repo/protobufs/stripe-service";
 
 import type { GrpcResponse } from "./types";
@@ -40,7 +41,7 @@ export class StripeService {
   }
 
   async getStripeCustomerId(
-    request: GetUserByIdRequest,
+    request: GetStripeCustomerIdRequest,
   ): GrpcResponse<GetStripeCustomerIdResponse> {
     const getStripeCustomerId = promisify(
       this.client.getStripeCustomerId.bind(this.client),
