@@ -42,7 +42,7 @@ func (s *StripeServiceServer) PostPendingTransfer(ctx context.Context, req *pb.P
 		slog.Error("Failed to post pending transfer", "error", err)
 		return nil, lib.ErrUnexpected
 	}
-	if rows, err := result.RowsAffected(); err != nil && rows == 0 {
+	if rows, err := result.RowsAffected(); err != nil || rows == 0 {
 		slog.Error("Failed to post pending transfer", "error", "No rows affected")
 		return nil, lib.ErrNotFound
 	}
@@ -67,7 +67,7 @@ func (s *StripeServiceServer) VoidPendingTransfer(ctx context.Context, req *pb.V
 		slog.Error("Failed to void pending transfer", "error", err)
 		return nil, lib.ErrUnexpected
 	}
-	if rows, err := result.RowsAffected(); err != nil && rows == 0 {
+	if rows, err := result.RowsAffected(); err != nil || rows == 0 {
 		slog.Error("Failed to void pending transfer", "error", "No rows affected")
 		return nil, lib.ErrNotFound
 	}
