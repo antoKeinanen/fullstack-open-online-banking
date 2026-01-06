@@ -34,6 +34,12 @@ func (s *StripeServiceServer) GetStripeCustomerId(ctx context.Context, req *pb.G
 		return nil, lib.ErrUnexpected
 	}
 
+	if stripeCustomerId.StripeCustomerId == nil {
+		return &pb.GetStripeCustomerIdResponse{
+			StripeCustomerId: "",
+		}, nil
+	}
+
 	return &pb.GetStripeCustomerIdResponse{
 		StripeCustomerId: *stripeCustomerId.StripeCustomerId,
 	}, nil
@@ -51,6 +57,12 @@ func (s *StripeServiceServer) GetUserId(ctx context.Context, req *pb.GetUserIdRe
 
 		slog.Error("Failed to get user id", "error", err)
 		return nil, lib.ErrUnexpected
+	}
+
+	if userId.UserId == nil {
+		return &pb.GetUserIdResponse{
+			UserId: "",
+		}, nil
 	}
 
 	return &pb.GetUserIdResponse{
