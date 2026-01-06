@@ -45,6 +45,20 @@ export async function getOrCreateStripeCustomer(
     return { error: newCustomerError };
   }
 
+  const { error: setStripeCustomerIdError } =
+    await stripeService.setStripeCustomerId({
+      userId: userId,
+      stripeCustomerId: newCustomer.id,
+    });
+  if (setStripeCustomerIdError) {
+    console.log(
+      "Failed to set stripe customer id for user",
+      setStripeCustomerIdError.message,
+      setStripeCustomerIdError.stack,
+    );
+    return { error: setStripeCustomerIdError };
+  }
+
   return { data: newCustomer.id };
 }
 
