@@ -16,7 +16,7 @@ export async function handleSuccess(
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
-    await stripeService.getPendingTransfer({
+    await stripeService.call("getPendingTransfer", {
       stripePaymentIntentId: paymentIntent.id,
     });
   if (pendingTransferError) {
@@ -30,9 +30,12 @@ export async function handleSuccess(
   }
 
   const stripeCustomerId = getStripeCustomerId(paymentIntent.customer);
-  const { data: user, error: userError } = await stripeService.getUserId({
-    stripeCustomerId: stripeCustomerId,
-  });
+  const { data: user, error: userError } = await stripeService.call(
+    "getUserId",
+    {
+      stripeCustomerId: stripeCustomerId,
+    },
+  );
   if (userError) {
     console.error(
       "Failed to get user id by stripe customer id",
@@ -44,11 +47,14 @@ export async function handleSuccess(
   }
 
   if (pendingTransfer.tigerbeetleTransferId) {
-    const { error: postError } = await stripeService.postPendingTransfer({
-      tigerbeetleTransferId: pendingTransfer.tigerbeetleTransferId,
-      userId: user.userId,
-      amount: formatAsHex(paymentIntent.amount),
-    });
+    const { error: postError } = await stripeService.call(
+      "postPendingTransfer",
+      {
+        tigerbeetleTransferId: pendingTransfer.tigerbeetleTransferId,
+        userId: user.userId,
+        amount: formatAsHex(paymentIntent.amount),
+      },
+    );
     if (postError) {
       console.error(
         "Failed to post pending transfer",
@@ -61,13 +67,15 @@ export async function handleSuccess(
     return c.text("ok", 200);
   }
 
-  const { error: createAndPostError } =
-    await stripeService.createAndPostTransfer({
+  const { error: createAndPostError } = await stripeService.call(
+    "createAndPostTransfer",
+    {
       stripeCustomerId: stripeCustomerId,
       stripePaymentIntentId: paymentIntent.id,
       userId: user.userId,
       amount: formatAsHex(paymentIntent.amount),
-    });
+    },
+  );
   if (createAndPostError) {
     console.error(
       "Failed to create and post transfer",
@@ -93,7 +101,7 @@ export async function handleProcessing(
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
-    await stripeService.getPendingTransfer({
+    await stripeService.call("getPendingTransfer", {
       stripePaymentIntentId: paymentIntent.id,
     });
   if (pendingTransferError) {
@@ -111,9 +119,12 @@ export async function handleProcessing(
   }
 
   const stripeCustomerId = getStripeCustomerId(paymentIntent.customer);
-  const { data: user, error: userError } = await stripeService.getUserId({
-    stripeCustomerId: stripeCustomerId,
-  });
+  const { data: user, error: userError } = await stripeService.call(
+    "getUserId",
+    {
+      stripeCustomerId: stripeCustomerId,
+    },
+  );
   if (userError) {
     console.error(
       "Failed to get user id by stripe customer id",
@@ -124,13 +135,15 @@ export async function handleProcessing(
     return c.text("failed to get user id", 500);
   }
 
-  const { error: newPendingTransferError } =
-    await stripeService.createPendingTransfer({
+  const { error: newPendingTransferError } = await stripeService.call(
+    "createPendingTransfer",
+    {
       stripeCustomerId: stripeCustomerId,
       stripePaymentIntentId: paymentIntent.id,
       userId: user.userId,
       amount: formatAsHex(paymentIntent.amount),
-    });
+    },
+  );
   if (newPendingTransferError) {
     console.error(
       "Failed to create pending transfer",
@@ -154,7 +167,7 @@ async function voidPendingTransfer(
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
-    await stripeService.getPendingTransfer({
+    await stripeService.call("getPendingTransfer", {
       stripePaymentIntentId: paymentIntent.id,
     });
   if (pendingTransferError) {
@@ -172,9 +185,12 @@ async function voidPendingTransfer(
   }
 
   const stripeCustomerId = getStripeCustomerId(paymentIntent.customer);
-  const { data: user, error: userError } = await stripeService.getUserId({
-    stripeCustomerId: stripeCustomerId,
-  });
+  const { data: user, error: userError } = await stripeService.call(
+    "getUserId",
+    {
+      stripeCustomerId: stripeCustomerId,
+    },
+  );
   if (userError) {
     console.error(
       "Failed to get user id by stripe customer id",
@@ -185,12 +201,14 @@ async function voidPendingTransfer(
     return c.text("failed to get user id", 500);
   }
 
-  const { error: newPendingTransferError } =
-    await stripeService.voidPendingTransfer({
+  const { error: newPendingTransferError } = await stripeService.call(
+    "voidPendingTransfer",
+    {
       tigerbeetleTransferId: pendingTransfer.tigerbeetleTransferId,
       userId: user.userId,
       amount: formatAsHex(paymentIntent.amount),
-    });
+    },
+  );
   if (newPendingTransferError) {
     console.error(
       "Failed to create pending transfer",

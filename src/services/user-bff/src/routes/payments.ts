@@ -113,10 +113,12 @@ paymentRouter.post(
     const paymentId = randomUUIDv7().replaceAll("-", "");
     await cacheTransaction(userId, idempotencyKey, paymentId, "pending");
 
-    const { data: toUser, error: toUserError } =
-      await userService.getUserByPhoneNumber({
+    const { data: toUser, error: toUserError } = await userService.call(
+      "getUserByPhoneNumber",
+      {
         phoneNumber: toUserPhoneNumber,
-      });
+      },
+    );
     if (toUserError != null) {
       await updateTransactionState(userId, idempotencyKey, "failed");
 
@@ -144,7 +146,7 @@ paymentRouter.post(
       );
     }
 
-    const { error } = await paymentService.createPayment({
+    const { error } = await paymentService.call("createPayment", {
       toUserId: toUser.userId,
       amount: Long.fromInt(amount),
       fromUserId: userId,

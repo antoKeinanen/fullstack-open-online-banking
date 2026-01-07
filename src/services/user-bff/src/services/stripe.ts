@@ -7,14 +7,16 @@ import { tryCatch } from "../util/tryCatch";
 
 const stripe = new StripeSDK(env.USER_BFF_STRIPE_SECRET_KEY);
 
-export const stripeService = new StripeService(env.USER_BFF_STRIPE_SERVICE_URL);
+export const stripeService = StripeService(env.USER_BFF_STRIPE_SERVICE_URL);
 
 export async function getOrCreateStripeCustomer(
   phoneNumber: string,
   userId: string,
 ) {
-  const { data: customer, error: customerError } =
-    await stripeService.getStripeCustomerId({ userId: userId });
+  const { data: customer, error: customerError } = await stripeService.call(
+    "getStripeCustomerId",
+    { userId: userId },
+  );
   if (customerError) {
     console.error(
       "Failed to get stripe customer",
@@ -45,11 +47,13 @@ export async function getOrCreateStripeCustomer(
     return { error: newCustomerError };
   }
 
-  const { error: setStripeCustomerIdError } =
-    await stripeService.setStripeCustomerId({
+  const { error: setStripeCustomerIdError } = await stripeService.call(
+    "setStripeCustomerId",
+    {
       userId: userId,
       stripeCustomerId: newCustomer.id,
-    });
+    },
+  );
   if (setStripeCustomerIdError) {
     console.log(
       "Failed to set stripe customer id for user",

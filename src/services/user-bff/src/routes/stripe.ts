@@ -38,9 +38,12 @@ stripeRouter.post(
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
     const { amount } = c.req.valid("json");
 
-    const { data: user, error: userError } = await userService.getUserById({
-      userId,
-    });
+    const { data: user, error: userError } = await userService.call(
+      "getUserById",
+      {
+        userId,
+      },
+    );
     if (userError) {
       console.error("Failed to get user", userError.details, userError.message);
       return c.json(createUnexpectedError(), 500);

@@ -55,7 +55,7 @@ authRouter.post(
   async (c) => {
     const body = c.req.valid("json");
 
-    const { error } = await userService.requestAuthentication(body);
+    const { error } = await userService.call("requestAuthentication", body);
     if (error != null) {
       if (error.details === "NOT_FOUND") {
         console.warn(
@@ -133,7 +133,7 @@ authRouter.post(
       return c.json(createUnexpectedError(), 500);
     }
 
-    const { data, error } = await userService.authenticateWithOTP({
+    const { data, error } = await userService.call("authenticateWithOtp", {
       ...body,
       application: userAgentParser.browser.name ?? "Unknown",
       device: userAgentParser.os.name ?? "Unknown",
@@ -212,7 +212,7 @@ authRouter.post(
   async (c) => {
     const cookies = c.req.valid("cookie");
 
-    const { data, error } = await userService.refreshToken(cookies);
+    const { data, error } = await userService.call("refreshToken", cookies);
     if (error != null) {
       console.error("Failed to refresh session", error);
       return c.json(createUnexpectedError(), 500);
@@ -274,7 +274,7 @@ authRouter.post(
   async (c) => {
     const request = c.req.valid("json");
 
-    const { error } = await userService.createUser({
+    const { error } = await userService.call("createUser", {
       ...request,
       birthDate: request.birthDate.toISOString(),
     });
@@ -325,7 +325,7 @@ authRouter.get(
   async (c) => {
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
 
-    const { data, error } = await userService.getActiveSessions({
+    const { data, error } = await userService.call("getActiveSessions", {
       userId,
     });
 
@@ -368,7 +368,7 @@ authRouter.delete(
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
     const { sessionId } = c.req.valid("json");
 
-    const { error } = await userService.invalidateSession({
+    const { error } = await userService.call("invalidateSession", {
       sessionId,
       userId,
     });

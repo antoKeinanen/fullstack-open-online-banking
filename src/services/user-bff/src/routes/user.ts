@@ -49,7 +49,7 @@ userRouter.get(
 
   async (c) => {
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
-    const { data, error } = await userService.getUserById({ userId });
+    const { data, error } = await userService.call("getUserById", { userId });
     if (error != null) {
       console.error("Failed to get user", error);
       return c.json(createUnexpectedError(), 500);
@@ -92,7 +92,7 @@ userRouter.get(
     const request = c.req.valid("query");
     const { sub: userId } = c.get("jwtPayload") as JwtPayload;
 
-    const { data, error } = await userService.getUserTransfers({
+    const { data, error } = await userService.call("getUserTransfers", {
       userId: userId,
       limit: request.limit,
       maxTimestamp: request.maxTimestamp,
