@@ -2,6 +2,7 @@ import type { Context, Next } from "hono";
 import { context, SpanStatusCode, trace } from "@opentelemetry/api";
 
 import type { Env } from "..";
+import { env } from "../env";
 
 const tracer = trace.getTracer("user-bff");
 
@@ -14,6 +15,7 @@ export async function tracingMiddleware(c: Context<Env>, next: Next) {
     "http.target": c.req.path,
     "http.host": c.req.header("host") ?? "unknown",
     "http.ip": c.req.header("x-forwarded-for") ?? "unknown",
+    "deployment.environment.name": env.NODE_ENV,
   });
 
   c.set("span", span);

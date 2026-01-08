@@ -1,3 +1,4 @@
+import { SpanStatusCode } from "@opentelemetry/api";
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { setCookie } from "hono/cookie";
@@ -19,11 +20,13 @@ import {
   sessionSchema,
 } from "@repo/validators/user";
 
-import type { JwtPayload } from "..";
+import type { Env } from "..";
 import { env } from "../env";
 import { userService } from "../services/userService";
+import { attrs, events } from "../util/attr";
+import { redactJWT } from "../util/redactor";
 
-export const authRouter = new Hono();
+export const authRouter = new Hono<Env>();
 
 authRouter.post(
   "/request-authentication",
@@ -53,22 +56,19 @@ authRouter.post(
   validator("json", requestAuthenticationRequestSchema),
 
   async (c) => {
+    const span = c.get("span");
     const body = c.req.valid("json");
 
     const { error } = await userService.call("requestAuthentication", body);
     if (error != null) {
+      span.recordException(error);
       if (error.details === "NOT_FOUND") {
-        console.warn(
-          "Failed to create authentication request: user does not exist",
-          body,
-        );
+        span.addEvent(events.EVENT_USER_NOT_FOUND);
+        span.setStatus({ code: SpanStatusCode.OK });
         return c.text("Success", 200);
       }
-      console.error(
-        "Failed to create authentication request for user:",
-        body,
-        error,
-      );
+
+      span.recordException(error);
       return c.json(createUnexpectedError(), 500);
     }
 
@@ -118,20 +118,31 @@ authRouter.post(
   validator("json", OTPAuthenticationRequestSchema),
 
   async (c) => {
+    const span = c.get("span");
     const body = c.req.valid("json");
 
     const userAgent = c.req.header("User-Agent");
     if (!userAgent) {
-      console.info("Failed to login, missing useragent header");
+      span.addEvent(events.EVENT_USER_NO_USER_AGENT);
       return c.json(createUnexpectedError(), 500);
     }
     const userAgentParser = UAParser(userAgent);
 
-    const ipAddress = c.req.header("x-forwarded-for");
-    if (!ipAddress) {
-      console.error("Failed to login, missing x-forwarded-for");
+    span.setAttribute(attrs.ATTR_USER_USER_AGENT, userAgent);
+
+    const forwardedFor = c.req.header("x-forwarded-for");
+    if (!forwardedFor) {
+      span.addEvent(events.EVENT_USER_NO_FORWARDED_FOR);
       return c.json(createUnexpectedError(), 500);
     }
+
+    const ipAddress = forwardedFor.split(", ")[0];
+    if (!ipAddress) {
+      span.addEvent(events.EVENT_USER_MALFORMED_FORWARDED_FOR);
+      return c.json(createUnexpectedError(), 500);
+    }
+
+    span.setAttribute(attrs.ATTR_USER_FORWARDED_FOR, ipAddress);
 
     const { data, error } = await userService.call("authenticateWithOtp", {
       ...body,
@@ -139,25 +150,34 @@ authRouter.post(
       device: userAgentParser.os.name ?? "Unknown",
       ipAddress: ipAddress,
     });
-    if (error != null) {
-      console.log(error);
+    if (error) {
       if (error.details === "NOT_FOUND" || error.details === "OTP_MISMATCH") {
+        span.addEvent(events.EVENT_AUTH_OTP_MISMATCH);
+        span.setAttribute(attrs.ATTR_AUTH_OTP_ERROR_CAUSE, error.details);
         return c.json(
           createSingleError("INVALID_INPUT", "Invalid number and/or code"),
           406,
         );
       }
 
+      span.recordException(error);
+
       return c.json(createUnexpectedError(), 500);
     }
+
+    span.setAttributes({
+      [attrs.ATTR_USER_SESSION_ACCESS_TOKEN]: redactJWT(data.accessToken),
+      [attrs.ATTR_USER_SESSION_ACCESS_TOKEN_EXPIRES]: data.accessTokenExpires,
+      [attrs.ATTR_USER_SESSION_REFRESH_TOKEN]: redactJWT(data.refreshToken),
+      [attrs.ATTR_USER_SESSION_REFRESH_TOKEN_EXPIRES]: data.refreshTokenExpires,
+    });
 
     if (!Object.values(data).every((v) => v !== undefined)) {
-      console.error(
-        "OTP authentication failed: user service data null check failed",
-      );
+      span.addEvent(events.EVENT_NULLITY_CHECK_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
+    span.addEvent(events.EVENT_COOKIE_SET);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     setCookie(c, "refreshToken", data.refreshToken!, {
       sameSite: "Strict",
@@ -210,21 +230,28 @@ authRouter.post(
   validator("cookie", refreshTokenRequestCookiesSchema),
 
   async (c) => {
+    const span = c.get("span");
     const cookies = c.req.valid("cookie");
 
     const { data, error } = await userService.call("refreshToken", cookies);
     if (error != null) {
-      console.error("Failed to refresh session", error);
+      span.recordException(error);
       return c.json(createUnexpectedError(), 500);
     }
 
     if (!Object.values(data).every((v) => v !== undefined)) {
-      console.error(
-        "OTP authentication failed: user service data null check failed",
-      );
+      span.addEvent(events.EVENT_REFRESH_TOKEN_NULL_CHECK_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
+    span.setAttributes({
+      [attrs.ATTR_USER_SESSION_ACCESS_TOKEN]: redactJWT(data.accessToken),
+      [attrs.ATTR_USER_SESSION_ACCESS_TOKEN_EXPIRES]: data.accessTokenExpires,
+      [attrs.ATTR_USER_SESSION_REFRESH_TOKEN]: redactJWT(data.refreshToken),
+      [attrs.ATTR_USER_SESSION_REFRESH_TOKEN_EXPIRES]: data.refreshTokenExpires,
+    });
+
+    span.addEvent(events.EVENT_COOKIE_SET);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     setCookie(c, "refreshToken", data.refreshToken!, {
       sameSite: "Strict",
@@ -272,6 +299,7 @@ authRouter.post(
   validator("json", createUserRequestSchema),
 
   async (c) => {
+    const span = c.get("span");
     const request = c.req.valid("json");
 
     const { error } = await userService.call("createUser", {
@@ -280,8 +308,12 @@ authRouter.post(
     });
     if (error !== null) {
       if (error.details === "CONFLICT") {
+        span.addEvent(events.EVENT_SIGN_UP_CONFLICT);
+        span.setStatus({ code: SpanStatusCode.OK });
         return c.text("Created", 201);
       }
+      span.recordException(error);
+      span.addEvent(events.EVENT_SIGN_UP_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
     return c.text("Created", 201);
@@ -323,14 +355,16 @@ authRouter.get(
   }),
 
   async (c) => {
-    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const span = c.get("span");
+    const { sub: userId } = c.get("jwtPayload");
 
     const { data, error } = await userService.call("getActiveSessions", {
       userId,
     });
 
     if (error != null) {
-      console.error("Failed to get active sessions", error);
+      span.recordException(error);
+      span.addEvent(events.EVENT_GET_SESSIONS_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
@@ -365,7 +399,8 @@ authRouter.delete(
   validator("json", invalidateSessionRequestSchema),
 
   async (c) => {
-    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const span = c.get("span");
+    const { sub: userId } = c.get("jwtPayload");
     const { sessionId } = c.req.valid("json");
 
     const { error } = await userService.call("invalidateSession", {
@@ -373,7 +408,8 @@ authRouter.delete(
       userId,
     });
     if (error != null) {
-      console.error("Failed to invalidate session", error);
+      span.recordException(error);
+      span.addEvent(events.EVENT_INVALIDATE_SESSION_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
@@ -393,6 +429,9 @@ authRouter.post(
   }),
 
   (c) => {
+    const span = c.get("span");
+
+    span.addEvent(events.EVENT_LOGOUT);
     setCookie(c, "refreshToken", "", {
       sameSite: "Strict",
       httpOnly: true,

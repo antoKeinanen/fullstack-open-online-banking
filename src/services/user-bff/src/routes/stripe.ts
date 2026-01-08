@@ -6,7 +6,7 @@ import { jwt } from "hono/jwt";
 import { createUnexpectedError } from "@repo/validators/error";
 import { generateStripeCheckoutRequestSchema } from "@repo/validators/stripe";
 
-import type { JwtPayload } from "..";
+import type { Env } from "..";
 import { env } from "../env";
 import {
   handleCancelled,
@@ -20,8 +20,9 @@ import {
   stripeConstructWebhookEvent,
 } from "../services/stripe";
 import { userService } from "../services/userService";
+import { attrs, events } from "../util/attr";
 
-export const stripeRouter = new Hono();
+export const stripeRouter = new Hono<Env>();
 
 stripeRouter.use(
   "*",
@@ -34,9 +35,16 @@ stripeRouter.use(
 stripeRouter.post(
   "/generate-stripe-checkout",
   validator("json", generateStripeCheckoutRequestSchema),
+
   async (c) => {
-    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const span = c.get("span");
+    const { sub: userId } = c.get("jwtPayload");
     const { amount } = c.req.valid("json");
+
+    span.setAttributes({
+      [attrs.ATTR_USER_ID]: userId,
+      [attrs.ATTR_STRIPE_CHECKOUT_AMOUNT]: amount,
+    });
 
     const { data: user, error: userError } = await userService.call(
       "getUserById",
@@ -45,23 +53,26 @@ stripeRouter.post(
       },
     );
     if (userError) {
-      console.error("Failed to get user", userError.details, userError.message);
+      span.recordException(userError);
+      span.addEvent(events.EVENT_STRIPE_CHECKOUT_GET_USER_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
     // THIS SHOULD NEVER HAPPEN
     if (!user.phoneNumber) {
-      console.error(
-        "Failed to create stripe checkout: user is missing phone number",
-      );
+      span.addEvent(events.EVENT_STRIPE_CHECKOUT_MISSING_PHONE);
       return c.json(createUnexpectedError(), 500);
     }
 
     const { data: stripeCustomerId, error: stripeCustomerError } =
       await getOrCreateStripeCustomer(user.phoneNumber, userId);
     if (stripeCustomerError) {
+      span.recordException(stripeCustomerError);
+      span.addEvent(events.EVENT_STRIPE_CHECKOUT_CUSTOMER_ERROR);
       return c.json(createUnexpectedError(), 500);
     }
+
+    span.setAttribute(attrs.ATTR_STRIPE_CUSTOMER_ID, stripeCustomerId);
 
     const { data: checkout, error: checkoutError } = await createStripeCheckout(
       stripeCustomerId,
@@ -69,21 +80,23 @@ stripeRouter.post(
       userId,
     );
     if (checkoutError) {
-      console.error(
-        "Failed to create stripe checkout",
-        checkoutError.message,
-        checkoutError.stack,
-      );
+      span.recordException(checkoutError);
+      span.addEvent(events.EVENT_STRIPE_CHECKOUT_CREATE_ERROR);
       return c.json(createUnexpectedError(), 500);
     }
+
+    span.setAttribute(attrs.ATTR_STRIPE_CHECKOUT_URL, checkout.url ?? "");
+    span.addEvent(events.EVENT_STRIPE_CHECKOUT_SUCCESS);
 
     return c.json({ url: checkout.url });
   },
 );
 
 stripeRouter.post("/webhook", async (c) => {
+  const span = c.get("span");
   const signature = c.req.header("stripe-signature");
   if (!signature) {
+    span.addEvent(events.EVENT_STRIPE_WEBHOOK_MISSING_SIGNATURE);
     return c.text("signature missing", 400);
   }
   const body = await c.req.text();
@@ -92,11 +105,12 @@ stripeRouter.post("/webhook", async (c) => {
     signature,
   );
   if (eventError) {
-    console.error("Failed to construct stripe webhook event");
+    span.recordException(eventError);
+    span.addEvent(events.EVENT_STRIPE_WEBHOOK_EVENT_ERROR);
     return c.text("bad event", 500);
   }
 
-  console.log("[STRIPE] got event", event.type);
+  span.addEvent(events.EVENT_STRIPE_WEBHOOK_RECEIVED);
 
   switch (event.type) {
     case "payment_intent.succeeded":
@@ -108,11 +122,7 @@ stripeRouter.post("/webhook", async (c) => {
     case "payment_intent.processing":
       return handleProcessing(event, c);
     default:
-      console.info(
-        "Stripe event triggered but no action was taken",
-        event.type,
-      );
+      span.addEvent(events.EVENT_STRIPE_WEBHOOK_NO_ACTION);
       return c.text("no action taken", 200);
-      break;
   }
 });

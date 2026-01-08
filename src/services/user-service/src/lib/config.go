@@ -11,6 +11,7 @@ const (
 	AccessTokenTTL             = 5 * time.Minute
 	RefreshTokenTTL            = 30 * time.Minute
 	OTPExpirationWindowMinutes = 5
+	ServiceName                = "user-service"
 )
 
 type Configuration struct {

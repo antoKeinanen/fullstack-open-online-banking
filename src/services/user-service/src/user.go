@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log/slog"
 	"time"
 
 	"user-service/src/lib"
@@ -12,99 +11,198 @@ import (
 	"user-service/src/repo"
 
 	"github.com/lib/pq"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	tbPb "protobufs/gen/go/tigerbeetle-service"
 	pb "protobufs/gen/go/user-service"
 )
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_PHONE_NUMBER, lib.RedactPhoneNumber(req.PhoneNumber)),
+		attribute.String(lib.ATTR_BIRTH_DATE, req.BirthDate),
+	)
+
+	ctx, parseBirthDateSpan := tracer.Start(ctx, lib.EVENT_USER_PARSE_BIRTH_DATE)
+	defer parseBirthDateSpan.End()
+
 	birthDate, err := time.Parse(time.RFC3339, req.BirthDate)
 	if err != nil {
-		slog.Error("Failed to create user, birthday parsing failed", "error", err)
+		parseBirthDateSpan.RecordError(err)
 		return nil, lib.ErrUnacceptableRequest
 	}
+	parseBirthDateSpan.End()
+
+	ctx, validateAgeSpan := tracer.Start(ctx, lib.EVENT_USER_VALIDATE_AGE)
+	defer validateAgeSpan.End()
 
 	now := time.Now().UTC()
 	if birthDate.AddDate(18, 0, 0).After(now) {
-		slog.Info("Failed to create user", "error", "user is not over 18")
+		validateAgeSpan.AddEvent(lib.EVENT_USER_UNDERAGE)
 		return nil, lib.ErrUnacceptableRequest
 	}
+	validateAgeSpan.End()
+
+	ctx, createTbAccountSpan := tracer.Start(ctx, lib.EVENT_TB_CREATE_ACCOUNT)
+	defer createTbAccountSpan.End()
 
 	tbUser, err := s.tigerbeetleService.CreateAccount(ctx, &tbPb.Empty{})
 	if err != nil {
-		slog.Error("Failed to create tigerbeetle account", "error", err)
+		createTbAccountSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+
+	createTbAccountSpan.SetAttributes(
+		attribute.String(lib.ATTR_TB_ACCOUNT_ID, tbUser.AccountId),
+	)
+	createTbAccountSpan.End()
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, tbUser.AccountId),
+	)
+
+	ctx, dbCreateUserSpan := tracer.Start(ctx, lib.EVENT_DB_CREATE_USER)
+	defer dbCreateUserSpan.End()
+
+	dbCreateUserSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryCreateUser),
+	)
 
 	user := repo.User{}
 	err = s.db.GetContext(ctx, &user, queries.QueryCreateUser, tbUser.AccountId, req.PhoneNumber, req.FirstName, req.LastName, req.Address, birthDate)
 	if err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
-			slog.Error("Failed to create account, user_id unique constraint failed", "error", err)
+			dbCreateUserSpan.AddEvent(lib.EVENT_DB_UNIQUE_CONSTRAINT_VIOLATION)
+			dbCreateUserSpan.RecordError(err)
 			return nil, lib.ErrConflict
 		}
 
-		slog.Error("Error: Failed to insert user to the database", "error", err)
+		dbCreateUserSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	dbCreateUserSpan.End()
 
 	return repo.DbUserToPbUser(user, "0", "0", "0", "0")
 }
 
 func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, req.UserId),
+	)
+
+	ctx, dbGetUserSpan := tracer.Start(ctx, lib.EVENT_DB_GET_USER)
+	defer dbGetUserSpan.End()
+
+	dbGetUserSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryGetUserById),
+	)
+
 	user := repo.User{}
 	err := s.db.GetContext(ctx, &user, queries.QueryGetUserById, req.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			slog.Info("User not found", "error", err)
+			dbGetUserSpan.AddEvent(lib.EVENT_USER_NOT_FOUND)
 			return nil, lib.ErrNotFound
 		}
 
-		slog.Error("Failed to get user from the database", "error", err)
+		dbGetUserSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	dbGetUserSpan.End()
+
+	ctx, lookupAccountSpan := tracer.Start(ctx, lib.EVENT_TB_LOOKUP_ACCOUNT)
+	defer lookupAccountSpan.End()
+
+	lookupAccountSpan.SetAttributes(
+		attribute.String(lib.ATTR_TB_ACCOUNT_ID, req.UserId),
+	)
 
 	account, err := s.tigerbeetleService.LookupAccount(ctx, &tbPb.AccountId{AccountId: req.UserId})
 	if err != nil {
 		if err == lib.ErrNotFound {
-			slog.Info("Account not found", "error", err)
+			lookupAccountSpan.AddEvent(lib.EVENT_ACCOUNT_NOT_FOUND)
 			return nil, lib.ErrNotFound
 		}
-		slog.Error("Failed to get account for user", "error", err)
+		lookupAccountSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	lookupAccountSpan.End()
 
 	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted, account.DebitsPending, account.CreditsPending)
 }
 
 func (s *UserServiceServer) GetUserByPhoneNumber(ctx context.Context, req *pb.GetUserByPhoneNumberRequest) (*pb.User, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_PHONE_NUMBER, lib.RedactPhoneNumber(req.PhoneNumber)),
+	)
+
+	ctx, dbGetUserSpan := tracer.Start(ctx, lib.EVENT_DB_GET_USER)
+	defer dbGetUserSpan.End()
+
+	dbGetUserSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryGetUserByPhoneNumber),
+	)
+
 	user := repo.User{}
 	err := s.db.GetContext(ctx, &user, queries.QueryGetUserByPhoneNumber, req.PhoneNumber)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			slog.Info("User not found", "error", err)
+			dbGetUserSpan.AddEvent(lib.EVENT_USER_NOT_FOUND)
 			return nil, lib.ErrNotFound
 		}
 
-		slog.Error("Failed to get user from the database", "error", err)
+		dbGetUserSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, user.UserId),
+	)
+	dbGetUserSpan.End()
+
+	ctx, lookupAccountSpan := tracer.Start(ctx, lib.EVENT_TB_LOOKUP_ACCOUNT)
+	defer lookupAccountSpan.End()
+
+	lookupAccountSpan.SetAttributes(
+		attribute.String(lib.ATTR_TB_ACCOUNT_ID, user.UserId),
+	)
 
 	account, err := s.tigerbeetleService.LookupAccount(ctx, &tbPb.AccountId{AccountId: user.UserId})
 	if err != nil {
 		if err == lib.ErrNotFound {
-			slog.Info("Account not found", "error", err)
+			lookupAccountSpan.AddEvent(lib.EVENT_ACCOUNT_NOT_FOUND)
 			return nil, lib.ErrNotFound
 		}
-		slog.Error("Failed to get account for user", "error", err)
+		lookupAccountSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	lookupAccountSpan.End()
 
 	return repo.DbUserToPbUser(user, account.CreditsPosted, account.DebitsPosted, account.DebitsPending, account.CreditsPending)
 }
 
 func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUserTransfersRequest) (*pb.GetUserTransfersResponse, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, req.UserId),
+	)
+
+	ctx, getTransfersSpan := tracer.Start(ctx, lib.EVENT_TB_GET_TRANSFERS)
+	defer getTransfersSpan.End()
+
 	tbReq := tbPb.GetAccountTransfersRequest{
 		UserId:       req.UserId,
 		MinTimestamp: req.MinTimestamp,
@@ -114,9 +212,14 @@ func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUse
 
 	transfers, err := s.tigerbeetleService.GetAccountTransfers(ctx, &tbReq)
 	if err != nil {
-		slog.Error("Failed to get user transactions", "error", err)
+		getTransfersSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+
+	getTransfersSpan.SetAttributes(
+		attribute.Int(lib.ATTR_TB_TRANSFER_COUNT, len(transfers.Transfers)),
+	)
+	getTransfersSpan.End()
 
 	userIds := make([]string, len(transfers.Transfers)*2)
 	for i, transfer := range transfers.Transfers {
@@ -125,10 +228,15 @@ func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUse
 	}
 	userIds = lib.RemoveDuplicates(userIds)
 
+	ctx, mapUserIdsSpan := tracer.Start(ctx, lib.EVENT_MAP_USER_IDS)
+	defer mapUserIdsSpan.End()
+
 	userIdToName, err := repo.MapUserIdsToUsernames(ctx, s.db, userIds)
 	if err != nil {
+		mapUserIdsSpan.RecordError(err)
 		return nil, err
 	}
+	mapUserIdsSpan.End()
 
 	pbTransfers := make([]*pb.Transfer, len(transfers.Transfers))
 	for i, transfer := range transfers.Transfers {

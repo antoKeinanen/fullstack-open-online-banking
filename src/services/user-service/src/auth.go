@@ -10,33 +10,40 @@ import (
 	"user-service/src/repo"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	pb "protobufs/gen/go/user-service"
 )
 
 func (s *UserServiceServer) RequestAuthentication(ctx context.Context, req *pb.RequestAuthenticationRequest) (*pb.Empty, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
 	otpCode, err := lib.GenerateOTPCode()
 	if err != nil {
-		slog.Error(
-			"Failed to generate otp code",
-			"error", err,
-		)
+		span.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 
+	ctx, hashOtpSpan := tracer.Start(ctx, lib.EVENT_OTP_HASH)
+	defer hashOtpSpan.End()
+
 	hashedOtpCode, err := lib.GenerateHash(otpCode)
 	if err != nil {
-		slog.Error(
-			"Failed to hash otp code",
-			"error", err,
-		)
+		hashOtpSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	hashOtpSpan.End()
+
+	ctx, storeOtpSpan := tracer.Start(ctx, lib.EVENT_OTP_STORE)
+	defer storeOtpSpan.End()
 
 	err = repo.StoreOTP(s.db, ctx, req.PhoneNumber, hashedOtpCode)
 	if err != nil {
 		return nil, err
 	}
+	storeOtpSpan.End()
 
 	//TODO: remove me
 	slog.Info("Issued otp code", "code", otpCode)
@@ -45,42 +52,74 @@ func (s *UserServiceServer) RequestAuthentication(ctx context.Context, req *pb.R
 }
 
 func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTPAuthenticationRequest) (*pb.Session, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	ctx, getOtpSpan := tracer.Start(ctx, lib.EVENT_OTP_GET)
+	defer getOtpSpan.End()
+
 	otpCode, err := repo.GetOtp(s.db, ctx, req.PhoneNumber)
 	if err != nil {
 		return nil, err
 	}
+	getOtpSpan.End()
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, otpCode.UserId),
+	)
+
+	ctx, verifyOtpSpan := tracer.Start(ctx, lib.EVENT_OTP_VERIFY)
+	defer verifyOtpSpan.End()
 
 	hashesMatch, err := lib.VerifyHash(otpCode.HashedOTPCode, req.Code)
 	if err != nil {
-		slog.Error(
-			"Failed to verify otp hash",
-			"error", err,
-		)
+		verifyOtpSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 	if !hashesMatch {
+		verifyOtpSpan.AddEvent(lib.EVENT_OTP_HASH_MISMATCH)
 		return nil, lib.ErrOTPMismatch
 	}
+	verifyOtpSpan.End()
 
 	sessionId, err := uuid.NewV7()
 	if err != nil {
-		slog.Error(
-			"Failed to generate uuid v7",
-			"error", err,
-		)
+		span.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_SESSION_ID, sessionId.String()),
+	)
+
+	ctx, generateTokenPairSpan := tracer.Start(ctx, lib.EVENT_GENERATE_TOKEN_PAIR)
+	defer generateTokenPairSpan.End()
 
 	tokenPair, err := s.tokenService.GenerateTokenPair(otpCode.UserId, sessionId.String())
 	if err != nil {
-		slog.Error(
-			"Failed to generate token pair",
-			"error", err,
-		)
+		generateTokenPairSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	generateTokenPairSpan.End()
 
-	_, err = s.db.ExecContext(
+	ctx, storeSessionSpan := tracer.Start(ctx, lib.EVENT_SESSION_STORE)
+	defer storeSessionSpan.End()
+
+	storeSessionSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInsertOtp),
+		attribute.StringSlice(lib.ATTR_DB_ARGS,
+			[]string{
+				sessionId.String(),
+				otpCode.UserId,
+				tokenPair.RefreshTokenExpires.UTC().Format(time.RFC3339),
+				req.Device,
+				req.Application,
+				req.IpAddress,
+			},
+		),
+	)
+
+	result, err := s.db.ExecContext(
 		ctx,
 		queries.QueryInsertSession,
 		sessionId,
@@ -91,9 +130,19 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 		req.IpAddress,
 	)
 	if err != nil {
-		slog.Error("Failed to register the session", "error", err)
+		storeSessionSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		storeSessionSpan.RecordError(err)
+		return nil, lib.ErrUnexpected
+	}
+
+	storeSessionSpan.SetAttributes(
+		attribute.Int64(lib.ATTR_DB_ROWS_AFFECTED, rowsAffected),
+	)
+	storeSessionSpan.End()
 
 	return &pb.Session{
 		AccessToken:         tokenPair.AccessToken,
@@ -104,27 +153,54 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 }
 
 func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.Session, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_REFRESH_TOKEN, lib.RedactJWT(req.RefreshToken)),
+	)
+
+	ctx, decodeTokenSpan := tracer.Start(ctx, lib.EVENT_DECODE_TOKEN)
+	defer decodeTokenSpan.End()
+
 	token, err := s.tokenService.DecodeAndValidate(req.RefreshToken)
 	if err != nil {
 		if err == lib.ErrTokenExpired {
+			decodeTokenSpan.AddEvent(lib.EVENT_TOKEN_EXPIRED)
 			return nil, err
 		}
 
-		slog.Error(
-			"Failed to validate and decode refresh token",
-			"error", err,
-		)
+		decodeTokenSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, token.UserId),
+		attribute.String(lib.ATTR_SESSION_ID, token.SessionId),
+	)
+
+	ctx, generateTokenPairSpan := tracer.Start(ctx, lib.EVENT_GENERATE_TOKEN_PAIR)
+	defer generateTokenPairSpan.End()
+
 	tokenPair, err := s.tokenService.GenerateTokenPair(token.UserId, token.SessionId)
 	if err != nil {
-		slog.Error(
-			"Failed to generate token pair",
-			"error", err,
-		)
+		generateTokenPairSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+	generateTokenPairSpan.End()
+
+	ctx, storeSessionSpan := tracer.Start(ctx, lib.EVENT_SESSION_STORE)
+	defer storeSessionSpan.End()
+
+	storeSessionSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryRefreshSession),
+		attribute.StringSlice(lib.ATTR_DB_ARGS,
+			[]string{
+				tokenPair.RefreshTokenExpires.UTC().Format(time.RFC3339),
+				token.SessionId,
+			},
+		),
+	)
 
 	result, err := s.db.ExecContext(
 		ctx,
@@ -133,18 +209,23 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 		token.SessionId,
 	)
 	if err != nil {
-		slog.Error("Failed to register the session", "error", err)
+		storeSessionSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		slog.Error("Failed to refresh the session", "error", err)
+		storeSessionSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 	if rowsAffected == 0 {
+		storeSessionSpan.AddEvent(lib.EVENT_DB_NO_ROWS_AFFECTED)
 		return nil, lib.ErrTokenExpired
 	}
+
+	storeSessionSpan.SetAttributes(
+		attribute.Int64(lib.ATTR_DB_ROWS_AFFECTED, rowsAffected),
+	)
 
 	return &pb.Session{
 		AccessToken:         tokenPair.AccessToken,
@@ -155,9 +236,19 @@ func (s *UserServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshTok
 }
 
 func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetActiveSessionsRequest) (*pb.GetActiveSessionsResponse, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, req.UserId),
+	)
+
+	ctx, getSessionsSpan := tracer.Start(ctx, lib.EVENT_SESSION_GET)
+	defer getSessionsSpan.End()
+
 	rows, err := s.db.QueryxContext(ctx, queries.QueryGetActiveSessions, req.UserId)
 	if err != nil {
-		slog.Error("Failed to get active sessions", "error", err)
+		getSessionsSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 	defer rows.Close()
@@ -166,15 +257,17 @@ func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetAc
 	for rows.Next() {
 		session := repo.ActiveSession{}
 		if err := rows.StructScan(&session); err != nil {
-			slog.Error("Failed to get active sessions", "error", err)
+			getSessionsSpan.RecordError(err)
 			return nil, lib.ErrUnexpected
 		}
 		activeSessions = append(activeSessions, repo.DbActiveSessionToPbActiveSession(session))
 	}
 	if err := rows.Err(); err != nil {
-		slog.Error("Failed to get active sessions", "error", err)
+		getSessionsSpan.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
+
+	getSessionsSpan.End()
 
 	return &pb.GetActiveSessionsResponse{
 		Sessions: activeSessions,
@@ -182,9 +275,16 @@ func (s *UserServiceServer) GetActiveSessions(ctx context.Context, req *pb.GetAc
 }
 
 func (s *UserServiceServer) InvalidateSession(ctx context.Context, req *pb.InvalidateSessionRequest) (*pb.Empty, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInvalidateSession),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{req.SessionId, req.UserId}),
+	)
+
 	_, err := s.db.ExecContext(ctx, queries.QueryInvalidateSession, req.SessionId, req.UserId)
 	if err != nil {
-		slog.Error("Failed to invalidate session", "error", err)
+		span.RecordError(err)
 		return nil, lib.ErrUnexpected
 	}
 
