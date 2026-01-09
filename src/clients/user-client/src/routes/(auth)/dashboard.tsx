@@ -96,7 +96,7 @@ function RouteComponent() {
   };
 
   return (
-    <main className="w-full auto-rows-fr grid-cols-2 grid-rows-3 space-y-4 md:grid md:gap-4">
+    <main className="w-full auto-rows-fr grid-cols-2 grid-rows-3 gap-4 md:grid">
       <Item className="p-0 md:hidden">
         <ItemMedia>
           <Avatar className="size-10">
@@ -114,7 +114,11 @@ function RouteComponent() {
           </ItemTitle>
         </ItemContent>
         <ItemActions>
-          <Button variant="outline" disabled={logOutMutation.isPending} onClick={() => logOutMutation.mutate()}>
+          <Button
+            variant="outline"
+            disabled={logOutMutation.isPending}
+            onClick={() => logOutMutation.mutate()}
+          >
             <LockIcon /> Log out
           </Button>
         </ItemActions>
