@@ -3,7 +3,7 @@ package lib
 func RedactPhoneNumber(phoneNumber string) string {
 	runes := []rune(phoneNumber)
 	if len(runes) <= 4 {
-		return phoneNumber
+		return "***"
 	}
 	redacted := ""
 	for i := 0; i < len(runes)-4; i++ {
