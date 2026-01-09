@@ -73,6 +73,7 @@ export function Navigation() {
             <Link
               key={item.id}
               to={item.to}
+              aria-current="page"
               className={cn(
                 "text-foreground hover:text-primary/50 flex flex-col items-center justify-center",
                 {
