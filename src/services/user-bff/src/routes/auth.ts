@@ -60,7 +60,7 @@ authRouter.post(
     const body = c.req.valid("json");
 
     const { error } = await userService.call("requestAuthentication", body);
-    if (error != null) {
+    if (error) {
       span.recordException(error);
       if (error.details === "NOT_FOUND") {
         span.addEvent(events.EVENT_USER_NOT_FOUND);
@@ -68,7 +68,6 @@ authRouter.post(
         return c.text("Success", 200);
       }
 
-      span.recordException(error);
       return c.json(createUnexpectedError(), 500);
     }
 
