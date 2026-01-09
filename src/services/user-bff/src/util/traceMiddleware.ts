@@ -1,5 +1,11 @@
 import type { Context, Next } from "hono";
 import { context, SpanStatusCode, trace } from "@opentelemetry/api";
+import {
+  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  ATTR_HTTP_REQUEST_METHOD,
+  ATTR_URL_FULL,
+  ATTR_URL_PATH,
+} from "@opentelemetry/semantic-conventions/incubating";
 
 import type { Env } from "..";
 import { env } from "../env";
@@ -10,12 +16,13 @@ export async function tracingMiddleware(c: Context<Env>, next: Next) {
   const span = tracer.startSpan(`${c.req.method} ${c.req.path}`);
 
   span.setAttributes({
-    "http.method": c.req.method,
-    "http.url": c.req.url,
-    "http.target": c.req.path,
-    "http.host": c.req.header("host") ?? "unknown",
-    "http.ip": c.req.header("x-forwarded-for") ?? "unknown",
-    "deployment.environment.name": env.NODE_ENV,
+    [ATTR_HTTP_REQUEST_METHOD]: c.req.method,
+    [ATTR_URL_FULL]: c.req.url,
+    [ATTR_URL_PATH]: c.req.path,
+    "http.request.header.host": c.req.header("host") ?? "unknown",
+    "http.request.header.x-forwarded-for":
+      c.req.header("x-forwarded-for") ?? "unknown",
+    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: env.NODE_ENV,
   });
 
   c.set("span", span);
