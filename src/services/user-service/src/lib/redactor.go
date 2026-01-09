@@ -1,19 +1,23 @@
 package lib
 
+import "strings"
+
 func RedactPhoneNumber(phoneNumber string) string {
 	runes := []rune(phoneNumber)
 	if len(runes) <= 4 {
 		return "***"
 	}
-	redacted := ""
+	var redacted strings.Builder
+	redacted.Grow(len(runes))
 	for i := 0; i < len(runes)-4; i++ {
 		if runes[i] == ' ' || runes[i] == '-' || runes[i] == '+' {
-			redacted += string(runes[i])
+			redacted.WriteRune(runes[i])
 		} else {
-			redacted += "*"
+			redacted.WriteRune('*')
 		}
 	}
-	return redacted + string(runes[len(runes)-4:])
+	redacted.WriteString(string(runes[len(runes)-4:]))
+	return redacted.String()
 }
 
 func RedactJWT(jwt string) string {
