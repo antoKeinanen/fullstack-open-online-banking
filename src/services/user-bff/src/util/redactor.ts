@@ -15,7 +15,7 @@ export function redactPhoneNumber(phoneNumber: string): string {
 }
 
 export function redactJWT(jwt?: string): string | undefined {
-  if (jwt == undefined) return undefined;
+  if (!jwt) return undefined;
 
   if (jwt.length <= 10) {
     return "***";
