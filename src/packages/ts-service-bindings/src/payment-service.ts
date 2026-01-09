@@ -4,7 +4,7 @@ import { PaymentServiceClient } from "@repo/protobufs/payment-service";
 
 import { GrpcService } from "./generic-service";
 
-export const PaymentService = (address: string) =>
-  new GrpcService(PaymentServiceClient, address, "payment-service", {
+export const PaymentService = async (address: string) =>
+  GrpcService.create(PaymentServiceClient, address, "payment-service", {
     credentials: grpc.credentials.createInsecure(),
   });

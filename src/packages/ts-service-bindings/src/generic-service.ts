@@ -43,7 +43,11 @@ type ExtractGrpcMethods<T extends grpc.Client> = FilterNever<GrpcMethods<T>>;
 export class GrpcService<T extends grpc.Client> {
   private client: T;
 
-  constructor(
+  private constructor(client: T) {
+    this.client = client;
+  }
+
+  static async create<T extends grpc.Client>(
     ClientConstructor: GrpcClientConstructor<T>,
     address: string,
     serviceName: string,
@@ -54,20 +58,26 @@ export class GrpcService<T extends grpc.Client> {
   ) {
     const credentials =
       options?.credentials ?? grpc.credentials.createInsecure();
-    this.client = new ClientConstructor(address, credentials);
+    const client = new ClientConstructor(address, credentials);
 
     console.log(`Connecting to ${serviceName} grpc`);
     const deadline = new Date();
     deadline.setSeconds(
       deadline.getSeconds() + (options?.connectionTimeoutSeconds ?? 5),
     );
-    this.client.waitForReady(deadline, (error) => {
-      if (error != undefined) {
-        console.error(`Failed to connect to ${serviceName} grpc`, error);
-        throw new Error(`Failed to connect to ${serviceName} grpc`);
-      }
-      console.log(`Connected to ${serviceName} grpc`);
+
+    await new Promise<void>((resolve, reject) => {
+      client.waitForReady(deadline, (error) => {
+        if (error != undefined) {
+          console.error(`Failed to connect to ${serviceName} grpc`, error);
+          reject(new Error(`Failed to connect to ${serviceName} grpc`));
+        }
+        console.log(`Connected to ${serviceName} grpc`);
+        resolve();
+      });
     });
+
+    return new GrpcService(client);
   }
 
   private injectContext(): grpc.Metadata {
