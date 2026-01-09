@@ -33,11 +33,7 @@ import { generateStripeCheckout } from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
 import { ResponsiveDialog } from "./responsiveDialog";
 
-export type TransactionDialogState =
-  | "deposit"
-  | "withdraw"
-  | "send"
-  | "request";
+export type TransactionDialogState = "deposit" | "withdraw" | "send";
 
 export interface TransactionDialogProps {
   open: boolean;
@@ -231,37 +227,6 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   );
 }
 
-function RequestTab() {
-  return (
-    <form>
-      <FieldSet>
-        <FieldGroup>
-          <FieldSet>
-            <Field>
-              <FieldLabel htmlFor="amount">Amount</FieldLabel>
-              <InputGroup>
-                <InputGroupInput itemID="amount" placeholder="0.00" />
-                <InputGroupAddon align="inline-end">€</InputGroupAddon>
-              </InputGroup>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="recipient">Recipient</FieldLabel>
-              <Input id="recipient" type="tel" placeholder="+3586864371" />
-            </Field>
-
-            <Field>
-              <Button>
-                <WalletIcon /> Request
-              </Button>
-            </Field>
-          </FieldSet>
-        </FieldGroup>
-      </FieldSet>
-    </form>
-  );
-}
-
 export function TransactionDialog({
   open,
   setOpen,
@@ -281,7 +246,6 @@ export function TransactionDialog({
           <TabsTrigger value="deposit">Deposit</TabsTrigger>
           <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
           <TabsTrigger value="send">Send</TabsTrigger>
-          <TabsTrigger value="request">Request</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deposit">
@@ -292,9 +256,6 @@ export function TransactionDialog({
         </TabsContent>
         <TabsContent value="send">
           <SendTab setOpen={setOpen} />
-        </TabsContent>
-        <TabsContent value="request">
-          <RequestTab />
         </TabsContent>
       </Tabs>
     </ResponsiveDialog>

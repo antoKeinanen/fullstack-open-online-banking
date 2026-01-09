@@ -8,8 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import {
-  BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
+  BanknoteIcon,
   BanknoteXIcon,
   LockIcon,
   WalletIcon,
@@ -101,7 +101,10 @@ function RouteComponent() {
         <ItemMedia>
           <Avatar className="size-10">
             <AvatarImage src="TODO" />
-            <AvatarFallback>AK</AvatarFallback>
+            <AvatarFallback>
+              {user.firstName[0]}
+              {user.lastName[0]}
+            </AvatarFallback>
           </Avatar>
         </ItemMedia>
         <ItemContent>
@@ -152,9 +155,9 @@ function RouteComponent() {
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => openTransactionDialog("request")}
+                onClick={() => openTransactionDialog("withdraw")}
               >
-                <BanknoteArrowDownIcon /> Request
+                <BanknoteIcon /> Withdraw
               </Button>
             </div>
           </CardContent>
@@ -178,23 +181,13 @@ function RouteComponent() {
               <EmptyTitle>No recent transfers</EmptyTitle>
               <EmptyDescription>
                 You don't have any recent transfers. Get started by depositing
-                or requesting balance.
+                balance.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex flex-row justify-center space-x-2">
-              <Button
-                className="col-span-2"
-                onClick={() => openTransactionDialog("deposit")}
-              >
+              <Button onClick={() => openTransactionDialog("deposit")}>
                 <WalletIcon />
                 Deposit
-              </Button>
-
-              <Button
-                variant="secondary"
-                onClick={() => openTransactionDialog("request")}
-              >
-                <BanknoteArrowDownIcon /> Request
               </Button>
             </EmptyContent>
           </Empty>

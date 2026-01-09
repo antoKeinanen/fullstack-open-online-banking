@@ -32,7 +32,7 @@ export function ResponsiveDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle className="sr-only">Transaction dialog</DialogTitle>
         <DialogDescription className="sr-only">
-          A dialog to send, request, deposit, and withdraw funds.
+          A dialog to send, deposit, and withdraw funds.
         </DialogDescription>
         <DialogContent>{children}</DialogContent>
       </Dialog>
@@ -43,7 +43,7 @@ export function ResponsiveDialog({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTitle className="sr-only">Transaction dialog</DrawerTitle>
       <DrawerDescription className="sr-only">
-        A dialog to send, request, deposit, and withdraw funds.
+        A dialog to send, deposit, and withdraw funds.
       </DrawerDescription>
       <DrawerContent>{children}</DrawerContent>
     </Drawer>
