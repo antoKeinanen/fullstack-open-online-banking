@@ -358,7 +358,7 @@ func (s *TigerbeetleServiceServer) LookupTransfer(ctx context.Context, req *pb.T
 	}
 	if len(transfers) == 0 {
 		lookupSpan.AddEvent(lib.EVENT_TB_TRANSFER_NOT_FOUND)
-		return nil, lib.ErrUnexpected
+		return nil, lib.ErrNotFound
 	}
 	lookupSpan.End()
 
