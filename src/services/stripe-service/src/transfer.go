@@ -143,6 +143,7 @@ func (s *StripeServiceServer) VoidPendingTransfer(ctx context.Context, req *pb.V
 
 	dbSpan.SetAttributes(
 		attribute.String(lib.ATTR_DB_QUERY, queries.QueryVoidPendingTransfer),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{req.TigerbeetleTransferId}),
 	)
 
 	result, err := s.db.ExecContext(ctx, queries.QueryVoidPendingTransfer, req.TigerbeetleTransferId)
