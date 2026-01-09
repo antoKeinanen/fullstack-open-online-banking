@@ -397,6 +397,9 @@ importers:
       '@faker-js/faker':
         specifier: ^10.1.0
         version: 10.1.0
+      '@hono/otel':
+        specifier: ^1.1.0
+        version: 1.1.0(hono@4.10.4)
       '@hono/standard-validator':
         specifier: ^0.1.5
         version: 0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4)
@@ -1005,6 +1008,11 @@ packages:
     resolution: {integrity: sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ==}
     engines: {node: '>=6'}
     hasBin: true
+
+  '@hono/otel@1.1.0':
+    resolution: {integrity: sha512-3lXExGP+odVTF3W1kTHgRGw4d4xdiYpeRs8dnTwfnHfw5uGEXgUzmkB4/ZQd3tDxYRt7eUhnWuBk5ChV97eqkA==}
+    peerDependencies:
+      hono: '>=4.0.0'
 
   '@hono/standard-validator@0.1.5':
     resolution: {integrity: sha512-EIyZPPwkyLn6XKwFj5NBEWHXhXbgmnVh2ceIFo5GO7gKI9WmzTjPDKnppQB0KrqKeAkq3kpoW4SIbu5X1dgx3w==}
@@ -4784,6 +4792,12 @@ snapshots:
       long: 5.3.2
       protobufjs: 7.5.4
       yargs: 17.7.2
+
+  '@hono/otel@1.1.0(hono@4.10.4)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/semantic-conventions': 1.38.0
+      hono: 4.10.4
 
   '@hono/standard-validator@0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.4)':
     dependencies:
