@@ -100,7 +100,11 @@ func (s *StripeServiceServer) PostPendingTransfer(ctx context.Context, req *pb.P
 	}
 
 	rows, err := result.RowsAffected()
-	if err != nil || rows == 0 {
+	if err != nil {
+		dbSpan.RecordError(err)
+		return nil, lib.ErrUnexpected
+	}
+	if rows == 0 {
 		dbSpan.AddEvent(lib.EVENT_DB_NO_ROWS_AFFECTED)
 		return nil, lib.ErrNotFound
 	}
