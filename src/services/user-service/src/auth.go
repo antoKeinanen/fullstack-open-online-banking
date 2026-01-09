@@ -106,7 +106,7 @@ func (s *UserServiceServer) AuthenticateWithOTP(ctx context.Context, req *pb.OTP
 	defer storeSessionSpan.End()
 
 	storeSessionSpan.SetAttributes(
-		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInsertOtp),
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInsertSession),
 		attribute.StringSlice(lib.ATTR_DB_ARGS,
 			[]string{
 				sessionId.String(),
