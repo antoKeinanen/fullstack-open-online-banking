@@ -274,7 +274,7 @@ async function voidPendingTransfer(
   if (newPendingTransferError) {
     span.recordException(newPendingTransferError);
     span.addEvent(events.EVENT_STRIPE_INTENT_VOID_TRANSFER_ERROR);
-    return c.text("failed to create pending transfer", 500);
+    return c.text("failed to void pending transfer", 500);
   }
 
   return c.text("ok", 200);
