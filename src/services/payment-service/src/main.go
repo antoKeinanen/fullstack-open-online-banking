@@ -103,7 +103,7 @@ func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.Create
 	return &pb.CreatePaymentResponse{}, nil
 }
 
-func newServer(config lib.Configuration) *PaymentServiceServer {
+func newServer(config *lib.Configuration) *PaymentServiceServer {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
@@ -133,7 +133,7 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	tracerCleanUp := initTracer(*config)
+	tracerCleanUp := initTracer(config)
 	defer tracerCleanUp()
 
 	opts := []grpc.ServerOption{
