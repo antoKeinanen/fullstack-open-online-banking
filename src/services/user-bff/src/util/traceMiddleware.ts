@@ -3,6 +3,9 @@ import { context, SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
   ATTR_HTTP_REQUEST_METHOD,
+  ATTR_HTTP_REQUEST_SIZE,
+  ATTR_HTTP_RESPONSE_SIZE,
+  ATTR_HTTP_RESPONSE_STATUS_CODE,
   ATTR_URL_FULL,
   ATTR_URL_PATH,
 } from "@opentelemetry/semantic-conventions/incubating";
@@ -23,6 +26,7 @@ export async function tracingMiddleware(c: Context<Env>, next: Next) {
     "http.request.header.x-forwarded-for":
       c.req.header("x-forwarded-for") ?? "unknown",
     [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: env.NODE_ENV,
+    [ATTR_HTTP_REQUEST_SIZE]: c.req.header("content-length") ?? "0",
   });
 
   c.set("span", span);
@@ -32,7 +36,11 @@ export async function tracingMiddleware(c: Context<Env>, next: Next) {
       await next();
 
       const status = c.res.status;
-      span.setAttribute("http.status", status);
+      span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status);
+      span.setAttribute(
+        ATTR_HTTP_RESPONSE_SIZE,
+        c.res.headers.get("content-length") ?? "0",
+      );
 
       if (c.res.ok) {
         span.setStatus({ code: SpanStatusCode.OK });
