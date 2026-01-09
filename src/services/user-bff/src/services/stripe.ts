@@ -7,7 +7,9 @@ import { tryCatch } from "../util/tryCatch";
 
 const stripe = new StripeSDK(env.USER_BFF_STRIPE_SECRET_KEY);
 
-export const stripeService = await StripeService(env.USER_BFF_STRIPE_SERVICE_URL);
+export const stripeService = await StripeService(
+  env.USER_BFF_STRIPE_SERVICE_URL,
+);
 
 export async function getOrCreateStripeCustomer(
   phoneNumber: string,
