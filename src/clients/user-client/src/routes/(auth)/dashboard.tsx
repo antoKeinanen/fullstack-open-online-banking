@@ -12,6 +12,7 @@ import {
   BanknoteIcon,
   BanknoteXIcon,
   LockIcon,
+  UserIcon,
   WalletIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -102,8 +103,7 @@ function RouteComponent() {
           <Avatar className="size-10">
             <AvatarImage src="TODO" />
             <AvatarFallback>
-              {user.firstName[0]}
-              {user.lastName[0]}
+              <UserIcon />
             </AvatarFallback>
           </Avatar>
         </ItemMedia>
