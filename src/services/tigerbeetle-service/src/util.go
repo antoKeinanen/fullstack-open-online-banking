@@ -9,22 +9,24 @@ import (
 )
 
 type Configuration struct {
-	TigerbeetleServicePort string
-	TigerbeetleAddress     string
+	TigerbeetleServicePort   string
+	TigerbeetleAddress       string
+	OtelExporterOtlpEndpoint string
 }
 
 func GetEnv(envName string) string {
 	variable := os.Getenv(envName)
 	if len(variable) == 0 {
-		log.Fatalf("Missing env variable %s", envName)
+		log.Fatalf("Missing env variable: %s", envName)
 	}
 	return variable
 }
 
 func ParseConfiguration() *Configuration {
 	return &Configuration{
-		TigerbeetleServicePort: GetEnv("TIGERBEETLE_SERVICE_PORT"),
-		TigerbeetleAddress:     GetEnv("TIGERBEETLE_ADDRESS"),
+		TigerbeetleServicePort:   GetEnv("TIGERBEETLE_SERVICE_PORT"),
+		TigerbeetleAddress:       GetEnv("TIGERBEETLE_ADDRESS"),
+		OtelExporterOtlpEndpoint: GetEnv("TIGERBEETLE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
 }
 

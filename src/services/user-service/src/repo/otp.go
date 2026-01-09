@@ -9,6 +9,8 @@ import (
 	"user-service/src/queries"
 
 	"github.com/jmoiron/sqlx"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type OTPCode struct {
@@ -17,31 +19,36 @@ type OTPCode struct {
 }
 
 func StoreOTP(db *sqlx.DB, ctx context.Context, phoneNumber, hashedOtpCode string) error {
+	span := trace.SpanFromContext(ctx)
+
+	expiresIn := fmt.Sprintf("%d minutes", lib.OTPExpirationWindowMinutes)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInsertOtp),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{lib.RedactPhoneNumber(phoneNumber), lib.RedactHash(hashedOtpCode), expiresIn}),
+	)
+
 	result, err := db.ExecContext(
 		ctx, queries.QueryInsertOtp,
-		phoneNumber, hashedOtpCode,
-		fmt.Sprintf("%d minutes", lib.OTPExpirationWindowMinutes),
+		phoneNumber, hashedOtpCode, expiresIn,
 	)
 	if err != nil {
-		slog.Error(
-			"Failed to store OTP",
-			"error", err,
-		)
+		span.RecordError(err)
 		return lib.ErrUnexpected
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		slog.Error(
-			"Failed to get rows affected after storing OTP",
-			"error", err,
-		)
+		span.RecordError(err)
 		return lib.ErrUnexpected
 	}
+
+	span.SetAttributes(
+		attribute.Int64(lib.ATTR_DB_ROWS_AFFECTED, rowsAffected),
+	)
+
 	if rowsAffected == 0 {
-		slog.Info("Failed to store OTP",
-			"error", "invalid phone number",
-		)
+		span.AddEvent(lib.EVENT_DB_NO_ROWS_AFFECTED)
 		return lib.ErrNotFound
 	}
 

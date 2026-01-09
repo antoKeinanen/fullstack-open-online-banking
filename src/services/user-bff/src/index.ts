@@ -1,4 +1,8 @@
+import "./util/otel";
+
+import type { Span } from "@opentelemetry/api";
 import type { JwtVariables } from "hono/jwt";
+import { httpInstrumentationMiddleware } from "@hono/otel";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
 import { logger } from "hono/logger";
@@ -8,6 +12,7 @@ import { authRouter } from "./routes/auth";
 import { paymentRouter } from "./routes/payments";
 import { stripeRouter } from "./routes/stripe";
 import { userRouter } from "./routes/user";
+import { tracingMiddleware } from "./util/traceMiddleware";
 
 export interface JwtPayload {
   iss: string;
@@ -17,10 +22,30 @@ export interface JwtPayload {
   sid: string;
 }
 
-const app = new Hono<{ Variables: JwtVariables<JwtPayload> }>().basePath(
-  "/api",
-);
+export interface Env {
+  Variables: {
+    span: Span;
+  } & JwtVariables<JwtPayload>;
+}
+
+const app = new Hono<Env>().basePath("/api");
 app.use(logger());
+
+const instrumentationConfig: Parameters<
+  typeof httpInstrumentationMiddleware
+>[0] = {
+  serviceName: "user-bff",
+  captureRequestHeaders: [
+    "user-agent",
+    "content-type",
+    "x-request-id",
+    "x-forwarded-for",
+    "content-length",
+  ],
+};
+
+app.use(httpInstrumentationMiddleware(instrumentationConfig));
+app.use("*", tracingMiddleware);
 
 app.route("/auth", authRouter);
 app.route("/user", userRouter);

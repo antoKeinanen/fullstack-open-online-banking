@@ -12,11 +12,12 @@ import {
   userSchema,
 } from "@repo/validators/user";
 
-import type { JwtPayload } from "..";
+import type { Env } from "..";
 import { env } from "../env";
 import { userService } from "../services/userService";
+import { attrs, events } from "../util/attr";
 
-export const userRouter = new Hono();
+export const userRouter = new Hono<Env>();
 
 userRouter.use(
   "*",
@@ -48,10 +49,15 @@ userRouter.get(
   }),
 
   async (c) => {
-    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
-    const { data, error } = await userService.getUserById({ userId });
+    const span = c.get("span");
+    const { sub: userId } = c.get("jwtPayload");
+
+    span.setAttribute(attrs.ATTR_USER_ID, userId);
+
+    const { data, error } = await userService.call("getUserById", { userId });
     if (error != null) {
-      console.error("Failed to get user", error);
+      span.recordException(error);
+      span.addEvent(events.EVENT_USER_GET_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 
@@ -89,10 +95,13 @@ userRouter.get(
   validator("query", getUserTransfersRequestSchema),
 
   async (c) => {
+    const span = c.get("span");
     const request = c.req.valid("query");
-    const { sub: userId } = c.get("jwtPayload") as JwtPayload;
+    const { sub: userId } = c.get("jwtPayload");
 
-    const { data, error } = await userService.getUserTransfers({
+    span.setAttribute(attrs.ATTR_USER_ID, userId);
+
+    const { data, error } = await userService.call("getUserTransfers", {
       userId: userId,
       limit: request.limit,
       maxTimestamp: request.maxTimestamp,
@@ -100,11 +109,8 @@ userRouter.get(
     });
 
     if (error != null) {
-      console.error(
-        "Failed to get transfers relating to user",
-        error.message,
-        error.metadata,
-      );
+      span.recordException(error);
+      span.addEvent(events.EVENT_USER_TRANSFERS_GET_FAILURE);
       return c.json(createUnexpectedError(), 500);
     }
 

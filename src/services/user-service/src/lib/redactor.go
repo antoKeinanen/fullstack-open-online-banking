@@ -1,0 +1,37 @@
+package lib
+
+import "strings"
+
+func RedactPhoneNumber(phoneNumber string) string {
+	runes := []rune(phoneNumber)
+	if len(runes) <= 4 {
+		return "***"
+	}
+	var redacted strings.Builder
+	redacted.Grow(len(runes))
+	for i := 0; i < len(runes)-4; i++ {
+		if runes[i] == ' ' || runes[i] == '-' || runes[i] == '+' {
+			redacted.WriteRune(runes[i])
+		} else {
+			redacted.WriteRune('*')
+		}
+	}
+	redacted.WriteString(string(runes[len(runes)-4:]))
+	return redacted.String()
+}
+
+func RedactJWT(jwt string) string {
+	runes := []rune(jwt)
+	if len(runes) <= 10 {
+		return "***"
+	}
+	return string(runes[:5]) + "..." + string(runes[len(runes)-5:])
+}
+
+func RedactHash(hash string) string {
+	runes := []rune(hash)
+	if len(runes) <= 10 {
+		return "***"
+	}
+	return string(runes[:5]) + "..." + string(runes[len(runes)-5:])
+}

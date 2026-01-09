@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
@@ -13,6 +15,14 @@ import (
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 type UserServiceServer struct {
@@ -22,6 +32,41 @@ type UserServiceServer struct {
 	tigerbeetleService           tbPb.TigerbeetleServiceClient
 	tigerbeetleServiceConnection *grpc.ClientConn
 	tokenService                 *lib.TokenService
+}
+
+func initTracer(config *lib.Configuration) func() {
+
+	grpcExporter, err := otlptracegrpc.New(
+		context.Background(),
+		otlptracegrpc.WithEndpoint(config.OtelExporterOtlpEndpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(lib.ServiceName),
+		),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tp := trace.NewTracerProvider(
+		trace.WithResource(res),
+		trace.WithBatcher(grpcExporter),
+	)
+	otel.SetTracerProvider(tp)
+
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	return func() {
+		tp.Shutdown(context.Background())
+	}
 }
 
 func newServer(config *lib.Configuration) *UserServiceServer {
@@ -35,6 +80,7 @@ func newServer(config *lib.Configuration) *UserServiceServer {
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	}
 
 	conn, err := grpc.NewClient(config.TigerbeetleServiceUrl, opts...)
@@ -64,7 +110,12 @@ func main() {
 		panic(err)
 	}
 
-	var opts []grpc.ServerOption
+	tracerCleanUp := initTracer(config)
+	defer tracerCleanUp()
+
+	opts := []grpc.ServerOption{
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+	}
 	grpcServer := grpc.NewServer(opts...)
 
 	server := newServer(config)
