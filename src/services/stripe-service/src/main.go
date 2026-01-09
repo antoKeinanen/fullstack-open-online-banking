@@ -32,7 +32,7 @@ type StripeServiceServer struct {
 	tigerbeetleServiceConnection *grpc.ClientConn
 }
 
-func initTracer(config lib.Configuration) func() {
+func initTracer(config *lib.Configuration) func() {
 	grpcExporter, err := otlptracegrpc.New(
 		context.Background(),
 		otlptracegrpc.WithEndpoint(config.OtelExporterOtlpEndpoint),
@@ -100,7 +100,7 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	tracerCleanUp := initTracer(*config)
+	tracerCleanUp := initTracer(config)
 	defer tracerCleanUp()
 
 	opts := []grpc.ServerOption{

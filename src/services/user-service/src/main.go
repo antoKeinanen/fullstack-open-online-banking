@@ -34,7 +34,7 @@ type UserServiceServer struct {
 	tokenService                 *lib.TokenService
 }
 
-func initTracer(config lib.Configuration) func() {
+func initTracer(config *lib.Configuration) func() {
 
 	grpcExporter, err := otlptracegrpc.New(
 		context.Background(),
@@ -110,7 +110,7 @@ func main() {
 		panic(err)
 	}
 
-	tracerCleanUp := initTracer(*config)
+	tracerCleanUp := initTracer(config)
 	defer tracerCleanUp()
 
 	opts := []grpc.ServerOption{

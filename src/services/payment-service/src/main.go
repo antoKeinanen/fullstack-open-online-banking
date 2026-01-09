@@ -33,7 +33,7 @@ type PaymentServiceServer struct {
 	tigerbeetleServiceConnection *grpc.ClientConn
 }
 
-func initTracer(config lib.Configuration) func() {
+func initTracer(config *lib.Configuration) func() {
 	grpcExporter, err := otlptracegrpc.New(
 		context.Background(),
 		otlptracegrpc.WithEndpoint(config.OtelExporterOtlpEndpoint),
@@ -103,7 +103,7 @@ func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.Create
 	return &pb.CreatePaymentResponse{}, nil
 }
 
-func newServer(config *lib.Configuration) *PaymentServiceServer {
+func newServer(config lib.Configuration) *PaymentServiceServer {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
