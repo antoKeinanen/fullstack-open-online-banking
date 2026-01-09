@@ -18,7 +18,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -35,11 +34,6 @@ type PaymentServiceServer struct {
 }
 
 func initTracer(config lib.Configuration) func() {
-	stdoutExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	grpcExporter, err := otlptracegrpc.New(
 		context.Background(),
 		otlptracegrpc.WithEndpoint(config.OtelExporterOtlpEndpoint),
@@ -63,7 +57,6 @@ func initTracer(config lib.Configuration) func() {
 	tp := trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithBatcher(grpcExporter),
-		trace.WithBatcher(stdoutExporter),
 	)
 	otel.SetTracerProvider(tp)
 

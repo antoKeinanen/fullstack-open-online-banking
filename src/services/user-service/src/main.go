@@ -19,7 +19,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -36,10 +35,6 @@ type UserServiceServer struct {
 }
 
 func initTracer(config lib.Configuration) func() {
-	stdoutExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	grpcExporter, err := otlptracegrpc.New(
 		context.Background(),
@@ -64,7 +59,6 @@ func initTracer(config lib.Configuration) func() {
 	tp := trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithBatcher(grpcExporter),
-		trace.WithBatcher(stdoutExporter),
 	)
 	otel.SetTracerProvider(tp)
 

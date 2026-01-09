@@ -23,10 +23,7 @@ const sdk = new NodeSDK({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: "user-bff",
   }),
-  spanProcessors: [
-    new BatchSpanProcessor(traceExporter),
-    new BatchSpanProcessor(new ConsoleSpanExporter()),
-  ],
+  spanProcessors: [new BatchSpanProcessor(traceExporter)],
   instrumentations: [
     getNodeAutoInstrumentations({
       "@opentelemetry/instrumentation-grpc": {
