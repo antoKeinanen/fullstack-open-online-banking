@@ -66,11 +66,12 @@ func (s *StripeServiceServer) PostPendingTransfer(ctx context.Context, req *pb.P
 	defer tbSpan.End()
 
 	tbSpan.SetAttributes(
-		attribute.String(lib.ATTR_DB_QUERY, lib.EVENT_TB_POST_PENDING_TRANSFER),
 		attribute.String(lib.ATTR_USER_ID, req.UserId),
 		attribute.String(lib.ATTR_TB_TRANSFER_ID, req.TigerbeetleTransferId),
 		attribute.String(lib.ATTR_TB_TRANSFER_AMOUNT, req.Amount),
 	)
+
+	tbSpan.AddEvent(lib.EVENT_TB_POST_PENDING_TRANSFER)
 
 	_, err := s.tigerbeetleService.PostPendingTransfer(ctx, &tbPb.PostPendingTransferRequest{
 		CreditAccountId:   lib.SYSTEM_FLOAT_ACCOUNT_ID,
