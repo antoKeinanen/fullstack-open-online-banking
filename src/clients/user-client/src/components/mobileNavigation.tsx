@@ -12,7 +12,7 @@ export function MobileNavigation() {
         <Link
           key={item.id}
           to={item.to}
-          aria-current={ item.urlRegex.test(pathname) ? "page" : undefined}
+          aria-current={item.urlRegex.test(pathname) ? "page" : undefined}
           className={cn(
             "text-foreground flex flex-col items-center justify-center",
             {

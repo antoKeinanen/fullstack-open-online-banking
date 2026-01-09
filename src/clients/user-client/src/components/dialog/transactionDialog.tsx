@@ -31,6 +31,7 @@ import type { ApiError } from "../../util/api";
 import { createPayment } from "../../services/paymentService";
 import { generateStripeCheckout } from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
+import { SlideToConfirm } from "../slideToConfirm";
 import { ResponsiveDialog } from "./responsiveDialog";
 
 export type TransactionDialogState = "deposit" | "withdraw" | "send";
@@ -62,7 +63,7 @@ function DepositTab() {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
@@ -90,11 +91,7 @@ function DepositTab() {
               )}
             />
 
-            <Field>
-              <Button type="submit" disabled={stripeCheckoutMutation.isPending}>
-                <WalletIcon /> Deposit
-              </Button>
-            </Field>
+            <SlideToConfirm onConfirm={() => form.handleSubmit(onSubmit)()} />
           </FieldSet>
         </FieldGroup>
       </FieldSet>
@@ -215,11 +212,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
               )}
             />
 
-            <Field>
-              <Button disabled={createPaymentMutation.isPending}>
-                <WalletIcon /> Send
-              </Button>
-            </Field>
+            <SlideToConfirm onConfirm={() => form.handleSubmit(onSubmit)()} />
           </FieldSet>
         </FieldGroup>
       </FieldSet>

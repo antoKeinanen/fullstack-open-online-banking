@@ -125,8 +125,8 @@ function RouteComponent() {
       </Item>
 
       <section className="flex flex-col gap-4 md:h-full">
-        <p className="invisible max-md:h-0" >e^0=0</p>
-        <Card className="flex col-span-1 w-full gap-2 md:h-full md:gap-6">
+        <p className="invisible max-md:h-0">e^0=0</p>
+        <Card className="col-span-1 flex w-full gap-2 md:h-full md:gap-6">
           <CardHeader>
             <CardTitle className="text-xl">
               {formatBalance(user.balance)}
