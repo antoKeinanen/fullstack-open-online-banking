@@ -82,7 +82,7 @@ func (s *TigerbeetleServiceServer) LookupAccount(ctx context.Context, accountId 
 	}
 	if len(accounts) == 0 {
 		lookupSpan.AddEvent(lib.EVENT_TB_ACCOUNT_NOT_FOUND)
-		return nil, lib.ErrUnexpected
+		return nil, lib.ErrNotFound
 	}
 	lookupSpan.End()
 
