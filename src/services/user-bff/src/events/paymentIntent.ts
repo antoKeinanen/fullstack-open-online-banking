@@ -68,7 +68,7 @@ export async function handleSuccess(
 
   if (!paymentIntent.customer) {
     span.addEvent(events.EVENT_STRIPE_INTENT_MISSING_CUSTOMER);
-    return c.text("no customer", 500);
+    return c.text("", 200);
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
@@ -153,7 +153,7 @@ export async function handleProcessing(
 
   if (!paymentIntent.customer) {
     span.addEvent(events.EVENT_STRIPE_INTENT_MISSING_CUSTOMER);
-    return c.text("", 500);
+    return c.text("", 200);
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
@@ -221,7 +221,7 @@ async function voidPendingTransfer(
 
   if (!paymentIntent.customer) {
     span.addEvent(events.EVENT_STRIPE_INTENT_MISSING_CUSTOMER);
-    return c.text("", 500);
+    return c.text("", 200);
   }
 
   const { data: pendingTransfer, error: pendingTransferError } =
@@ -236,7 +236,7 @@ async function voidPendingTransfer(
 
   if (!pendingTransfer.tigerbeetleTransferId) {
     span.addEvent(events.EVENT_STRIPE_INTENT_TRANSFER_NOT_FOUND);
-    return c.text("transfer not found", 500);
+    return c.text("", 200);
   }
 
   span.setAttribute(
