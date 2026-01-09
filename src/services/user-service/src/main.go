@@ -49,7 +49,7 @@ func initTracer(config lib.Configuration) func() {
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceName("user-service"),
+			semconv.ServiceName(lib.ServiceName),
 		),
 	)
 	if err != nil {
