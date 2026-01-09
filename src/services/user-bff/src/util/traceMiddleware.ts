@@ -36,6 +36,11 @@ export async function tracingMiddleware(c: Context<Env>, next: Next) {
 
       if (c.res.ok) {
         span.setStatus({ code: SpanStatusCode.OK });
+      } else {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: c.res.statusText,
+        });
       }
     } catch (err: unknown) {
       span.setStatus({
