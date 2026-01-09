@@ -1,23 +1,25 @@
 package lib
 
 func RedactPhoneNumber(phoneNumber string) string {
-	if len(phoneNumber) <= 4 {
+	runes := []rune(phoneNumber)
+	if len(runes) <= 4 {
 		return phoneNumber
 	}
 	redacted := ""
-	for i := 0; i < len(phoneNumber)-4; i++ {
-		if phoneNumber[i] == ' ' || phoneNumber[i] == '-' || phoneNumber[i] == '+' {
-			redacted += string(phoneNumber[i])
+	for i := 0; i < len(runes)-4; i++ {
+		if runes[i] == ' ' || runes[i] == '-' || runes[i] == '+' {
+			redacted += string(runes[i])
 		} else {
 			redacted += "*"
 		}
 	}
-	return redacted + phoneNumber[len(phoneNumber)-4:]
+	return redacted + string(runes[len(runes)-4:])
 }
 
 func RedactJWT(jwt string) string {
-	if len(jwt) <= 10 {
+	runes := []rune(jwt)
+	if len(runes) <= 10 {
 		return "***"
 	}
-	return jwt[:5] + "..." + jwt[len(jwt)-5:]
+	return string(runes[:5]) + "..." + string(runes[len(runes)-5:])
 }
