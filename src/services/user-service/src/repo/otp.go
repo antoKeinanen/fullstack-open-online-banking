@@ -25,7 +25,7 @@ func StoreOTP(db *sqlx.DB, ctx context.Context, phoneNumber, hashedOtpCode strin
 
 	span.SetAttributes(
 		attribute.String(lib.ATTR_DB_QUERY, queries.QueryInsertOtp),
-		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{lib.RedactPhoneNumber(phoneNumber), hashedOtpCode, expiresIn}),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{lib.RedactPhoneNumber(phoneNumber), lib.RedactHash(hashedOtpCode), expiresIn}),
 	)
 
 	result, err := db.ExecContext(

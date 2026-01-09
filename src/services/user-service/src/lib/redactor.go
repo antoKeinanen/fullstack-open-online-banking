@@ -23,3 +23,11 @@ func RedactJWT(jwt string) string {
 	}
 	return string(runes[:5]) + "..." + string(runes[len(runes)-5:])
 }
+
+func RedactHash(hash string) string {
+	runes := []rune(hash)
+	if len(runes) <= 10 {
+		return "***"
+	}
+	return string(runes[:5]) + "..." + string(runes[len(runes)-5:])
+}
