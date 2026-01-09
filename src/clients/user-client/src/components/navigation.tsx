@@ -88,6 +88,7 @@ export function Navigation() {
         <div>
           <button
             onClick={() => logOutMutation.mutate()}
+            disabled={logOutMutation.isPending}
             className="text-foreground hover:text-primary/50 flex flex-col items-center justify-center"
           >
             <LogOutIcon size={ICON_SIZE} />

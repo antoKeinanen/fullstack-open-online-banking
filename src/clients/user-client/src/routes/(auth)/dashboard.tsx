@@ -114,7 +114,7 @@ function RouteComponent() {
           </ItemTitle>
         </ItemContent>
         <ItemActions>
-          <Button variant="outline" onClick={() => logOutMutation.mutate()}>
+          <Button variant="outline" disabled={logOutMutation.isPending} onClick={() => logOutMutation.mutate()}>
             <LockIcon /> Log out
           </Button>
         </ItemActions>
