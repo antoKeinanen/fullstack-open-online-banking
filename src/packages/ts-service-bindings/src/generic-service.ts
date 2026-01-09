@@ -71,6 +71,7 @@ export class GrpcService<T extends grpc.Client> {
         if (error != undefined) {
           console.error(`Failed to connect to ${serviceName} grpc`, error);
           reject(new Error(`Failed to connect to ${serviceName} grpc`));
+          return;
         }
         console.log(`Connected to ${serviceName} grpc`);
         resolve();
