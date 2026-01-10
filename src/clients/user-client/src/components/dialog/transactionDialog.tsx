@@ -46,6 +46,10 @@ export interface TransactionDialogProps {
 function DepositTab() {
   const form = useForm({
     resolver: zodResolver(generateStripeCheckoutRequestSchema),
+    defaultValues: {
+      amount: "",
+    },
+    reValidateMode: "onBlur",
   });
 
   const stripeCheckoutMutation = useMutation({
@@ -63,7 +67,7 @@ function DepositTab() {
   };
 
   return (
-    <form>
+    <form onSubmit={(e) => e.preventDefault()}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
@@ -91,7 +95,13 @@ function DepositTab() {
               )}
             />
 
-            <SlideToConfirm onConfirm={() => form.handleSubmit(onSubmit)()} />
+            <SlideToConfirm
+              onConfirm={() => form.handleSubmit(onSubmit)()}
+              isLoading={stripeCheckoutMutation.isPending}
+              disabled={
+                stripeCheckoutMutation.isPending || !form.formState.isValid
+              }
+            />
           </FieldSet>
         </FieldGroup>
       </FieldSet>
@@ -143,6 +153,8 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
     resolver: zodResolver(createPaymentFormSchema),
     defaultValues: {
       idempotencyKey: crypto.randomUUID(),
+      amount: "",
+      userPhoneNumber: "",
     },
   });
 
@@ -203,8 +215,12 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Recipient</FieldLabel>
-                  {/* TODO: make phone number */}
-                  <Input {...field} id={field.name} placeholder="+3586864371" />
+                  <Input
+                    {...field}
+                    id={field.name}
+                    type="tel"
+                    placeholder="+3586864371"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -212,7 +228,13 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
               )}
             />
 
-            <SlideToConfirm onConfirm={() => form.handleSubmit(onSubmit)()} />
+            <SlideToConfirm
+              onConfirm={() => form.handleSubmit(onSubmit)()}
+              isLoading={createPaymentMutation.isPending}
+              disabled={
+                createPaymentMutation.isPending || !form.formState.isValid
+              }
+            />
           </FieldSet>
         </FieldGroup>
       </FieldSet>

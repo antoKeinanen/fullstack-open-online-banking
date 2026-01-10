@@ -6,22 +6,27 @@ import { Spinner } from "@repo/web-ui/spinner";
 interface SlideToConfirmProps {
   onConfirm: () => void;
   text?: string;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
-export function SlideToConfirm({
-  onConfirm,
-  text = "Slide to confirm",
-}: SlideToConfirmProps) {
+interface SliderProps {
+  onConfirm: () => void;
+  text: string;
+  disabled?: boolean;
+}
+
+function Slider({ onConfirm, text, disabled = false }: SliderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
-  const isConfirmedRef = useRef(false);
   const offsetXRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [offsetX, setOffsetX] = useState(0);
-  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const HEAD_SIZE = 40; // tailwind w-10
   const THRESHOLD = 0.9; // 90% to confirm
+
+  const displayOffset = disabled ? 0 : offsetX;
 
   const getMaxOffset = useCallback(() => {
     if (!containerRef.current) return 0;
@@ -29,19 +34,14 @@ export function SlideToConfirm({
   }, []);
 
   const handleStart = useCallback(() => {
-    if (isConfirmedRef.current) return;
+    if (disabled) return;
     isDraggingRef.current = true;
     setIsDragging(true);
-  }, []);
+  }, [disabled]);
 
   const handleMove = useCallback(
     (clientX: number) => {
-      if (
-        !isDraggingRef.current ||
-        !containerRef.current ||
-        isConfirmedRef.current
-      )
-        return;
+      if (!isDraggingRef.current || !containerRef.current) return;
 
       const rect = containerRef.current.getBoundingClientRect();
       const maxOffset = getMaxOffset();
@@ -56,7 +56,7 @@ export function SlideToConfirm({
   );
 
   const handleEnd = useCallback(() => {
-    if (!isDraggingRef.current || isConfirmedRef.current) return;
+    if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
 
@@ -64,9 +64,6 @@ export function SlideToConfirm({
     const progress = offsetXRef.current / maxOffset;
 
     if (progress >= THRESHOLD) {
-      isConfirmedRef.current = true;
-      setIsConfirmed(true);
-      setOffsetX(maxOffset);
       onConfirm();
     } else {
       offsetXRef.current = 0;
@@ -102,43 +99,32 @@ export function SlideToConfirm({
     window.addEventListener("mouseup", onMouseUp);
   };
 
-  if (isConfirmed) {
-    return (
-      <div
-        ref={containerRef}
-        className="border-border bg-primary text-primary-foreground relative flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border select-none"
-      >
-        <Spinner /> Processing...
-      </div>
-    );
-  }
-
   return (
     <div
       ref={containerRef}
-      className="border-border bg-muted text-muted-foreground relative w-full overflow-hidden rounded-xl border select-none"
+      className={`border-border bg-muted text-muted-foreground relative w-full overflow-hidden rounded-xl border select-none ${disabled ? "opacity-50" : ""}`}
     >
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-medium"
         style={{
-          clipPath: `inset(0 0 0 ${offsetX + HEAD_SIZE}px)`,
+          clipPath: `inset(0 0 0 ${displayOffset + HEAD_SIZE}px)`,
         }}
       >
         {text}
       </div>
 
       <div
-        className="bg-primary/70 absolute top-0 left-0 h-full rounded-xl bg-linear-to-r transition-none"
+        className={`absolute top-0 left-0 h-full rounded-xl bg-linear-to-r transition-none ${disabled ? "bg-muted-foreground/30" : "bg-primary/70"}`}
         style={{
-          width: offsetX + HEAD_SIZE,
+          width: displayOffset + HEAD_SIZE,
           transition: isDragging ? "none" : "width 0.3s ease-out",
         }}
       />
 
       <div
-        className="bg-primary text-primary-foreground relative z-10 flex h-10 w-10 cursor-grab items-center justify-center rounded-xl active:cursor-grabbing"
+        className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-xl ${disabled ? "bg-muted-foreground text-muted cursor-not-allowed" : "bg-primary text-primary-foreground cursor-grab active:cursor-grabbing"}`}
         style={{
-          transform: `translateX(${offsetX}px)`,
+          transform: `translateX(${displayOffset}px)`,
           transition: isDragging ? "none" : "transform 0.3s ease-out",
         }}
         onMouseDown={handleMouseDownWithGlobal}
@@ -150,4 +136,21 @@ export function SlideToConfirm({
       </div>
     </div>
   );
+}
+
+export function SlideToConfirm({
+  onConfirm,
+  text = "Slide to confirm",
+  isLoading = false,
+  disabled = false,
+}: SlideToConfirmProps) {
+  if (isLoading) {
+    return (
+      <div className="border-border bg-primary text-primary-foreground relative flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border select-none">
+        <Spinner /> Processing...
+      </div>
+    );
+  }
+
+  return <Slider onConfirm={onConfirm} text={text} disabled={disabled} />;
 }
