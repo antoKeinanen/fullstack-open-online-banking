@@ -181,7 +181,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   };
 
   return (
-    <form>
+    <form onSubmit={(e) => e.preventDefault()}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
