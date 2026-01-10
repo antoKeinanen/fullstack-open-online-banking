@@ -169,7 +169,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
