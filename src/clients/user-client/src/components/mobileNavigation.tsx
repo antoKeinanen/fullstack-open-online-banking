@@ -1,51 +1,18 @@
-import type { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ArrowLeftRightIcon, HomeIcon, UserIcon } from "lucide-react";
 
 import { cn } from "@repo/web-ui";
 
-const ICON_SIZE = 32 as const;
-
-interface MobileNavigationItem {
-  label: string;
-  id: string;
-  urlRegex: RegExp;
-  to: string;
-  icon: ReactNode;
-}
-
-const mobileNavigationItems: MobileNavigationItem[] = [
-  {
-    label: "Home",
-    id: "home",
-    urlRegex: /^\/dashboard(\/)?$/,
-    to: "/dashboard",
-    icon: <HomeIcon size={ICON_SIZE} />,
-  },
-  {
-    label: "Transfers",
-    id: "transfers",
-    urlRegex: /^\/transfers(\/)?$/,
-    to: "/transfers",
-    icon: <ArrowLeftRightIcon size={ICON_SIZE} />,
-  },
-  {
-    label: "Me",
-    id: "me",
-    urlRegex: /^\/me(\/)?$/,
-    to: "/me",
-    icon: <UserIcon size={ICON_SIZE} />,
-  },
-];
+import { navigationItems } from "./navigation";
 
 export function MobileNavigation() {
   const { pathname } = useLocation();
   return (
     <nav className="bg-background border-border flex h-20 w-dvw justify-evenly border">
-      {mobileNavigationItems.map((item) => (
+      {navigationItems.map((item) => (
         <Link
           key={item.id}
           to={item.to}
+          aria-current={item.urlRegex.test(pathname) ? "page" : undefined}
           className={cn(
             "text-foreground flex flex-col items-center justify-center",
             {

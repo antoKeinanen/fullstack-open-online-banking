@@ -6,11 +6,13 @@ import {
   useLoaderData,
   useRouter,
 } from "@tanstack/react-router";
+import { useMediaQuery } from "@uidotdev/usehooks";
 import {
-  BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
+  BanknoteIcon,
   BanknoteXIcon,
   LockIcon,
+  UserIcon,
   WalletIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -51,7 +53,7 @@ export const Route = createFileRoute("/(auth)/dashboard")({
   loader: async () => {
     const [user, transfers] = await Promise.all([
       getUserDetails(),
-      getUserTransfers({ limit: 5 }),
+      getUserTransfers({ limit: 16 }),
     ]);
     return {
       user: user,
@@ -67,6 +69,8 @@ export const Route = createFileRoute("/(auth)/dashboard")({
 
 function RouteComponent() {
   useInvalidateRouteDataOnRefocus();
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const { user, transfers } = useLoaderData({ from: Route.id });
   const { clearSession } = useAuthStore();
@@ -93,12 +97,14 @@ function RouteComponent() {
   };
 
   return (
-    <main className="w-full space-y-4">
-      <Item className="p-0">
+    <main className="w-full auto-rows-fr grid-cols-2 grid-rows-3 gap-4 md:grid">
+      <Item className="p-0 md:hidden">
         <ItemMedia>
           <Avatar className="size-10">
             <AvatarImage src="TODO" />
-            <AvatarFallback>AK</AvatarFallback>
+            <AvatarFallback>
+              <UserIcon />
+            </AvatarFallback>
           </Avatar>
         </ItemMedia>
         <ItemContent>
@@ -108,54 +114,61 @@ function RouteComponent() {
           </ItemTitle>
         </ItemContent>
         <ItemActions>
-          <Button variant="outline" onClick={() => logOutMutation.mutate()}>
+          <Button
+            variant="outline"
+            disabled={logOutMutation.isPending}
+            onClick={() => logOutMutation.mutate()}
+          >
             <LockIcon /> Log out
           </Button>
         </ItemActions>
       </Item>
 
-      <Card className="w-full gap-2">
-        <CardHeader>
-          <CardTitle className="text-xl">
-            {formatBalance(user.balance)}
-            {user.pendingDebits !== "0" && (
-              <p className="text-muted-foreground text-sm">
-                Pending deposits: {formatBalance(user.pendingDebits)}
-              </p>
-            )}
-            {user.pendingCredits !== "0" && (
-              <p className="text-muted-foreground text-sm">
-                Pending withdraws: {formatBalance(user.pendingCredits)}
-              </p>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            <Button
-              className="col-span-2"
-              onClick={() => openTransactionDialog("deposit")}
-            >
-              <WalletIcon />
-              Deposit
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => openTransactionDialog("send")}
-            >
-              <BanknoteArrowUpIcon /> Send
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => openTransactionDialog("request")}
-            >
-              <BanknoteArrowDownIcon /> Request
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <section className="flex flex-col gap-4 md:h-full">
+        <p className="invisible max-md:h-0">e^0=0</p>
+        <Card className="col-span-1 flex w-full gap-2 md:h-full md:gap-6">
+          <CardHeader>
+            <CardTitle className="text-xl">
+              {formatBalance(user.balance)}
+              {user.pendingDebits !== "0" && (
+                <p className="text-muted-foreground text-sm">
+                  Pending deposits: {formatBalance(user.pendingDebits)}
+                </p>
+              )}
+              {user.pendingCredits !== "0" && (
+                <p className="text-muted-foreground text-sm">
+                  Pending withdraws: {formatBalance(user.pendingCredits)}
+                </p>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 grid-rows-2 gap-2">
+              <Button
+                className="col-span-2"
+                onClick={() => openTransactionDialog("deposit")}
+              >
+                <WalletIcon />
+                Deposit
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => openTransactionDialog("send")}
+              >
+                <BanknoteArrowUpIcon /> Send
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => openTransactionDialog("withdraw")}
+              >
+                <BanknoteIcon /> Withdraw
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
-      <section className="space-y-1.5">
+      <section className="col-span-2 row-span-2 space-y-1.5">
         <div className="text-foreground flex items-center justify-between">
           <p>Recent transfers</p>
           <Link to="/transfers">
@@ -172,23 +185,13 @@ function RouteComponent() {
               <EmptyTitle>No recent transfers</EmptyTitle>
               <EmptyDescription>
                 You don't have any recent transfers. Get started by depositing
-                or requesting balance.
+                balance.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex flex-row justify-center space-x-2">
-              <Button
-                className="col-span-2"
-                onClick={() => openTransactionDialog("deposit")}
-              >
+              <Button onClick={() => openTransactionDialog("deposit")}>
                 <WalletIcon />
                 Deposit
-              </Button>
-
-              <Button
-                variant="secondary"
-                onClick={() => openTransactionDialog("request")}
-              >
-                <BanknoteArrowDownIcon /> Request
               </Button>
             </EmptyContent>
           </Empty>
@@ -196,7 +199,7 @@ function RouteComponent() {
           <ItemGroup>
             {transfers
               .filter((t) => !t.pending)
-              .slice(0, 3)
+              .slice(0, isDesktop ? 6 : 3)
               .map((transfer) => (
                 <TransferCard key={transfer.transferId} transfer={transfer} />
               ))}
@@ -204,23 +207,25 @@ function RouteComponent() {
         )}
       </section>
 
-      <div className="text-foreground flex items-center justify-between">
-        <p>Suggestions</p>
-      </div>
+      <section className="col-span-1 col-start-2 row-start-1 flex flex-col gap-4">
+        <div className="text-foreground">
+          <p>Suggestions</p>
+        </div>
 
-      <Card>
-        <CardContent className="grid grid-cols-4 grid-rows-2 items-center justify-items-center gap-3">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-            <RecommendedUserCard key={`recommended-user-${i}`} />
-          ))}
-        </CardContent>
-      </Card>
-      <TransactionDialog
-        open={transactionDialogOpen}
-        setOpen={setTransactionDialogOpen}
-        state={transactionState}
-        setState={setTransactionState}
-      />
+        <Card className="h-full">
+          <CardContent className="grid grid-cols-4 grid-rows-2 items-center justify-items-center gap-3">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
+              <RecommendedUserCard key={`recommended-user-${i}`} />
+            ))}
+          </CardContent>
+        </Card>
+        <TransactionDialog
+          open={transactionDialogOpen}
+          setOpen={setTransactionDialogOpen}
+          state={transactionState}
+          setState={setTransactionState}
+        />
+      </section>
     </main>
   );
 }

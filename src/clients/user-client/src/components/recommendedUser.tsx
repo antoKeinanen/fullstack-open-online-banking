@@ -19,7 +19,9 @@ export function RecommendedUserCard() {
         </ItemMedia>
       </ItemHeader>
       <ItemContent>
-        <ItemTitle className="w-full justify-center">Example User</ItemTitle>
+        <ItemTitle className="w-full justify-center text-center">
+          Example User
+        </ItemTitle>
       </ItemContent>
     </Item>
   );

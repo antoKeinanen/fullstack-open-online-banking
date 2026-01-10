@@ -31,13 +31,10 @@ import type { ApiError } from "../../util/api";
 import { createPayment } from "../../services/paymentService";
 import { generateStripeCheckout } from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
+import { SlideToConfirm } from "../slideToConfirm";
 import { ResponsiveDialog } from "./responsiveDialog";
 
-export type TransactionDialogState =
-  | "deposit"
-  | "withdraw"
-  | "send"
-  | "request";
+export type TransactionDialogState = "deposit" | "withdraw" | "send";
 
 export interface TransactionDialogProps {
   open: boolean;
@@ -49,6 +46,10 @@ export interface TransactionDialogProps {
 function DepositTab() {
   const form = useForm({
     resolver: zodResolver(generateStripeCheckoutRequestSchema),
+    defaultValues: {
+      amount: "",
+    },
+    reValidateMode: "onBlur",
   });
 
   const stripeCheckoutMutation = useMutation({
@@ -66,7 +67,7 @@ function DepositTab() {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={(e) => e.preventDefault()}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
@@ -94,11 +95,13 @@ function DepositTab() {
               )}
             />
 
-            <Field>
-              <Button type="submit" disabled={stripeCheckoutMutation.isPending}>
-                <WalletIcon /> Deposit
-              </Button>
-            </Field>
+            <SlideToConfirm
+              onConfirm={() => form.handleSubmit(onSubmit)()}
+              isLoading={stripeCheckoutMutation.isPending}
+              disabled={
+                stripeCheckoutMutation.isPending || !form.formState.isValid
+              }
+            />
           </FieldSet>
         </FieldGroup>
       </FieldSet>
@@ -150,6 +153,8 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
     resolver: zodResolver(createPaymentFormSchema),
     defaultValues: {
       idempotencyKey: crypto.randomUUID(),
+      amount: "",
+      userPhoneNumber: "",
     },
   });
 
@@ -176,7 +181,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={(e) => e.preventDefault()}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
@@ -210,8 +215,12 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Recipient</FieldLabel>
-                  {/* TODO: make phone number */}
-                  <Input {...field} id={field.name} placeholder="+3586864371" />
+                  <Input
+                    {...field}
+                    id={field.name}
+                    type="tel"
+                    placeholder="+3586864371"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -219,42 +228,13 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
               )}
             />
 
-            <Field>
-              <Button disabled={createPaymentMutation.isPending}>
-                <WalletIcon /> Send
-              </Button>
-            </Field>
-          </FieldSet>
-        </FieldGroup>
-      </FieldSet>
-    </form>
-  );
-}
-
-function RequestTab() {
-  return (
-    <form>
-      <FieldSet>
-        <FieldGroup>
-          <FieldSet>
-            <Field>
-              <FieldLabel htmlFor="amount">Amount</FieldLabel>
-              <InputGroup>
-                <InputGroupInput itemID="amount" placeholder="0.00" />
-                <InputGroupAddon align="inline-end">€</InputGroupAddon>
-              </InputGroup>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="recipient">Recipient</FieldLabel>
-              <Input id="recipient" type="tel" placeholder="+3586864371" />
-            </Field>
-
-            <Field>
-              <Button>
-                <WalletIcon /> Request
-              </Button>
-            </Field>
+            <SlideToConfirm
+              onConfirm={() => form.handleSubmit(onSubmit)()}
+              isLoading={createPaymentMutation.isPending}
+              disabled={
+                createPaymentMutation.isPending || !form.formState.isValid
+              }
+            />
           </FieldSet>
         </FieldGroup>
       </FieldSet>
@@ -281,7 +261,6 @@ export function TransactionDialog({
           <TabsTrigger value="deposit">Deposit</TabsTrigger>
           <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
           <TabsTrigger value="send">Send</TabsTrigger>
-          <TabsTrigger value="request">Request</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deposit">
@@ -292,9 +271,6 @@ export function TransactionDialog({
         </TabsContent>
         <TabsContent value="send">
           <SendTab setOpen={setOpen} />
-        </TabsContent>
-        <TabsContent value="request">
-          <RequestTab />
         </TabsContent>
       </Tabs>
     </ResponsiveDialog>
