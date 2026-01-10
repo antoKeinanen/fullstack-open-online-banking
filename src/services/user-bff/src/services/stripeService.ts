@@ -1,3 +1,4 @@
+import type { Span } from "@opentelemetry/api";
 import StripeSDK from "stripe";
 
 import { StripeService } from "@repo/service-bindings/stripe-service";
@@ -12,15 +13,19 @@ export const stripeService = await StripeService(
   env.USER_BFF_STRIPE_SERVICE_URL,
 );
 
-export async function createPayout(userId: string, amountInCents: number) {
+export async function createPayout(
+  span: Span,
+  userId: string,
+  amountInCents: number,
+) {
   const { data: stripeAccount, error: stripeAccountError } =
     await stripeService.call("getStripeAccountId", { userId });
   if (stripeAccountError) {
-    console.error("Failed to get stripe account", stripeAccountError);
+    span.recordException(stripeAccountError);
     return { error: stripeAccountError };
   }
   if (!stripeAccount.stripeAccountId) {
-    console.error("missing stripe account id");
+    span.recordException(new Error("Missing stripe account id"));
     return {
       error: new Error("Missing stripe account id. Create one by onboarding"),
     };
@@ -34,19 +39,15 @@ export async function createPayout(userId: string, amountInCents: number) {
     });
 
   if (createPendingPayoutError) {
-    if (createPendingPayoutError.details === "NOT_ENOUGH_FUNDS") {
-      console.warn("Failed to create payout. Not enough funds");
-      return { error: createPendingPayoutError };
-    }
-
-    console.error("Failed to create payout", createPendingPayoutError);
+    span.recordException(createPendingPayoutError);
     return { error: createPendingPayoutError };
   }
 
   if (!pendingPayout.tigerbeetleTransferId) {
-    console.error("Failed to create payout. Missing tigerbeetle id");
+    span.recordException(new Error("Missing tigerbeetle transfer id"));
     return { error: new Error("Could not create payout") };
   }
+
   const { data: stripeTransfer, error: stripeTransferError } = await tryCatch(
     stripe.transfers.create({
       amount: amountInCents,
@@ -59,7 +60,7 @@ export async function createPayout(userId: string, amountInCents: number) {
     }),
   );
   if (stripeTransferError) {
-    console.log("Failed to create stripe transfer", stripeTransferError);
+    span.recordException(stripeTransferError);
     return { error: stripeTransferError };
   }
 
@@ -72,18 +73,18 @@ export async function createPayout(userId: string, amountInCents: number) {
   );
 
   if (setPayoutIdError) {
-    console.error("Failed to create payout", setPayoutIdError);
+    span.recordException(setPayoutIdError);
     return { error: setPayoutIdError };
   }
 
   return { error: null };
 }
 
-export async function checkPayoutEligibility(userId: string) {
+export async function checkPayoutEligibility(span: Span, userId: string) {
   const { data: stripeAccount, error: stripeAccountError } =
     await stripeService.call("getStripeAccountId", { userId });
   if (stripeAccountError) {
-    console.error("Failed to get stripe account", stripeAccountError);
+    span.recordException(stripeAccountError);
     return { error: stripeAccountError };
   }
 
@@ -100,7 +101,7 @@ export async function checkPayoutEligibility(userId: string) {
     stripe.accounts.retrieve(stripeAccount.stripeAccountId),
   );
   if (accountError) {
-    console.error("Failed to retrieve stripe account", accountError);
+    span.recordException(accountError);
     return { error: accountError };
   }
 
@@ -131,6 +132,7 @@ export async function checkPayoutEligibility(userId: string) {
 }
 
 async function getStripeAccountOnboardingLink(
+  span: Span,
   stripeAccountId: string,
   type: StripeSDK.AccountLinkCreateParams.Type,
 ) {
@@ -144,27 +146,24 @@ async function getStripeAccountOnboardingLink(
       }),
     );
   if (stripeAccountLinkError) {
-    console.error(
-      "Failed to create stripe account link",
-      stripeAccountLinkError,
-    );
-
+    span.recordException(stripeAccountLinkError);
     return { error: stripeAccountLinkError };
   }
 
   return { data: stripeAccountLink };
 }
 
-export async function getOrCreateStripeAccount(userId: string) {
+export async function getOrCreateStripeAccount(span: Span, userId: string) {
   const { data: stripeAccount, error: stripeAccountError } =
     await stripeService.call("getStripeAccountId", { userId });
   if (stripeAccountError) {
-    console.error("Failed to get stripe account", stripeAccountError);
+    span.recordException(stripeAccountError);
     return { error: stripeAccountError };
   }
 
   if (stripeAccount.stripeAccountId) {
     return getStripeAccountOnboardingLink(
+      span,
       stripeAccount.stripeAccountId,
       "account_onboarding",
     );
@@ -188,10 +187,7 @@ export async function getOrCreateStripeAccount(userId: string) {
       }),
     );
   if (newStripeAccountError) {
-    console.error(
-      "Failed to create stripe account",
-      newStripeAccountError.message,
-    );
+    span.recordException(newStripeAccountError);
     return { error: newStripeAccountError };
   }
 
@@ -203,20 +199,19 @@ export async function getOrCreateStripeAccount(userId: string) {
     },
   );
   if (setStripeAccountIdError) {
-    console.error(
-      "Failed to set stripe account on database",
-      setStripeAccountIdError,
-    );
+    span.recordException(setStripeAccountIdError);
     return { error: setStripeAccountIdError };
   }
 
   return getStripeAccountOnboardingLink(
+    span,
     newStripeAccount.id,
     "account_onboarding",
   );
 }
 
 export async function getOrCreateStripeCustomer(
+  span: Span,
   phoneNumber: string,
   userId: string,
 ) {
@@ -225,11 +220,7 @@ export async function getOrCreateStripeCustomer(
     { userId: userId },
   );
   if (customerError) {
-    console.error(
-      "Failed to get stripe customer",
-      customerError.message,
-      customerError.details,
-    );
+    span.recordException(customerError);
     return { error: customerError };
   }
 
@@ -246,11 +237,7 @@ export async function getOrCreateStripeCustomer(
     }),
   );
   if (newCustomerError) {
-    console.error(
-      "Failed to create a new customer",
-      newCustomerError.message,
-      newCustomerError.stack,
-    );
+    span.recordException(newCustomerError);
     return { error: newCustomerError };
   }
 
@@ -262,11 +249,7 @@ export async function getOrCreateStripeCustomer(
     },
   );
   if (setStripeCustomerIdError) {
-    console.log(
-      "Failed to set stripe customer id for user",
-      setStripeCustomerIdError.message,
-      setStripeCustomerIdError.stack,
-    );
+    span.recordException(setStripeCustomerIdError);
     return { error: setStripeCustomerIdError };
   }
 

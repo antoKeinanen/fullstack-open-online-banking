@@ -76,7 +76,7 @@ stripeRouter.post(
     }
 
     const { data: stripeCustomerId, error: stripeCustomerError } =
-      await getOrCreateStripeCustomer(user.phoneNumber, userId);
+      await getOrCreateStripeCustomer(span, user.phoneNumber, userId);
     if (stripeCustomerError) {
       span.recordException(stripeCustomerError);
       span.addEvent(events.EVENT_STRIPE_CHECKOUT_CUSTOMER_ERROR);
@@ -189,7 +189,7 @@ stripeRouter.post(
     span.setAttribute(attrs.ATTR_PAYOUT_ID, payoutId);
     await cacheTransaction(userId, idempotencyKey, payoutId, "pending");
 
-    const { error } = await createPayout(userId, amount);
+    const { error } = await createPayout(span, userId, amount);
 
     if (error) {
       span.recordException(error);
@@ -231,7 +231,7 @@ stripeRouter.get("/payout-eligibility", async (c) => {
 
   span.setAttribute(attrs.ATTR_USER_ID, userId);
 
-  const { data, error } = await checkPayoutEligibility(userId);
+  const { data, error } = await checkPayoutEligibility(span, userId);
   if (error) {
     span.recordException(error);
     return c.json(createUnexpectedError(), 500);
@@ -241,9 +241,10 @@ stripeRouter.get("/payout-eligibility", async (c) => {
 });
 
 stripeRouter.get("/onboard-url", async (c) => {
+  const span = c.get("span");
   const { sub: userId } = c.get("jwtPayload");
 
-  const { data, error } = await getOrCreateStripeAccount(userId);
+  const { data, error } = await getOrCreateStripeAccount(span, userId);
   if (error) {
     console.error("Failed", error);
     return c.json(createUnexpectedError(), 500);
