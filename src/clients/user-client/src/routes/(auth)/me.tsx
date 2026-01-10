@@ -18,6 +18,7 @@ import {
   getActiveSessions,
   invalidateSession,
 } from "../../services/authService";
+import { getStripeOnboardingUrl } from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
 import { formatDateTime } from "../../util/formatters";
 
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/(auth)/me")({
   component: RouteComponent,
   loader: async () => ({
     sessions: (await getActiveSessions()).sessions,
+    onboardUrl: (await getStripeOnboardingUrl()).url,
   }),
   errorComponent: () => <p>Failed to load page data</p>,
 });
@@ -74,10 +76,11 @@ export function SessionCard({
 }
 
 function RouteComponent() {
-  const { sessions } = Route.useLoaderData();
+  const { sessions, onboardUrl } = Route.useLoaderData();
 
   return (
     <div>
+      <a href={onboardUrl}>onboard :)</a>
       <ItemGroup>
         <p className="text-foreground py-2 first:pt-0">Sessions</p>
         {sessions.map((session) => (

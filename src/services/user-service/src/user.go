@@ -103,6 +103,7 @@ func (s *UserServiceServer) GetUserById(ctx context.Context, req *pb.GetUserById
 
 	dbGetUserSpan.SetAttributes(
 		attribute.String(lib.ATTR_DB_QUERY, queries.QueryGetUserById),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{req.UserId}),
 	)
 
 	user := repo.User{}

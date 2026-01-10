@@ -1,5 +1,14 @@
-import type { GenerateStripeCheckoutRequest } from "@repo/validators/stripe";
-import { generateStripeCheckoutResponseSchema } from "@repo/validators/stripe";
+import z from "zod";
+
+import type {
+  CreateStripePayoutRequest,
+  GenerateStripeCheckoutRequest,
+} from "@repo/validators/stripe";
+import {
+  generateStripeCheckoutResponseSchema,
+  getOnboardingUrlResponseSchema,
+  payoutEligibilityResponseSchema,
+} from "@repo/validators/stripe";
 
 import * as api from "../util/api";
 
@@ -9,4 +18,19 @@ export function generateStripeCheckout(req: GenerateStripeCheckoutRequest) {
     generateStripeCheckoutResponseSchema,
     req,
   );
+}
+
+export function getStripeOnboardingUrl() {
+  return api.get("/api/stripe/onboard-url", getOnboardingUrlResponseSchema);
+}
+
+export function getPayoutEligibility() {
+  return api.get(
+    "/api/stripe/payout-eligibility",
+    payoutEligibilityResponseSchema,
+  );
+}
+
+export function createPayout(req: CreateStripePayoutRequest) {
+  return api.post("/api/stripe/payouts", z.unknown(), req);
 }

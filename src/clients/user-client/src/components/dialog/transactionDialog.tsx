@@ -1,17 +1,21 @@
 import type { Dispatch } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { WalletIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { CreatePaymentForm } from "@repo/validators/payment";
-import type { GenerateStripeCheckoutRequest } from "@repo/validators/stripe";
+import type {
+  CreateStripePayoutForm,
+  GenerateStripeCheckoutRequest,
+} from "@repo/validators/stripe";
 import { createPaymentFormSchema } from "@repo/validators/payment";
-import { generateStripeCheckoutRequestSchema } from "@repo/validators/stripe";
+import {
+  createStripePayoutFormSchema,
+  generateStripeCheckoutRequestSchema,
+} from "@repo/validators/stripe";
 import { Button } from "@repo/web-ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/web-ui/card";
 import {
   Field,
   FieldError,
@@ -29,7 +33,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/web-ui/tabs";
 
 import type { ApiError } from "../../util/api";
 import { createPayment } from "../../services/paymentService";
-import { generateStripeCheckout } from "../../services/stripeService";
+import {
+  createPayout,
+  generateStripeCheckout,
+  getPayoutEligibility,
+  getStripeOnboardingUrl,
+} from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
 import { SlideToConfirm } from "../slideToConfirm";
 import { ResponsiveDialog } from "./responsiveDialog";
@@ -109,37 +118,111 @@ function DepositTab() {
   );
 }
 
-function WithdrawTab() {
+function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
+  const router = useRouter();
+  const form = useForm({
+    resolver: zodResolver(createStripePayoutFormSchema),
+    defaultValues: {
+      idempotencyKey: crypto.randomUUID(),
+      amount: "",
+    },
+  });
+
+  const eligibilityQuery = useQuery({
+    queryKey: ["payoutEligibility"],
+    queryFn: getPayoutEligibility,
+  });
+
+  const payoutMutation = useMutation({
+    mutationFn: createPayout,
+    onSuccess: async () => {
+      toast.success("Withdrawal initiated successfully");
+      await router.invalidate();
+      form.reset({ idempotencyKey: crypto.randomUUID(), amount: "" });
+      setOpen(false);
+    },
+    onError: (error: ApiError) => {
+      toastErrors(error);
+      form.setValue("idempotencyKey", crypto.randomUUID());
+    },
+  });
+
+  const onSubmit = (values: CreateStripePayoutForm) => {
+    payoutMutation.mutate({
+      amount: Math.floor(values.amount * 100),
+      idempotencyKey: values.idempotencyKey,
+    });
+  };
+
+  if (eligibilityQuery.isPending) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <p className="text-muted-foreground">Checking eligibility...</p>
+      </div>
+    );
+  }
+
+  if (eligibilityQuery.isError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-8">
+        <p className="text-destructive">Failed to check eligibility</p>
+        <Button variant="outline" onClick={() => eligibilityQuery.refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (!eligibilityQuery.data.eligible) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-8">
+        <p className="text-muted-foreground">{eligibilityQuery.data.reason}</p>
+        <Button
+          onClick={async () => {
+            const { url } = await getStripeOnboardingUrl();
+            window.location.href = url;
+          }}
+        >
+          Complete Onboarding
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <form>
+    <form onSubmit={(e) => e.preventDefault()}>
       <FieldSet>
         <FieldGroup>
           <FieldSet>
-            <Field>
-              <FieldLabel>Amount</FieldLabel>
-              <InputGroup>
-                <InputGroupInput placeholder="0.00" />
-                <InputGroupAddon align="inline-end">€</InputGroupAddon>
-              </InputGroup>
-            </Field>
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput
+                      {...field}
+                      value={field.value as string}
+                      aria-invalid={fieldState.invalid}
+                      itemID={field.name}
+                      type="number"
+                      placeholder="0.00"
+                    />
+                    <InputGroupAddon align="inline-end">€</InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-            <div>
-              <p className="text-foreground">Payment</p>
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    Space I left out for the stripe integration :)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent></CardContent>
-              </Card>
-            </div>
-
-            <Field>
-              <Button>
-                <WalletIcon /> Withdraw
-              </Button>
-            </Field>
+            <SlideToConfirm
+              onConfirm={() => form.handleSubmit(onSubmit)()}
+              isLoading={payoutMutation.isPending}
+              disabled={payoutMutation.isPending || !form.formState.isValid}
+            />
           </FieldSet>
         </FieldGroup>
       </FieldSet>
@@ -267,7 +350,7 @@ export function TransactionDialog({
           <DepositTab />
         </TabsContent>
         <TabsContent value="withdraw">
-          <WithdrawTab />
+          <WithdrawTab setOpen={setOpen} />
         </TabsContent>
         <TabsContent value="send">
           <SendTab setOpen={setOpen} />

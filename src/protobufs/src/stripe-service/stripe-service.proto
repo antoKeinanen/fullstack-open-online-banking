@@ -12,13 +12,57 @@ service StripeService {
   rpc CreateAndPostTransfer(CreateAndPostTransferRequest) returns (Empty);
   rpc VoidPendingTransfer(VoidPendingTransferRequest) returns (Empty);
   rpc CreatePendingTransfer(CreatePendingTransferRequest) returns (Empty);
+  rpc GetStripeAccountId(GetStripeAccountIdRequest) returns (GetStripeAccountIdResponse);
+  rpc SetStripeAccountId(SetStripeAccountIdRequest) returns (Empty);
+  rpc CreatePendingPayout(CreatePendingPayoutRequest) returns (CreatePendingPayoutResponse);
+  rpc PostPendingPayout(PostPendingPayoutRequest) returns (Empty);
+  rpc VoidPendingPayout(VoidPendingPayoutRequest) returns (Empty);
+  rpc SetStripePayoutId(SetStripePayoutIdRequest) returns (Empty);
+}
+
+message CreatePendingPayoutResponse {
+  string tigerbeetle_transfer_id = 1;
+}
+
+message PostPendingPayoutRequest {
+  string stripe_payout_id = 1;
+  string amount = 2;
+}
+
+message VoidPendingPayoutRequest {
+  string stripe_payout_id = 1;
+  string amount = 2;
+}
+
+message SetStripePayoutIdRequest {
+  string tigerbeetle_transfer_id = 1;
+  string stripe_payout_id        = 2;
+}
+
+message CreatePendingPayoutRequest {
+  string user_id           = 1;
+  string stripe_account_id = 3;
+  string amount            = 4;
+}
+
+message GetStripeAccountIdRequest {
+  string user_id = 1;
+}
+
+message GetStripeAccountIdResponse {
+  string stripe_account_id = 1;
+}
+
+message SetStripeAccountIdRequest {
+  string user_id           = 1;
+  string stripe_account_id = 2;
 }
 
 message CreatePendingTransferRequest {
-  string user_id = 1;
+  string user_id                  = 1;
   string stripe_payment_intent_id = 2;
-  string stripe_customer_id = 3;
-  string amount = 4;
+  string stripe_customer_id       = 3;
+  string amount                   = 4;
 }
 
 message GetPendingTransferRequest {
