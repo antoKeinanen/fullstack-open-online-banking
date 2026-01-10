@@ -16,7 +16,7 @@ import { useAuthStore } from "../stores/authStore";
 
 const ICON_SIZE = 32 as const;
 
-export interface MobileNavigationItem {
+export interface NavigationItem {
   label: string;
   id: string;
   urlRegex: RegExp;
@@ -24,7 +24,7 @@ export interface MobileNavigationItem {
   icon: ReactNode;
 }
 
-export const navigationItems: MobileNavigationItem[] = [
+export const navigationItems: NavigationItem[] = [
   {
     label: "Home",
     id: "home",
