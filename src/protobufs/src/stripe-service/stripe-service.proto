@@ -41,8 +41,8 @@ message SetStripePayoutIdRequest {
 
 message CreatePendingPayoutRequest {
   string user_id           = 1;
-  string stripe_account_id = 3;
-  string amount            = 4;
+  string stripe_account_id = 2;
+  string amount            = 3;
 }
 
 message GetStripeAccountIdRequest {
