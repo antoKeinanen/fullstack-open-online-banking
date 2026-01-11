@@ -298,7 +298,7 @@ export async function createStripeCheckout(
         {
           price_data: {
             currency: "eur",
-            unit_amount: Math.floor(amount * 100),
+            unit_amount: Math.round(amount * 100),
             product_data: {
               name: `${amount}€ deposit`,
               description: `Add ${amount}€ to your account`,
