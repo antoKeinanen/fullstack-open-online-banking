@@ -147,6 +147,9 @@ function RouteComponent() {
         <Item
           className="w-full items-stretch rounded-none"
           onClick={() => logOutMutation.mutate()}
+          onKeyDown={(e) => {
+            if (e.key == "enter" || e.key == " ") logOutMutation.mutate();
+          }}
           role="button"
           tabIndex={0}
         >
