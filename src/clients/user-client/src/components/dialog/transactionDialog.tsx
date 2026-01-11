@@ -37,7 +37,6 @@ import {
   createPayout,
   generateStripeCheckout,
   getPayoutEligibility,
-  getStripeOnboardingUrl,
 } from "../../services/stripeService";
 import { toastErrors } from "../../util/errorToaster";
 import { SlideToConfirm } from "../slideToConfirm";
@@ -178,10 +177,7 @@ function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
       <div className="flex flex-col items-center justify-center gap-4 py-8">
         <p className="text-muted-foreground">{eligibilityQuery.data.reason}</p>
         <Button
-          onClick={async () => {
-            const { url } = await getStripeOnboardingUrl();
-            window.location.href = url;
-          }}
+          onClick={() => router.navigate({ to: "/stripe/refresh-onboard" })}
         >
           Complete Onboarding
         </Button>

@@ -17,6 +17,7 @@ import { Route as authTransfersRouteImport } from './routes/(auth)/transfers'
 import { Route as authSuccessRouteImport } from './routes/(auth)/success'
 import { Route as authMeRouteImport } from './routes/(auth)/me'
 import { Route as authDashboardRouteImport } from './routes/(auth)/dashboard'
+import { Route as authStripeRefreshOnboardRouteImport } from './routes/(auth)/stripe.refresh-onboard'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -57,6 +58,12 @@ const authDashboardRoute = authDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => authRouteRoute,
 } as any)
+const authStripeRefreshOnboardRoute =
+  authStripeRefreshOnboardRouteImport.update({
+    id: '/stripe/refresh-onboard',
+    path: '/stripe/refresh-onboard',
+    getParentRoute: () => authRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof authMeRoute
   '/success': typeof authSuccessRoute
   '/transfers': typeof authTransfersRoute
+  '/stripe/refresh-onboard': typeof authStripeRefreshOnboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
   '/me': typeof authMeRoute
   '/success': typeof authSuccessRoute
   '/transfers': typeof authTransfersRoute
+  '/stripe/refresh-onboard': typeof authStripeRefreshOnboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +95,7 @@ export interface FileRoutesById {
   '/(auth)/me': typeof authMeRoute
   '/(auth)/success': typeof authSuccessRoute
   '/(auth)/transfers': typeof authTransfersRoute
+  '/(auth)/stripe/refresh-onboard': typeof authStripeRefreshOnboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/success'
     | '/transfers'
+    | '/stripe/refresh-onboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/success'
     | '/transfers'
+    | '/stripe/refresh-onboard'
   id:
     | '__root__'
     | '/'
@@ -116,6 +128,7 @@ export interface FileRouteTypes {
     | '/(auth)/me'
     | '/(auth)/success'
     | '/(auth)/transfers'
+    | '/(auth)/stripe/refresh-onboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authDashboardRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(auth)/stripe/refresh-onboard': {
+      id: '/(auth)/stripe/refresh-onboard'
+      path: '/stripe/refresh-onboard'
+      fullPath: '/stripe/refresh-onboard'
+      preLoaderRoute: typeof authStripeRefreshOnboardRouteImport
+      parentRoute: typeof authRouteRoute
+    }
   }
 }
 
@@ -191,6 +211,7 @@ interface authRouteRouteChildren {
   authMeRoute: typeof authMeRoute
   authSuccessRoute: typeof authSuccessRoute
   authTransfersRoute: typeof authTransfersRoute
+  authStripeRefreshOnboardRoute: typeof authStripeRefreshOnboardRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
@@ -198,6 +219,7 @@ const authRouteRouteChildren: authRouteRouteChildren = {
   authMeRoute: authMeRoute,
   authSuccessRoute: authSuccessRoute,
   authTransfersRoute: authTransfersRoute,
+  authStripeRefreshOnboardRoute: authStripeRefreshOnboardRoute,
 }
 
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
