@@ -155,7 +155,11 @@ function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
 
   if (eligibilityQuery.isPending) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div
+        className="flex items-center justify-center py-8"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-muted-foreground">Checking eligibility...</p>
       </div>
     );
@@ -163,7 +167,10 @@ function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
 
   if (eligibilityQuery.isError) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-8">
+      <div
+        className="flex flex-col items-center justify-center gap-4 py-8"
+        role="alert"
+      >
         <p className="text-destructive">Failed to check eligibility</p>
         <Button variant="outline" onClick={() => eligibilityQuery.refetch()}>
           Retry
