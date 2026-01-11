@@ -7,7 +7,9 @@ const (
 	ATTR_TB_TRANSFER_AMOUNT = "tb.transfer.amount"
 
 	ATTR_STRIPE_CUSTOMER_ID       = "stripe.customer.id"
+	ATTR_STRIPE_ACCOUNT_ID        = "stripe.account.id"
 	ATTR_STRIPE_PAYMENT_INTENT_ID = "stripe.payment_intent.id"
+	ATTR_STRIPE_PAYOUT_ID         = "stripe.payout.id"
 
 	ATTR_DB_QUERY         = "db.query"
 	ATTR_DB_ARGS          = "db.args"
@@ -28,5 +30,12 @@ const (
 	EVENT_CUSTOMER_GET_STRIPE_ID = "customer.get_stripe_id"
 	EVENT_CUSTOMER_GET_USER_ID   = "customer.get_user_id"
 
+	EVENT_ACCOUNT_SET_STRIPE_ID = "account.set_stripe_id"
+	EVENT_ACCOUNT_GET_STRIPE_ID = "account.get_stripe_id"
+
 	EVENT_TRANSFER_GET_PENDING = "transfer.get_pending"
+
+	EVENT_PAYOUT_CREATE_PENDING = "payout.pending.create"
+	EVENT_PAYOUT_POST_PENDING   = "payout.pending.post"
+	EVENT_PAYOUT_VOID_PENDING   = "payout.pending.void"
 )

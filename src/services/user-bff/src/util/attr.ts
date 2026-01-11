@@ -36,6 +36,15 @@ export const attrs = {
   ATTR_STRIPE_FAILURE_REASON: "stripe.failure_reason",
   ATTR_STRIPE_CANCELLATION_CODE: "stripe.cancellation_code",
   ATTR_STRIPE_CANCELLED_AT: "stripe.cancelled_at",
+  ATTR_STRIPE_TRANSFER_ID: "stripe.transfer_id",
+  ATTR_STRIPE_TRANSFER_AMOUNT: "stripe.transfer_amount",
+  ATTR_STRIPE_TRANSFER_CURRENCY: "stripe.transfer_currency",
+  ATTR_STRIPE_TRANSFER_DESTINATION: "stripe.transfer_destination",
+
+  ATTR_PAYOUT_IDEMPOTENCY_KEY: "payout.idempotency_key",
+  ATTR_PAYOUT_AMOUNT: "payout.amount",
+  ATTR_PAYOUT_ID: "payout.id",
+  ATTR_PAYOUT_TRANSACTION_STATE: "payout.transaction_state",
 };
 
 export const events = {
@@ -98,4 +107,18 @@ export const events = {
   EVENT_STRIPE_INTENT_VOID_TRANSFER_ERROR: "stripe.intent.void_transfer_error",
   EVENT_STRIPE_INTENT_CANCELLED: "stripe.intent.cancelled",
   EVENT_STRIPE_INTENT_FAILED: "stripe.intent.failed",
+
+  EVENT_STRIPE_TRANSFER_SUCCESS: "stripe.transfer.success",
+  EVENT_STRIPE_TRANSFER_SET_ID_ERROR: "stripe.transfer.set_id_error",
+  EVENT_STRIPE_TRANSFER_NO_METADATA: "stripe.transfer.no_metadata",
+  EVENT_STRIPE_TRANSFER_PENDING_ERROR: "stripe.transfer.pending_error",
+  EVENT_STRIPE_TRANSFER_POST_ERROR: "stripe.transfer.post_error",
+
+  EVENT_PAYOUT_DUPLICATE_PENDING: "payout.duplicate_pending",
+  EVENT_PAYOUT_DUPLICATE_FAILED: "payout.duplicate_failed",
+  EVENT_PAYOUT_DUPLICATE_SUCCESS: "payout.duplicate_success",
+  EVENT_PAYOUT_INSUFFICIENT_FUNDS: "payout.insufficient_funds",
+  EVENT_PAYOUT_SUCCESS: "payout.success",
+  EVENT_PAYOUT_FAILURE: "payout.failure",
+  EVENT_PAYOUT_MISSING_STRIPE_ACCOUNT: "payout.missing_stripe_account",
 };

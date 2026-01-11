@@ -3,7 +3,7 @@ import type { Context } from "hono";
 import type Stripe from "stripe";
 
 import type { Env } from "..";
-import { stripeService } from "../services/stripe";
+import { stripeService } from "../services/stripeService";
 import { attrs, events } from "../util/attr";
 import { formatAsHex } from "../util/formatter";
 import { getStripeCustomerId } from "../util/stripe";

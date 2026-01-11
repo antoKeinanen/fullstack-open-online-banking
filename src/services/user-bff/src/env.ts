@@ -13,7 +13,7 @@ export const env = createEnv({
     USER_BFF_JWT_SECRET: z.string(),
     USER_BFF_REDIS_CONNECTION_STRING: z.string(),
     USER_BFF_STRIPE_SECRET_KEY: z.string(),
-    USER_BFF_STRIPE_SUCCESS_ENDPOINT: z.string(),
+    USER_BFF_BASE_URL: z.string(),
     USER_BFF_STRIPE_SERVICE_URL: z.url(),
     USER_BFF_STRIPE_WEBHOOK_SECRET: z.string(),
     USER_BFF_OTEL_EXPORTER_OTLP_ENDPOINT: z.string(),

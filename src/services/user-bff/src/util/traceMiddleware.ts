@@ -8,7 +8,8 @@ import { env } from "../env";
 const tracer = trace.getTracer("user-bff");
 
 export async function tracingMiddleware(c: Context<Env>, next: Next) {
-  const span = tracer.startSpan(`${c.req.method} ${c.req.path}`);
+  const span =
+    trace.getActiveSpan() ?? tracer.startSpan(`${c.req.method} ${c.req.path}`);
 
   span.setAttribute(ATTR_DEPLOYMENT_ENVIRONMENT_NAME, env.NODE_ENV);
 
