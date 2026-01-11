@@ -42,11 +42,17 @@ func DbUserToPbUser(dbUser User, credits, debits, pendingDebits, pendingCredits 
 	}
 	debitsBig, err := HexStringToBigInt(debits)
 	if err != nil {
-		slog.Error("Failed to parse debits to hex bigInt", "error", err)
+		slog.Error("Failed to parse debits hex to bigInt", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+	pendingCreditsBig, err := HexStringToBigInt(pendingCredits)
+	if err != nil {
+		slog.Error("Failed to parse pending credits hex to bigInt", "error", err)
 		return nil, lib.ErrUnexpected
 	}
 
-	balance := big.NewInt(0).Sub(debitsBig, creditsBig).Text(16)
+	balance := big.NewInt(0).Sub(debitsBig, creditsBig)
+	balance = big.NewInt(0).Sub(balance, pendingCreditsBig)
 
 	return &pb.User{
 		UserId:         dbUser.UserId,
@@ -56,7 +62,7 @@ func DbUserToPbUser(dbUser User, credits, debits, pendingDebits, pendingCredits 
 		Address:        dbUser.Address,
 		BirthDate:      dbUser.BirthDate.UTC().Format(time.RFC3339),
 		CreatedAt:      dbUser.CreatedAt.UTC().Format(time.RFC3339),
-		Balance:        balance,
+		Balance:        balance.Text(16),
 		PendingDebits:  pendingDebits,
 		PendingCredits: pendingCredits,
 	}, nil
