@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@repo/web-ui/button";
 import { Card } from "@repo/web-ui/card";
@@ -12,6 +12,7 @@ export const Route = createFileRoute("/(auth)/stripe/refresh-onboard")({
 });
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const onboardUrlQuery = useQuery({
     queryKey: ["onboardUrl"],
     queryFn: getStripeOnboardingUrl,
@@ -34,9 +35,12 @@ function RouteComponent() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link to="/dashboard">
-              <Button variant="outline">Cancel</Button>
-            </Link>
+            <Button
+              onClick={() => navigate({ to: "/dashboard" })}
+              variant="outline"
+            >
+              Cancel
+            </Button>
             <Button onClick={() => onboardUrlQuery.refetch()}>Retry</Button>
           </div>
         </Card>
@@ -57,9 +61,12 @@ function RouteComponent() {
             information. You will be redirected shortly.
           </p>
         </div>
-        <Link to="/dashboard">
-          <Button variant="outline">Cancel</Button>
-        </Link>
+        <Button
+          onClick={() => navigate({ to: "/dashboard" })}
+          variant="outline"
+        >
+          Cancel
+        </Button>
       </Card>
     </div>
   );
