@@ -10,6 +10,6 @@ var (
 	QuerySetStripeAccountId = `
 		update banking.users
 		set stripe_account_id = $1
-		where  user_id = $2
+		where user_id = $2
 	`
 )
