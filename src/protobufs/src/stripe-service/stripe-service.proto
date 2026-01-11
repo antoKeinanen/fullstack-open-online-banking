@@ -88,9 +88,9 @@ message CreateAndPostTransferRequest {
 }
 
 message VoidPendingTransferRequest {
-  string stripe_payout_id = 1;
-  string user_id          = 2;
-  string amount           = 3;
+  string tigerbeetle_transfer_id = 1;
+  string user_id                 = 2;
+  string amount                  = 3;
 }
 
 message SetStripeCustomerIdRequest {
