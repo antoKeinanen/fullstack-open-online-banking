@@ -21,6 +21,29 @@ function RouteComponent() {
     window.location.replace(onboardUrlQuery.data.url);
   }
 
+  if (onboardUrlQuery.isError) {
+    return (
+      <div className="m-auto max-w-sm self-center pt-8 md:max-w-md">
+        <Card className="flex flex-col items-center justify-center gap-8 overflow-clip px-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-center text-lg font-semibold">
+              Something went wrong
+            </h1>
+            <p className="text-muted-foreground text-center text-sm">
+              We couldn't redirect you to Stripe onboarding. Please try again.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Link to="/dashboard">
+              <Button variant="outline">Cancel</Button>
+            </Link>
+            <Button onClick={() => onboardUrlQuery.refetch()}>Retry</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="m-auto max-w-sm self-center pt-8 md:max-w-md">
       <Card className="flex flex-col items-center justify-center gap-8 overflow-clip px-6">
