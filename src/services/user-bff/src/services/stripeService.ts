@@ -6,6 +6,7 @@ import { StripeService } from "@repo/service-bindings/stripe-service";
 import { env } from "../env";
 import { formatAsHex } from "../util/formatter";
 import { tryCatch } from "../util/tryCatch";
+import { userService } from "./userService";
 
 const stripe = new StripeSDK(env.USER_BFF_STRIPE_SECRET_KEY);
 
@@ -169,11 +170,25 @@ export async function getOrCreateStripeAccount(span: Span, userId: string) {
     );
   }
 
+  const { data: user, error: userError } = await userService.call(
+    "getUserById",
+    { userId },
+  );
+  if (userError) {
+    span.recordException(userError);
+    return { error: userError };
+  }
+
   const { data: newStripeAccount, error: newStripeAccountError } =
     await tryCatch(
       stripe.accounts.create({
         type: "express",
         country: "FI",
+        individual: {
+          phone: user.phoneNumber,
+          first_name: user.firstName,
+          last_name: user.lastName,
+        },
         business_profile: {
           product_description: "In app withdrawals",
         },
