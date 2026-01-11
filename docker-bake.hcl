@@ -1,11 +1,16 @@
 group "all" {
-  targets = ["user-service", "tigerbeetle-service", "payment-service", "stripe-service", "user-bff", "user-client"]
+  targets = ["user-service", "tigerbeetle-service", "payment-service", "stripe-service", "user-bff", "user-client", "ingress-router"]
 }
 
 target "base" {
   dockerfile = "Dockerfile"
   context = "."
   target = "base"
+}
+
+target "ingress-router" {
+  dockerfile = "src/packages/ingress-router/Dockerfile"
+  tags = [ "ingress-router" ]
 }
 
 target "user-service" {
