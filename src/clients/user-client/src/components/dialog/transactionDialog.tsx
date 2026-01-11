@@ -149,7 +149,7 @@ function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
 
   const onSubmit = (values: CreateStripePayoutForm) => {
     payoutMutation.mutate({
-      amount: Math.floor(values.amount * 100),
+      amount: Math.round(values.amount * 100),
       idempotencyKey: values.idempotencyKey,
     });
   };
@@ -261,7 +261,7 @@ function SendTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
 
   const onSubmit = (values: CreatePaymentForm) => {
     createPaymentMutation.mutate({
-      amount: Math.floor(values.amount * 100),
+      amount: Math.round(values.amount * 100),
       toUserPhoneNumber: values.userPhoneNumber,
       idempotencyKey: values.idempotencyKey,
     });
