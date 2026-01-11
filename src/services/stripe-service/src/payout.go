@@ -13,6 +13,27 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func (s *StripeServiceServer) voidPendingTransferOnError(ctx context.Context, tracer trace.Tracer, userId, transferId, amount string) {
+	ctx, voidSpan := tracer.Start(ctx, lib.EVENT_TB_VOID_PENDING_TRANSFER)
+	defer voidSpan.End()
+
+	voidSpan.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, userId),
+		attribute.String(lib.ATTR_TB_TRANSFER_ID, transferId),
+		attribute.String(lib.ATTR_TB_TRANSFER_AMOUNT, amount),
+	)
+
+	_, err := s.tigerbeetleService.VoidPendingTransfer(ctx, &tbPb.VoidPendingTransferRequest{
+		CreditAccountId:   userId,
+		DebitAccountId:    lib.SYSTEM_FLOAT_ACCOUNT_ID,
+		Amount:            amount,
+		PendingTransferId: transferId,
+	})
+	if err != nil {
+		voidSpan.RecordError(err)
+	}
+}
+
 func (s *StripeServiceServer) CreatePendingPayout(ctx context.Context, req *pb.CreatePendingPayoutRequest) (*pb.CreatePendingPayoutResponse, error) {
 	span := trace.SpanFromContext(ctx)
 	tracer := span.TracerProvider().Tracer(lib.ServiceName)
@@ -51,11 +72,13 @@ func (s *StripeServiceServer) CreatePendingPayout(ctx context.Context, req *pb.C
 	result, err := s.db.ExecContext(ctx, queries.QueryCreatePendingPayout, transferResp.TransferId, req.StripeAccountId, req.UserId)
 	if err != nil {
 		dbSpan.RecordError(err)
+		s.voidPendingTransferOnError(ctx, tracer, req.UserId, transferResp.TransferId, req.Amount)
 		return nil, lib.ErrUnexpected
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		dbSpan.RecordError(err)
+		s.voidPendingTransferOnError(ctx, tracer, req.UserId, transferResp.TransferId, req.Amount)
 		return nil, lib.ErrUnexpected
 	}
 	span.SetAttributes(
