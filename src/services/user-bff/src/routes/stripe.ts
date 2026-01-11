@@ -246,7 +246,7 @@ stripeRouter.get("/onboard-url", async (c) => {
 
   const { data, error } = await getOrCreateStripeAccount(span, userId);
   if (error) {
-    console.error("Failed", error);
+    span.recordException(error);
     return c.json(createUnexpectedError(), 500);
   }
 
