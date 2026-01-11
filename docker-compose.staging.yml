@@ -1,0 +1,111 @@
+services:
+  cloudflared-tunnel:
+    image: cloudflare/cloudflared
+    container_name: fso-banking-cloudflared-tunnel
+    command: tunnel run
+    networks:
+      - fso-banking
+    env_file:
+      - .env.staging
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+
+
+
+
+  ingress-router:
+    image: ingress-router
+    container_name: fso-banking-ingress-router
+    networks:
+      - fso-banking
+
+  user-client:
+    image: user-client
+    container_name: fso-banking-user-client
+    networks:
+      - fso-banking
+
+  tigerbeetle-service:
+    image: tigerbeetle-service
+    container_name: fso-banking-tigerbeetle-service
+    networks:
+      - fso-banking
+    security_opt:
+      - seccomp=unconfined
+    env_file:
+      - .env.staging
+    environment:
+      - TIGERBEETLE_ADDRESS=${LOCAL_IP}:3001
+      - TIGERBEETLE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+
+  user-service:
+    image: user-service
+    container_name: fso-banking-user-service
+    restart: on-failure
+    depends_on:
+      - tigerbeetle-service
+    networks:
+      - fso-banking
+    env_file:
+      - .env.staging
+    environment:
+      - USER_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
+      - USER_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+      - USER_SERVICE_JWT_SECRET=${USER_SERVICE_JWT_SECRET}
+      - USER_SERVICE_DATABASE_DSN=${USER_SERVICE_DATABASE_DSN}
+
+  payment-service:
+    image: payment-service
+    container_name: fso-banking-payment-service
+    restart: on-failure
+    depends_on:
+      - tigerbeetle-service
+    networks:
+      - fso-banking
+    env_file:
+      - .env.staging
+    environment:
+      - PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
+      - PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+
+  stripe-service:
+    image: stripe-service
+    container_name: fso-banking-stripe-service
+    restart: on-failure
+    depends_on:
+      - tigerbeetle-service
+    networks:
+      - fso-banking
+    env_file:
+      - .env.staging
+    environment:
+      - STRIPE_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
+      - STRIPE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+      - STRIPE_SERVICE_DATABASE_DSN=${STRIPE_SERVICE_DATABASE_DSN}
+
+  user-bff:
+    image: user-bff
+    container_name: fso-banking-user-bff
+    restart: on-failure
+    depends_on:
+      - user-service
+      - payment-service
+      - stripe-service
+    networks:
+      - fso-banking
+    env_file:
+      - .env.staging
+    environment:
+      - USER_BFF_USER_SERVICE_URL=http://fso-banking-user-service:50052
+      - USER_BFF_PAYMENT_SERVICE_URL=http://fso-banking-payment-service:50053
+      - USER_BFF_STRIPE_SERVICE_URL=http://fso-banking-stripe-service:50054
+      - USER_BFF_OTEL_EXPORTER_OTLP_ENDPOINT=http://${LOCAL_IP}:4317
+      - USER_BFF_BASE_URL=${BASE_URL}
+      - USER_BFF_JWT_SECRET=${USER_BFF_JWT_SECRET}
+      - USER_BFF_REDIS_CONNECTION_STRING=${USER_BFF_REDIS_CONNECTION_STRING}
+      - USER_BFF_STRIPE_SECRET_KEY=${USER_BFF_STRIPE_SECRET_KEY}
+      - USER_BFF_STRIPE_WEBHOOK_SECRET=${USER_BFF_STRIPE_WEBHOOK_SECRET}
+
+networks:
+  fso-banking:
+    driver: bridge

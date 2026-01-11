@@ -8,13 +8,13 @@ export const env = createEnv({
       .string()
       .regex(/^[0-9]+$/)
       .transform((s) => Number.parseInt(s)),
-    USER_BFF_USER_SERVICE_URL: z.url(),
-    USER_BFF_PAYMENT_SERVICE_URL: z.url(),
+    USER_BFF_USER_SERVICE_URL: z.url().transform((url) => new URL(url).host),
+    USER_BFF_PAYMENT_SERVICE_URL: z.url().transform((url) => new URL(url).host),
     USER_BFF_JWT_SECRET: z.string(),
     USER_BFF_REDIS_CONNECTION_STRING: z.string(),
     USER_BFF_STRIPE_SECRET_KEY: z.string(),
     USER_BFF_BASE_URL: z.string(),
-    USER_BFF_STRIPE_SERVICE_URL: z.url(),
+    USER_BFF_STRIPE_SERVICE_URL: z.url().transform((url) => new URL(url).host),
     USER_BFF_STRIPE_WEBHOOK_SECRET: z.string(),
     USER_BFF_OTEL_EXPORTER_OTLP_ENDPOINT: z.string(),
     NODE_ENV: z.enum(["development", "production"]),
