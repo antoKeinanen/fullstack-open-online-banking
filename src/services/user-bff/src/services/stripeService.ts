@@ -62,6 +62,15 @@ export async function createPayout(
   );
   if (stripeTransferError) {
     span.recordException(stripeTransferError);
+
+    const { error } = await stripeService.call("voidPendingPayout", {
+      stripePayoutId: pendingPayout.tigerbeetleTransferId,
+      amount: formatAsHex(amountInCents),
+    });
+    if (error) {
+      span.recordException(error);
+    }
+
     return { error: stripeTransferError };
   }
 
