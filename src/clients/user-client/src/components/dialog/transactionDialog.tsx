@@ -130,6 +130,7 @@ function WithdrawTab({ setOpen }: { setOpen: Dispatch<boolean> }) {
   const eligibilityQuery = useQuery({
     queryKey: ["payoutEligibility"],
     queryFn: getPayoutEligibility,
+    staleTime: 6 * 60 * 1000, // 5 minutes
   });
 
   const payoutMutation = useMutation({
