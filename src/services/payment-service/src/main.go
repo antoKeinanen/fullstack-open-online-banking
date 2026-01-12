@@ -123,7 +123,7 @@ func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.Create
 	}
 
 	dbSpan.SetAttributes(
-		attribute.Int64("db.rows_affected", rowsAffected),
+		attribute.Int64(lib.ATTR_DB_ROWS_AFFECTED, rowsAffected),
 	)
 	dbSpan.End()
 
