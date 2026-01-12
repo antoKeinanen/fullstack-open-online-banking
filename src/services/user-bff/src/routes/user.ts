@@ -7,6 +7,7 @@ import {
   createUnexpectedError,
 } from "@repo/validators/error";
 import {
+  getSuggestedUsersResponseSchema,
   getUserTransfersRequestSchema,
   getUserTransfersResponseSchema,
   userSchema,
@@ -114,6 +115,55 @@ userRouter.get(
       return c.json(createUnexpectedError(), 500);
     }
 
+    return c.json(data, 200);
+  },
+);
+
+userRouter.get(
+  "/suggested",
+
+  describeRoute({
+    description:
+      "Returns a list of suggested users based on the currently logged in user's recent transfers",
+
+    responses: {
+      200: {
+        description: "A successful response",
+        content: {
+          "application/json": {
+            schema: resolver(getSuggestedUsersResponseSchema),
+          },
+        },
+      },
+      500: {
+        description: "The request has failed",
+        content: {
+          "application/json": {
+            schema: resolver(apiErrorResponseSchema),
+          },
+        },
+      },
+    },
+  }),
+
+  async (c) => {
+    const span = c.get("span");
+    const { sub: userId } = c.get("jwtPayload");
+
+    span.setAttribute(attrs.ATTR_USER_ID, userId);
+
+    const { data, error } = await userService.call("getSuggestedUsers", {
+      userId: userId,
+      limit: 8,
+    });
+
+    if (error != null) {
+      span.recordException(error);
+      span.addEvent(events.EVENT_USER_SUGGESTED_GET_FAILURE);
+      return c.json(createUnexpectedError(), 500);
+    }
+
+    span.addEvent(events.EVENT_USER_SUGGESTED_GET_SUCCESS);
     return c.json(data, 200);
   },
 );

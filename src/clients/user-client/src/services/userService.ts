@@ -1,5 +1,6 @@
 import type { GetUserTransfersRequest } from "@repo/validators/user";
 import {
+  getSuggestedUsersResponseSchema,
   getUserTransfersResponseSchema,
   userSchema,
 } from "@repo/validators/user";
@@ -24,4 +25,8 @@ export async function getUserTransfers(req: GetUserTransfersRequest) {
     "/api/user/transfers?" + query.toString(),
     getUserTransfersResponseSchema,
   );
+}
+
+export async function getSuggestedUsers() {
+  return api.get("/api/user/suggested", getSuggestedUsersResponseSchema);
 }

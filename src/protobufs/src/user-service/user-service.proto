@@ -13,6 +13,7 @@ service UserService {
   rpc InvalidateSession(InvalidateSessionRequest) returns (Empty);
   rpc GetUserByPhoneNumber(GetUserByPhoneNumberRequest) returns (User);
   rpc GetUserTransfers(GetUserTransfersRequest) returns (GetUserTransfersResponse);
+  rpc GetSuggestedUsers(GetSuggestedUsersRequest) returns (GetSuggestedUsersResponse);
 }
 
 message GetUserTransfersRequest {
@@ -116,4 +117,20 @@ message Session {
   string refresh_token         = 2;
   string access_token_expires  = 3;
   string refresh_token_expires = 4;
+}
+
+message GetSuggestedUsersRequest {
+  string user_id = 1;
+  int32  limit   = 2;
+}
+
+message SuggestedUser {
+  string user_id      = 1;
+  string phone_number = 2;
+  string first_name   = 3;
+  string last_name    = 4;
+}
+
+message GetSuggestedUsersResponse {
+  repeated SuggestedUser users = 1;
 }

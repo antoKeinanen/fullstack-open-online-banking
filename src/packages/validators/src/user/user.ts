@@ -65,3 +65,18 @@ export const getUserTransfersResponseSchema = z.object({
 export type GetUserTransfersResponse = z.infer<
   typeof getUserTransfersResponseSchema
 >;
+
+export const suggestedUserSchema = z.object({
+  userId: z.string(),
+  phoneNumber: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
+export type SuggestedUser = z.infer<typeof suggestedUserSchema>;
+
+export const getSuggestedUsersResponseSchema = z.object({
+  users: z.array(suggestedUserSchema),
+});
+export type GetSuggestedUsersResponse = z.infer<
+  typeof getSuggestedUsersResponseSchema
+>;
