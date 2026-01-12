@@ -111,7 +111,7 @@ func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.Create
 		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{transferResp.TransferId, req.FromUserId, req.ToUserId, amount}),
 	)
 
-	result, err := s.db.ExecContext(ctx, lib.QueryInsertTransfer, transferResp.TransferId, req.FromUserId, req.ToUserId, req.Amount)
+	result, err := s.db.ExecContext(ctx, lib.QueryInsertTransfer, transferResp.TransferId, req.FromUserId, req.ToUserId, amount)
 	if err != nil {
 		dbSpan.RecordError(err)
 		return nil, err
