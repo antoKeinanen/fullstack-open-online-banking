@@ -28,19 +28,20 @@ message GetUserTransfersResponse {
 }
 
 message Transfer {
-  string transfer_id            = 1;
-  string debit_account_id       = 2;
-  string credit_account_id      = 3;
-  string amount                 = 4;
-  string debit_user_full_name   = 5;
-  string credit_user_full_name  = 6;
-  string timestamp              = 7;
-  bool   is_system_transfer     = 8;
-  bool   is_increasing_transfer = 9;
-  bool   pending                = 10;
-  bool   posted                 = 11;
-  bool   voided                 = 12;
-
+  string transfer_id             = 1;
+  string debit_account_id        = 2;
+  string credit_account_id       = 3;
+  string amount                  = 4;
+  string debit_user_first_name   = 5;
+  string credit_user_first_name  = 6;
+  string timestamp               = 7;
+  bool   is_system_transfer      = 8;
+  bool   is_increasing_transfer  = 9;
+  bool   pending                 = 10;
+  bool   posted                  = 11;
+  bool   voided                  = 12;
+  string debit_user_last_name    = 13;
+  string credit_user_last_name   = 14;
 }
 
 message GetUserByPhoneNumberRequest {

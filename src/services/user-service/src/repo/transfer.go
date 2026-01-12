@@ -5,14 +5,16 @@ import (
 	pb "protobufs/gen/go/user-service"
 )
 
-func TbTransferToPbTransfer(transfer *tbPb.Transfer, debitUserName, creditUserName, requestUserId string) *pb.Transfer {
+func TbTransferToPbTransfer(transfer *tbPb.Transfer, debitUser, creditUser UserName, requestUserId string) *pb.Transfer {
 	return &pb.Transfer{
 		TransferId:           transfer.TransferId,
 		Amount:               transfer.Amount,
 		DebitAccountId:       transfer.DebitAccountId,
 		CreditAccountId:      transfer.CreditAccountId,
-		DebitUserFullName:    debitUserName,
-		CreditUserFullName:   creditUserName,
+		DebitUserFirstName:   debitUser.FirstName,
+		DebitUserLastName:    debitUser.LastName,
+		CreditUserFirstName:  creditUser.FirstName,
+		CreditUserLastName:   creditUser.LastName,
 		Timestamp:            transfer.Timestamp,
 		IsIncreasingTransfer: transfer.DebitAccountId == requestUserId,
 		IsSystemTransfer:     transfer.CreditAccountId == "1" || transfer.DebitAccountId == "1",

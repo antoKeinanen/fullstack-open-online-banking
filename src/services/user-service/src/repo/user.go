@@ -74,8 +74,13 @@ type DbUserIdToNameMap struct {
 	UserId    string `db:"user_id"`
 }
 
-func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[string]string, error) {
-	result := make(map[string]string)
+type UserName struct {
+	FirstName string
+	LastName  string
+}
+
+func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[string]UserName, error) {
+	result := make(map[string]UserName)
 
 	rows, err := db.QueryxContext(ctx, queries.QueryMapUserIdsToNames, pq.Array(ids))
 	if err != nil {
@@ -90,7 +95,7 @@ func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[
 			slog.Error("Failed to scan user row", "error", err)
 			return result, lib.ErrUnexpected
 		}
-		result[user.UserId] = lib.FormatName(user.FirstName, user.LastName)
+		result[user.UserId] = UserName{FirstName: user.FirstName, LastName: user.LastName}
 	}
 
 	if err := rows.Err(); err != nil {

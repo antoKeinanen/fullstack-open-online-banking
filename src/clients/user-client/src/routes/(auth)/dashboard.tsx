@@ -12,7 +12,6 @@ import {
   BanknoteIcon,
   BanknoteXIcon,
   LockIcon,
-  UserIcon,
   UsersIcon,
   WalletIcon,
 } from "lucide-react";
@@ -110,7 +109,8 @@ function RouteComponent() {
           <Avatar className="size-10">
             <AvatarImage src="TODO" />
             <AvatarFallback>
-              <UserIcon />
+              {user.firstName[0].toUpperCase()}
+              {user.lastName[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </ItemMedia>

@@ -1,5 +1,4 @@
 import type { SuggestedUser } from "@repo/validators/user";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/web-ui/avatar";
 import {
   Item,

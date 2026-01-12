@@ -241,10 +241,10 @@ func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUse
 
 	pbTransfers := make([]*pb.Transfer, len(transfers.Transfers))
 	for i, transfer := range transfers.Transfers {
-		debitUserName := userIdToName[transfer.DebitAccountId]
-		creditUserName := userIdToName[transfer.CreditAccountId]
+		debitUser := userIdToName[transfer.DebitAccountId]
+		creditUser := userIdToName[transfer.CreditAccountId]
 
-		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUserName, creditUserName, req.UserId)
+		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUser, creditUser, req.UserId)
 	}
 
 	return &pb.GetUserTransfersResponse{
