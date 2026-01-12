@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	pb "protobufs/gen/go/stripe-service"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
@@ -95,7 +96,7 @@ func newServer(config *lib.Configuration) *StripeServiceServer {
 
 func main() {
 	config := lib.ParseConfiguration()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.StripeServicePort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", config.StripeServicePort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -113,5 +114,6 @@ func main() {
 	defer server.tigerbeetleServiceConnection.Close()
 
 	pb.RegisterStripeServiceServer(grpcServer, server)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.StripeServicePort)
 	grpcServer.Serve(lis)
 }

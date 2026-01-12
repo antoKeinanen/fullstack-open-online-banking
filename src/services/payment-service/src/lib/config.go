@@ -6,9 +6,10 @@ import (
 )
 
 type Configuration struct {
-	PaymentServicePort       string
-	TigerbeetleServiceUrl    string
-	OtelExporterOtlpEndpoint string
+	PaymentServicePort        string
+	TigerbeetleServiceUrl     string
+	PaymentServiceDatabaseDsn string
+	OtelExporterOtlpEndpoint  string
 }
 
 func GetEnv(envName string) string {
@@ -21,8 +22,9 @@ func GetEnv(envName string) string {
 
 func ParseConfiguration() *Configuration {
 	return &Configuration{
-		PaymentServicePort:       GetEnv("PAYMENT_SERVICE_PORT"),
-		TigerbeetleServiceUrl:    GetEnv("PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL"),
-		OtelExporterOtlpEndpoint: GetEnv("PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT"),
+		PaymentServicePort:        GetEnv("PAYMENT_SERVICE_PORT"),
+		TigerbeetleServiceUrl:     GetEnv("PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL"),
+		PaymentServiceDatabaseDsn: GetEnv("PAYMENT_SERVICE_DATABASE_DSN"),
+		OtelExporterOtlpEndpoint:  GetEnv("PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
 }

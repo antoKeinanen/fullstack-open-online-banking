@@ -14,6 +14,8 @@ const (
 
 	ATTR_SESSION_ID    = "auth.session.id"
 	ATTR_REFRESH_TOKEN = "auth.session.refresh_token"
+
+	ATTR_SUGGESTED_USERS_LIMIT = "suggested_users.limit"
 )
 
 const (
@@ -46,4 +48,7 @@ const (
 	EVENT_TB_GET_TRANSFERS  = "tigerbeetle.get_transfers"
 
 	EVENT_ACCOUNT_NOT_FOUND = "tigerbeetle.account_not_found"
+
+	EVENT_GET_SUGGESTED_USERS    = "suggested_users.get"
+	EVENT_GET_SUGGESTED_USERS_DB = "suggested_users.db.get"
 )

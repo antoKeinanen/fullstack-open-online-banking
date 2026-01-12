@@ -3,6 +3,8 @@ module payment-service
 go 1.25.4
 
 require (
+	github.com/jmoiron/sqlx v1.4.0
+	github.com/lib/pq v1.10.9
 	github.com/tigerbeetle/tigerbeetle-go v0.16.62
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.64.0
 	go.opentelemetry.io/otel v1.39.0

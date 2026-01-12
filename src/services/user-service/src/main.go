@@ -104,7 +104,7 @@ func newServer(config *lib.Configuration) *UserServiceServer {
 
 func main() {
 	config := lib.ParseConfiguration()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.UserServicePort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", config.UserServicePort))
 	if err != nil {
 		slog.Error("Failed to listen", "error", err)
 		panic(err)
@@ -123,5 +123,6 @@ func main() {
 	defer server.tigerbeetleServiceConnection.Close()
 
 	pb.RegisterUserServiceServer(grpcServer, server)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.UserServicePort)
 	grpcServer.Serve(lis)
 }

@@ -48,8 +48,10 @@ export const transferSchema = z.object({
   debitAccountId: z.string(),
   creditAccountId: z.string(),
   amount: z.string(),
-  debitUserFullName: z.string(),
-  creditUserFullName: z.string(),
+  debitUserFirstName: z.string(),
+  debitUserLastName: z.string(),
+  creditUserFirstName: z.string(),
+  creditUserLastName: z.string(),
   timestamp: z.iso.datetime(),
   isIncreasingTransfer: z.boolean(),
   isSystemTransfer: z.boolean(),
@@ -64,4 +66,19 @@ export const getUserTransfersResponseSchema = z.object({
 });
 export type GetUserTransfersResponse = z.infer<
   typeof getUserTransfersResponseSchema
+>;
+
+export const suggestedUserSchema = z.object({
+  userId: z.string(),
+  phoneNumber: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
+export type SuggestedUser = z.infer<typeof suggestedUserSchema>;
+
+export const getSuggestedUsersResponseSchema = z.object({
+  users: z.array(suggestedUserSchema),
+});
+export type GetSuggestedUsersResponse = z.infer<
+  typeof getSuggestedUsersResponseSchema
 >;

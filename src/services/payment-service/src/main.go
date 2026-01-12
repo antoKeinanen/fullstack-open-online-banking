@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"payment-service/src/lib"
 	pb "protobufs/gen/go/payment-service"
@@ -11,6 +12,8 @@ import (
 
 	tbt "github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -28,6 +31,7 @@ import (
 type PaymentServiceServer struct {
 	pb.UnimplementedPaymentServiceServer
 
+	db                           *sqlx.DB
 	config                       *lib.Configuration
 	tigerbeetleServiceClient     tbPb.TigerbeetleServiceClient
 	tigerbeetleServiceConnection *grpc.ClientConn
@@ -100,10 +104,40 @@ func (s *PaymentServiceServer) CreatePayment(ctx context.Context, req *pb.Create
 	)
 	createTransferSpan.End()
 
+	ctx, dbSpan := tracer.Start(ctx, lib.EVENT_DB_CREATE_TRANSFER)
+	defer dbSpan.End()
+
+	dbSpan.SetAttributes(
+		attribute.String(lib.ATTR_DB_QUERY, lib.QueryInsertTransfer),
+		attribute.StringSlice(lib.ATTR_DB_ARGS, []string{transferResp.TransferId, req.FromUserId, req.ToUserId, amount}),
+	)
+
+	result, err := s.db.ExecContext(ctx, lib.QueryInsertTransfer, transferResp.TransferId, req.FromUserId, req.ToUserId, amount)
+	if err != nil {
+		dbSpan.RecordError(err)
+		return nil, err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		dbSpan.RecordError(err)
+		return nil, err
+	}
+
+	dbSpan.SetAttributes(
+		attribute.Int64(lib.ATTR_DB_ROWS_AFFECTED, rowsAffected),
+	)
+	dbSpan.End()
+
 	return &pb.CreatePaymentResponse{}, nil
 }
 
 func newServer(config *lib.Configuration) *PaymentServiceServer {
+	db, err := sqlx.Connect("postgres", config.PaymentServiceDatabaseDsn)
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	log.Println("Connected to db")
+
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
@@ -117,6 +151,7 @@ func newServer(config *lib.Configuration) *PaymentServiceServer {
 	log.Println("Connected to tiger beetle service.")
 
 	s := &PaymentServiceServer{
+		db:                           db,
 		config:                       config,
 		tigerbeetleServiceClient:     tigerbeetleClient,
 		tigerbeetleServiceConnection: conn,
@@ -128,7 +163,7 @@ func newServer(config *lib.Configuration) *PaymentServiceServer {
 func main() {
 	config := lib.ParseConfiguration()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.PaymentServicePort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", config.PaymentServicePort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -142,8 +177,10 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	server := newServer(config)
+	defer server.db.Close()
 	defer server.tigerbeetleServiceConnection.Close()
 
 	pb.RegisterPaymentServiceServer(grpcServer, server)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.PaymentServicePort)
 	grpcServer.Serve(lis)
 }

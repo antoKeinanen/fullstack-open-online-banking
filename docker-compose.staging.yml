@@ -2,16 +2,13 @@ services:
   cloudflared-tunnel:
     image: cloudflare/cloudflared
     container_name: fso-banking-cloudflared-tunnel
-    command: tunnel run
+    command: tunnel --loglevel warn run 
     networks:
       - fso-banking
     env_file:
       - .env.staging
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-
-
-
 
   ingress-router:
     image: ingress-router
@@ -67,6 +64,7 @@ services:
     environment:
       - PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
       - PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+      - PAYMENT_SERVICE_DATABASE_DSN=${PAYMENT_SERVICE_DATABASE_DSN}
 
   stripe-service:
     image: stripe-service

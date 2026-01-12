@@ -65,6 +65,8 @@ export const events = {
 
   EVENT_USER_GET_FAILURE: "user.get_failure",
   EVENT_USER_TRANSFERS_GET_FAILURE: "user.transfers.get_failure",
+  EVENT_USER_SUGGESTED_GET_SUCCESS: "user.suggested.get_success",
+  EVENT_USER_SUGGESTED_GET_FAILURE: "user.suggested.get_failure",
 
   EVENT_PAYMENT_TRANSFER_DUPLICATE_PENDING:
     "payment.transfer.duplicate_pending",

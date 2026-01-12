@@ -74,8 +74,13 @@ type DbUserIdToNameMap struct {
 	UserId    string `db:"user_id"`
 }
 
-func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[string]string, error) {
-	result := make(map[string]string)
+type UserName struct {
+	FirstName string
+	LastName  string
+}
+
+func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[string]UserName, error) {
+	result := make(map[string]UserName)
 
 	rows, err := db.QueryxContext(ctx, queries.QueryMapUserIdsToNames, pq.Array(ids))
 	if err != nil {
@@ -90,7 +95,7 @@ func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[
 			slog.Error("Failed to scan user row", "error", err)
 			return result, lib.ErrUnexpected
 		}
-		result[user.UserId] = lib.FormatName(user.FirstName, user.LastName)
+		result[user.UserId] = UserName{FirstName: user.FirstName, LastName: user.LastName}
 	}
 
 	if err := rows.Err(); err != nil {
@@ -100,4 +105,42 @@ func MapUserIdsToUsernames(ctx context.Context, db *sqlx.DB, ids []string) (map[
 
 	return result, nil
 
+}
+
+type SuggestedUser struct {
+	UserId      string `db:"user_id"`
+	PhoneNumber string `db:"phone_number"`
+	FirstName   string `db:"first_name"`
+	LastName    string `db:"last_name"`
+}
+
+func GetSuggestedUsers(ctx context.Context, db *sqlx.DB, userId string, limit int32) ([]SuggestedUser, error) {
+	var users []SuggestedUser
+
+	rows, err := db.QueryxContext(ctx, queries.QueryGetSuggestedUsers, userId, limit)
+	if err != nil {
+		slog.Error("Failed to get suggested users", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+	defer rows.Close()
+
+	seen := make(map[string]bool)
+	for rows.Next() {
+		var user SuggestedUser
+		if err := rows.StructScan(&user); err != nil {
+			slog.Error("Failed to scan suggested user row", "error", err)
+			return nil, lib.ErrUnexpected
+		}
+		if !seen[user.UserId] {
+			seen[user.UserId] = true
+			users = append(users, user)
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		slog.Error("Error iterating suggested users rows", "error", err)
+		return nil, lib.ErrUnexpected
+	}
+
+	return users, nil
 }

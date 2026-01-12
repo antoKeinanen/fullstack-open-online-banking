@@ -1,7 +1,6 @@
 import {
   ArrowLeftRightIcon,
   ClockIcon,
-  UserIcon,
   UserRoundCogIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -29,9 +28,21 @@ function formatTransfer({
   pending,
   isSystemTransfer,
   isIncreasingTransfer,
-  creditUserFullName,
-  debitUserFullName,
+  creditUserFirstName,
+  creditUserLastName,
+  debitUserFirstName,
+  debitUserLastName,
 }: Transfer) {
+  const otherUserFirstName = isIncreasingTransfer
+    ? creditUserFirstName
+    : debitUserFirstName;
+  const otherUserLastName = isIncreasingTransfer
+    ? creditUserLastName
+    : debitUserLastName;
+  const otherUserFullName = `${otherUserFirstName} ${otherUserLastName}`.trim();
+  const otherUserInitials =
+    `${otherUserFirstName[0]}${otherUserLastName[0]}`.toUpperCase();
+
   const conditions = [
     {
       check: () => voided && isSystemTransfer,
@@ -39,13 +50,15 @@ function formatTransfer({
       avatar: <XCircleIcon />,
       symbol: isIncreasingTransfer ? "+" : "-",
       recipient: "System Float Account",
+      initials: null,
     },
     {
       check: () => voided,
       label: "Failed",
       avatar: <XCircleIcon />,
       symbol: isIncreasingTransfer ? "+" : "-",
-      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+      recipient: otherUserFullName,
+      initials: otherUserInitials,
     },
     {
       check: () => pending && isSystemTransfer,
@@ -53,13 +66,15 @@ function formatTransfer({
       avatar: <ClockIcon />,
       symbol: isIncreasingTransfer ? "+" : "-",
       recipient: "System Float Account",
+      initials: null,
     },
     {
       check: () => pending,
       label: "Pending",
       avatar: <ClockIcon />,
       symbol: isIncreasingTransfer ? "+" : "-",
-      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+      recipient: otherUserFullName,
+      initials: otherUserInitials,
     },
     {
       check: () => isSystemTransfer,
@@ -67,13 +82,15 @@ function formatTransfer({
       avatar: <UserRoundCogIcon />,
       symbol: isIncreasingTransfer ? "+" : "-",
       recipient: "System Float Account",
+      initials: null,
     },
     {
       check: () => !isSystemTransfer,
       label: isIncreasingTransfer ? "Sent You" : "You Sent",
-      avatar: <UserIcon />,
+      avatar: null,
       symbol: isIncreasingTransfer ? "+" : "-",
-      recipient: isIncreasingTransfer ? creditUserFullName : debitUserFullName,
+      recipient: otherUserFullName,
+      initials: otherUserInitials,
     },
   ];
 
@@ -83,6 +100,7 @@ function formatTransfer({
       label: "Transfer",
       symbol: "",
       recipient: "Unexpected",
+      initials: null,
     }
   );
 }
@@ -93,8 +111,8 @@ export function TransferCard({ transfer }: TransferCardProps) {
     <Item className="not-last:border-b-border rounded-none">
       <ItemMedia>
         <Avatar className="size-12">
-          <AvatarImage src="TODO" />
-          <AvatarFallback>{format.avatar}</AvatarFallback>
+          <AvatarImage src={undefined} />
+          <AvatarFallback>{format.initials ?? format.avatar}</AvatarFallback>
         </Avatar>
       </ItemMedia>
       <ItemContent>

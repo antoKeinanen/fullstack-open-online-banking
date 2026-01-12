@@ -241,13 +241,48 @@ func (s *UserServiceServer) GetUserTransfers(ctx context.Context, req *pb.GetUse
 
 	pbTransfers := make([]*pb.Transfer, len(transfers.Transfers))
 	for i, transfer := range transfers.Transfers {
-		debitUserName := userIdToName[transfer.DebitAccountId]
-		creditUserName := userIdToName[transfer.CreditAccountId]
+		debitUser := userIdToName[transfer.DebitAccountId]
+		creditUser := userIdToName[transfer.CreditAccountId]
 
-		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUserName, creditUserName, req.UserId)
+		pbTransfers[i] = repo.TbTransferToPbTransfer(transfer, debitUser, creditUser, req.UserId)
 	}
 
 	return &pb.GetUserTransfersResponse{
 		Transfers: pbTransfers,
+	}, nil
+}
+
+func (s *UserServiceServer) GetSuggestedUsers(ctx context.Context, req *pb.GetSuggestedUsersRequest) (*pb.GetSuggestedUsersResponse, error) {
+	span := trace.SpanFromContext(ctx)
+	tracer := span.TracerProvider().Tracer(lib.ServiceName)
+
+	span.SetAttributes(
+		attribute.String(lib.ATTR_USER_ID, req.UserId),
+		attribute.Int64(lib.ATTR_SUGGESTED_USERS_LIMIT, int64(req.Limit)),
+	)
+
+	ctx, dbSpan := tracer.Start(ctx, lib.EVENT_GET_SUGGESTED_USERS_DB)
+	defer dbSpan.End()
+
+	users, err := repo.GetSuggestedUsers(ctx, s.db, req.UserId, req.Limit)
+	if err != nil {
+		dbSpan.RecordError(err)
+		dbSpan.End()
+		return nil, lib.ErrUnexpected
+	}
+	dbSpan.End()
+
+	pbUsers := make([]*pb.SuggestedUser, len(users))
+	for i, user := range users {
+		pbUsers[i] = &pb.SuggestedUser{
+			UserId:      user.UserId,
+			PhoneNumber: user.PhoneNumber,
+			FirstName:   user.FirstName,
+			LastName:    user.LastName,
+		}
+	}
+
+	return &pb.GetSuggestedUsersResponse{
+		Users: pbUsers,
 	}, nil
 }

@@ -12,7 +12,7 @@ import {
   BanknoteIcon,
   BanknoteXIcon,
   LockIcon,
-  UserIcon,
+  UsersIcon,
   WalletIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -43,7 +43,11 @@ import { TransactionDialog } from "../../components/dialog/transactionDialog";
 import { RecommendedUserCard } from "../../components/recommendedUser";
 import { TransferCard } from "../../components/transferCard";
 import { logOut } from "../../services/authService";
-import { getUserDetails, getUserTransfers } from "../../services/userService";
+import {
+  getSuggestedUsers,
+  getUserDetails,
+  getUserTransfers,
+} from "../../services/userService";
 import { useAuthStore } from "../../stores/authStore";
 import { formatBalance } from "../../util/formatters";
 import { useInvalidateRouteDataOnRefocus } from "../../util/useInvalidateRouteDataOnRefocus";
@@ -51,13 +55,15 @@ import { useInvalidateRouteDataOnRefocus } from "../../util/useInvalidateRouteDa
 export const Route = createFileRoute("/(auth)/dashboard")({
   component: RouteComponent,
   loader: async () => {
-    const [user, transfers] = await Promise.all([
+    const [user, transfers, suggestedUsers] = await Promise.all([
       getUserDetails(),
       getUserTransfers({ limit: 16 }),
+      getSuggestedUsers(),
     ]);
     return {
       user: user,
       transfers: transfers.transfers,
+      suggestedUsers: suggestedUsers.users,
     };
   },
   onError: (err) => {
@@ -72,7 +78,7 @@ function RouteComponent() {
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const { user, transfers } = useLoaderData({ from: Route.id });
+  const { user, transfers, suggestedUsers } = useLoaderData({ from: Route.id });
   const { clearSession } = useAuthStore();
   const { navigate } = useRouter();
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
@@ -103,7 +109,8 @@ function RouteComponent() {
           <Avatar className="size-10">
             <AvatarImage src="TODO" />
             <AvatarFallback>
-              <UserIcon />
+              {user.firstName[0].toUpperCase()}
+              {user.lastName[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </ItemMedia>
@@ -214,9 +221,25 @@ function RouteComponent() {
 
         <Card className="h-full">
           <CardContent className="grid grid-cols-4 grid-rows-2 items-center justify-items-center gap-3">
-            {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-              <RecommendedUserCard key={`recommended-user-${i}`} />
-            ))}
+            {suggestedUsers.length === 0 ? (
+              <div className="col-span-4 row-span-2">
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <UsersIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No suggestions yet</EmptyTitle>
+                    <EmptyDescription>
+                      Send or receive money to see suggested users here.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </div>
+            ) : (
+              suggestedUsers.map((user) => (
+                <RecommendedUserCard key={user.userId} user={user} />
+              ))
+            )}
           </CardContent>
         </Card>
         <TransactionDialog
