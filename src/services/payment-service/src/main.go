@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"payment-service/src/lib"
 	pb "protobufs/gen/go/payment-service"
@@ -162,7 +163,7 @@ func newServer(config *lib.Configuration) *PaymentServiceServer {
 func main() {
 	config := lib.ParseConfiguration()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", config.PaymentServicePort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", config.PaymentServicePort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -180,5 +181,6 @@ func main() {
 	defer server.tigerbeetleServiceConnection.Close()
 
 	pb.RegisterPaymentServiceServer(grpcServer, server)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.PaymentServicePort)
 	grpcServer.Serve(lis)
 }

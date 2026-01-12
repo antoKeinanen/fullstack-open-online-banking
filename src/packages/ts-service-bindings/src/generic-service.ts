@@ -60,20 +60,35 @@ export class GrpcService<T extends grpc.Client> {
       options?.credentials ?? grpc.credentials.createInsecure();
     const client = new ClientConstructor(address, credentials);
 
-    console.log(`Connecting to ${serviceName} grpc`);
+    const connectionTimeoutSeconds = options?.connectionTimeoutSeconds ?? 5;
     const deadline = new Date();
-    deadline.setSeconds(
-      deadline.getSeconds() + (options?.connectionTimeoutSeconds ?? 5),
+    deadline.setSeconds(deadline.getSeconds() + connectionTimeoutSeconds);
+
+    console.log(
+      `[${serviceName}] Connecting to gRPC service at ${address} (timeout: ${connectionTimeoutSeconds}s, deadline: ${deadline.toISOString()})`,
     );
 
     await new Promise<void>((resolve, reject) => {
       client.waitForReady(deadline, (error) => {
         if (error != undefined) {
-          console.error(`Failed to connect to ${serviceName} grpc`, error);
-          reject(new Error(`Failed to connect to ${serviceName} grpc`));
+          console.error(
+            `[${serviceName}] Failed to connect to gRPC service at ${address}`,
+            {
+              error: error.message,
+              deadline: deadline.toISOString(),
+              timeoutSeconds: connectionTimeoutSeconds,
+            },
+          );
+          reject(
+            new Error(
+              `Failed to connect to ${serviceName} gRPC at ${address}: ${error.message}`,
+            ),
+          );
           return;
         }
-        console.log(`Connected to ${serviceName} grpc`);
+        console.log(
+          `[${serviceName}] Successfully connected to gRPC service at ${address}`,
+        );
         resolve();
       });
     });
