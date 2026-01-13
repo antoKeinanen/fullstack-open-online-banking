@@ -15,5 +15,5 @@ spec:
       version: 1.28.2
   install:
     crds: Create
-  update:
+  upgrade:
     crds: CreateReplace
