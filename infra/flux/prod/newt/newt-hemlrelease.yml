@@ -20,10 +20,10 @@ spec:
   values:
     newtInstances:
       - name: main
-    enabled: true
-    auth:
-      existingSecretName: newt-cred
-      keys:
-        endpointKey: PANGOLIN_ENDPOINT
-        idKey: NEWT_ID
-        secretKey: NEWT_SECRET
+        enabled: true
+        auth:
+          existingSecretName: newt-cred
+          keys:
+            endpointKey: PANGOLIN_ENDPOINT
+            idKey: NEWT_ID
+            secretKey: NEWT_SECRET
