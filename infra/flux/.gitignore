@@ -1,0 +1,4 @@
+.env*
+!.env.example
+*-secret.yaml
+!*-sealed-secret.yaml
