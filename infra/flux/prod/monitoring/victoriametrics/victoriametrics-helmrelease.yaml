@@ -7,7 +7,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: victoriametrics
+      chart: victoria-metrics-operator
       sourceRef:
         kind: HelmRepository
         name: victoriametrics
