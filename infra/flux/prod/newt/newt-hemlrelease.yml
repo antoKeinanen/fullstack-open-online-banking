@@ -10,7 +10,7 @@ spec:
       chart: newt
       sourceRef:
         kind: HelmRepository
-        name: newt
+        name: fossorial
         namespace: flux-system
       version: 1.1.0
   install:
