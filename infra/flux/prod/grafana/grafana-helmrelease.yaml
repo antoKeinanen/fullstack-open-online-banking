@@ -13,3 +13,6 @@ spec:
         name: grafana
         namespace: flux-system
       version: 10.5.5
+  values:
+    podAnnotations:
+      sidecar.istio.io/inject: "true"
