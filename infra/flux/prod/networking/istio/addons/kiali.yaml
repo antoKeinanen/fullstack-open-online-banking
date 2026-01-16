@@ -127,8 +127,8 @@ data:
         url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428"
       grafana:
         enabled: true
-        internalUrl: "http://grafana.monitoring.svc:3000" 
-        url: "https://grafana.fso-banking.antok.dev"
+        internal_url: "http://grafana.monitoring.svc:3000" 
+        external_url: "https://grafana.fso-banking.antok.dev"
       tracing:
         enabled: false
     identity:
