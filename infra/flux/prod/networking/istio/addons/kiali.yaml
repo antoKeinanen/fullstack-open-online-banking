@@ -124,7 +124,9 @@ data:
       istio:
         root_namespace: istio-system
       prometheus:
-        url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428"
+        enabled: true
+        internal_url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428"
+        external_url: "https://victoriametrics.fso-banking.antok.dev/"
       grafana:
         enabled: true
         internal_url: "http://grafana.monitoring.svc:3000" 
