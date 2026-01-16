@@ -13,3 +13,13 @@ spec:
         name: grafana
         namespace: flux-system
       version: 10.5.5
+  values:
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: VictoriaMetrics
+            type: prometheus
+            url: http://vmsingle-victoriametrics-single.monitoring.svc:8428
+            access: proxy
+            isDefault: true
