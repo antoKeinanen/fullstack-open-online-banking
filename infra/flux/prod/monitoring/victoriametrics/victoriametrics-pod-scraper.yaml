@@ -4,9 +4,11 @@ metadata:
   name: victoriametrics-pod-scraper
   namespace: monitoring
 spec:
+  namespaceSelector:
+    any: true
   selector:
     matchLabels:
       scrapeMetrics: enabled
   podMetricsEndpoints:
-    - port: metrics
+    - port: http
       interval: 30s
