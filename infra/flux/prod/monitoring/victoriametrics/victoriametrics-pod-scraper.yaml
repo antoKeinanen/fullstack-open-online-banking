@@ -3,6 +3,8 @@ kind: VMPodScrape
 metadata:
   name: victoriametrics-pod-scraper
   namespace: monitoring
+  labels:
+    scrapeMetrics: enabled
 spec:
   namespaceSelector:
     any: true
