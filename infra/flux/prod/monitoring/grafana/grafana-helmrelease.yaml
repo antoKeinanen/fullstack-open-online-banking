@@ -7,7 +7,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: graf
+      chart: grafana
       sourceRef:
         kind: HelmRepository
         name: grafana
