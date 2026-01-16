@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: demo-app-service-scrape
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo-app
+  endpoints:
+  - port: http
