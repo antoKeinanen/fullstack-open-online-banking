@@ -4,17 +4,18 @@ metadata:
   name: demo-app
   namespace: default
   labels:
-    scrapeMetrics: enabled
+    app.kubernetes.io/name: demo-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      scrapeMetrics: enabled
+      app.kubernetes.io/name: demo-app
   template:
     metadata:
       labels:
-        scrapeMetrics: enabled
         app.kubernetes.io/name: demo-app
+        scrapeMetrics: enabled
+    spec:
       containers:
         - name: main
           image: docker.io/victoriametrics/demo-app:1.2
