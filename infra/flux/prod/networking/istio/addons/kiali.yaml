@@ -123,6 +123,10 @@ data:
         enabled: true
       istio:
         root_namespace: istio-system
+      prometheus:
+        url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428"
+      grafana:
+        url: "http://grafana.monitoring.svc:3000"
       tracing:
         enabled: false
     identity:
