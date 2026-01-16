@@ -14,6 +14,7 @@ spec:
     metadata:
       labels:
         scrapeMetrics: enabled
+        app.kubernetes.io/name: demo-app
       containers:
         - name: main
           image: docker.io/victoriametrics/demo-app:1.2
