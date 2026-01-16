@@ -2,6 +2,7 @@ apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
   name: victoriametrics-pod-scraper
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
