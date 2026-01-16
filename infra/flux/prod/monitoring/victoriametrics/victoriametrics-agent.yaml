@@ -7,3 +7,6 @@ spec:
   selectAllByDefault: true
   remoteWrite:
     - url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428/api/v1/write"
+  podScrapeSelector:
+    matchLabels:
+      scrapeMetrics: enabled
