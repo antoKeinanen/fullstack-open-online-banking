@@ -14,8 +14,8 @@ spec:
         namespace: flux-system
       version: 10.5.5
   values:
-    podAnnotations:
-      sidecar.istio.io/inject: "true"
+    podLabels:
+      istio-injection: enabled
     datasources:
       datasources.yaml:
         apiVersion: 1
