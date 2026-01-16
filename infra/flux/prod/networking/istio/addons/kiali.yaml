@@ -126,7 +126,9 @@ data:
       prometheus:
         url: "http://vmsingle-victoriametrics-single.monitoring.svc:8428"
       grafana:
-        url: "http://grafana.monitoring.svc:3000"
+        enabled: true
+        in_cluster_url: "http://grafana.monitoring.svc:3000" 
+        url: "https://grafana.fso-banking.antok.dev"
       tracing:
         enabled: false
     identity:
@@ -139,7 +141,7 @@ data:
         ignore:
         - KIA1301
     login_token:
-      signing_key: CHANGEME00000000
+      signing_key: 7hm+IVIOfWoROsYL9a300mOyb0XVV+6TdBreqtx60+k=
     server:
       observability:
         metrics:
