@@ -23,3 +23,9 @@ spec:
             url: http://vmsingle-victoriametrics-single.monitoring.svc:8428
             access: proxy
             isDefault: true
+    persistence:
+      enabled: true
+      size: 10Gi
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ""
