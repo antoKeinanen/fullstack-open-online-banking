@@ -1,0 +1,17 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: istio-pod-scraper
+  namespace: monitoring
+  labels:
+    scrapeMetrics: enabled
+spec:
+  namespaceSelector:
+    matchNames:
+      - istio-system
+  selector:
+    matchLabels:
+      app: istiod
+  podMetricsEndpoints:
+    - port: http-monitoring
+      interval: 30s
