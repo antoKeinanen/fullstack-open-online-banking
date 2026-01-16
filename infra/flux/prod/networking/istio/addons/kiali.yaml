@@ -129,7 +129,7 @@ data:
         external_url: "https://victoriametrics.fso-banking.antok.dev/"
       grafana:
         enabled: true
-        internal_url: "http://grafana.monitoring.svc:3000" 
+        internal_url: "http://grafana.monitoring.svc:80" 
         external_url: "https://grafana.fso-banking.antok.dev"
       tracing:
         enabled: false
