@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  labels:
+    app: payment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: payment-service:latest
+          ports:
+            - name: grpc
+              containerPort: 50053
+            - name: health
+              containerPort: 8081
+          env:
+            - name: PAYMENT_SERVICE_PORT
+              value: "50053"
+            - name: PAYMENT_SERVICE_HEALTH_PORT
+              value: "8081"
+            - name: PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL
+              value: "tigerbeetle-service:50051"
+            - name: PAYMENT_SERVICE_DATABASE_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secrets
+                  key: database-dsn
+            - name: PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "otel-collector:4317"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          # Startup probe - allows up to 150s for initial startup
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          # Liveness probe - restarts container if it becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: health
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness probe - removes from service if dependencies are unhealthy
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: health
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - name: grpc
+      port: 50053
+      targetPort: grpc
+    - name: health
+      port: 8081
+      targetPort: health

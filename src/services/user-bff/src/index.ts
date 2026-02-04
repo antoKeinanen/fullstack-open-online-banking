@@ -9,6 +9,7 @@ import { logger } from "hono/logger";
 
 import { env } from "./env";
 import { authRouter } from "./routes/auth";
+import { healthRouter, setReady } from "./routes/health";
 import { paymentRouter } from "./routes/payments";
 import { stripeRouter } from "./routes/stripe";
 import { userRouter } from "./routes/user";
@@ -51,6 +52,11 @@ app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/payment", paymentRouter);
 app.route("/stripe", stripeRouter);
+app.route("/health", healthRouter);
+
+// Mark service as ready after all routes are registered
+setReady(true);
+console.log(`User BFF ready on port ${env.USER_BFF_PORT}`);
 
 if (process.env.NODE_ENV !== "production")
   app.get("/openapi", openAPIRouteHandler(app, {}));

@@ -6,9 +6,14 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
 	pb "protobufs/gen/go/stripe-service"
 	tbPb "protobufs/gen/go/tigerbeetle-service"
 
+	"stripe-service/src/health"
 	"stripe-service/src/lib"
 
 	"github.com/jmoiron/sqlx"
@@ -113,7 +118,28 @@ func main() {
 	defer server.db.Close()
 	defer server.tigerbeetleServiceConnection.Close()
 
+	// Setup health server
+	healthServer := health.NewServer(lib.ServiceName)
+	healthServer.Register(health.NewPostgresChecker(server.db))
+	healthServer.Register(health.NewGrpcChecker(server.tigerbeetleServiceConnection, "tigerbeetle-service"))
+	httpServer := healthServer.StartHTTPServer(config.StripeServiceHealthPort)
+	defer httpServer.Shutdown(context.Background())
+
+	// Mark as ready after all connections are established
+	healthServer.SetReady(true)
+
 	pb.RegisterStripeServiceServer(grpcServer, server)
-	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.StripeServicePort)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", config.StripeServicePort, "healthPort", config.StripeServiceHealthPort)
+
+	// Handle graceful shutdown
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		<-sigChan
+		slog.Info("Shutting down gracefully...")
+		healthServer.SetReady(false)
+		grpcServer.GracefulStop()
+	}()
+
 	grpcServer.Serve(lis)
 }

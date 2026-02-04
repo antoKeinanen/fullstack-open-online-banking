@@ -2,19 +2,24 @@ services:
   cloudflared-tunnel:
     image: cloudflare/cloudflared
     container_name: fso-banking-cloudflared-tunnel
-    command: tunnel --loglevel warn run 
+    command: tunnel --loglevel warn run
     networks:
       - fso-banking
     env_file:
       - .env.staging
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      - ingress-router
 
   ingress-router:
     image: ingress-router
     container_name: fso-banking-ingress-router
     networks:
       - fso-banking
+    depends_on:
+      - user-bff
+      - user-client
 
   user-client:
     image: user-client
@@ -34,13 +39,21 @@ services:
     environment:
       - TIGERBEETLE_ADDRESS=${LOCAL_IP}:3001
       - TIGERBEETLE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
+      - TIGERBEETLE_SERVICE_HEALTH_PORT=8081
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   user-service:
     image: user-service
     container_name: fso-banking-user-service
     restart: on-failure
     depends_on:
-      - tigerbeetle-service
+      tigerbeetle-service:
+        condition: service_healthy
     networks:
       - fso-banking
     env_file:
@@ -50,13 +63,21 @@ services:
       - USER_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
       - USER_SERVICE_JWT_SECRET=${USER_SERVICE_JWT_SECRET}
       - USER_SERVICE_DATABASE_DSN=${USER_SERVICE_DATABASE_DSN}
+      - USER_SERVICE_HEALTH_PORT=8081
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   payment-service:
     image: payment-service
     container_name: fso-banking-payment-service
     restart: on-failure
     depends_on:
-      - tigerbeetle-service
+      tigerbeetle-service:
+        condition: service_healthy
     networks:
       - fso-banking
     env_file:
@@ -65,13 +86,21 @@ services:
       - PAYMENT_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
       - PAYMENT_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
       - PAYMENT_SERVICE_DATABASE_DSN=${PAYMENT_SERVICE_DATABASE_DSN}
+      - PAYMENT_SERVICE_HEALTH_PORT=8081
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   stripe-service:
     image: stripe-service
     container_name: fso-banking-stripe-service
     restart: on-failure
     depends_on:
-      - tigerbeetle-service
+      tigerbeetle-service:
+        condition: service_healthy
     networks:
       - fso-banking
     env_file:
@@ -80,15 +109,25 @@ services:
       - STRIPE_SERVICE_TIGERBEETLE_SERVICE_URL=fso-banking-tigerbeetle-service:50051
       - STRIPE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT=${LOCAL_IP}:4317
       - STRIPE_SERVICE_DATABASE_DSN=${STRIPE_SERVICE_DATABASE_DSN}
+      - STRIPE_SERVICE_HEALTH_PORT=8081
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   user-bff:
     image: user-bff
     container_name: fso-banking-user-bff
     restart: on-failure
     depends_on:
-      - user-service
-      - payment-service
-      - stripe-service
+      user-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      stripe-service:
+        condition: service_healthy
     networks:
       - fso-banking
     env_file:
@@ -103,6 +142,12 @@ services:
       - USER_BFF_REDIS_CONNECTION_STRING=${USER_BFF_REDIS_CONNECTION_STRING}
       - USER_BFF_STRIPE_SECRET_KEY=${USER_BFF_STRIPE_SECRET_KEY}
       - USER_BFF_STRIPE_WEBHOOK_SECRET=${USER_BFF_STRIPE_WEBHOOK_SECRET}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/api/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   fso-banking:

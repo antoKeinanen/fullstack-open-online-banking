@@ -16,6 +16,7 @@ const (
 
 type Configuration struct {
 	UserServicePort          string
+	UserServiceHealthPort    string
 	TigerbeetleServiceUrl    string
 	UserServiceDatabaseDsn   string
 	UserServiceJWTSecret     string
@@ -31,9 +32,18 @@ func GetEnv(envName string) string {
 	return variable
 }
 
+func GetEnvOrDefault(envName string, defaultValue string) string {
+	variable := os.Getenv(envName)
+	if len(variable) == 0 {
+		return defaultValue
+	}
+	return variable
+}
+
 func ParseConfiguration() *Configuration {
 	return &Configuration{
 		UserServicePort:          GetEnv("USER_SERVICE_PORT"),
+		UserServiceHealthPort:    GetEnvOrDefault("USER_SERVICE_HEALTH_PORT", "8081"),
 		TigerbeetleServiceUrl:    GetEnv("USER_SERVICE_TIGERBEETLE_SERVICE_URL"),
 		UserServiceDatabaseDsn:   GetEnv("USER_SERVICE_DATABASE_DSN"),
 		UserServiceJWTSecret:     GetEnv("USER_SERVICE_JWT_SECRET"),

@@ -6,8 +6,12 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	pb "protobufs/gen/go/tigerbeetle-service"
+	"tigerbeetle-service/src/health"
 	"tigerbeetle-service/src/lib"
 
 	"google.golang.org/grpc"
@@ -94,7 +98,27 @@ func main() {
 	server := newServer(configuration)
 	defer server.tbClient.Close()
 
+	// Setup health server
+	healthServer := health.NewServer(lib.ServiceName)
+	healthServer.Register(health.NewTigerbeetleChecker(server.tbClient))
+	httpServer := healthServer.StartHTTPServer(configuration.TigerbeetleServiceHealthPort)
+	defer httpServer.Shutdown(context.Background())
+
+	// Mark as ready after all connections are established
+	healthServer.SetReady(true)
+
 	pb.RegisterTigerbeetleServiceServer(grpcServer, server)
-	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", configuration.TigerbeetleServicePort)
+	slog.Info("Service ready to accept connections", "service", lib.ServiceName, "port", configuration.TigerbeetleServicePort, "healthPort", configuration.TigerbeetleServiceHealthPort)
+
+	// Handle graceful shutdown
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		<-sigChan
+		slog.Info("Shutting down gracefully...")
+		healthServer.SetReady(false)
+		grpcServer.GracefulStop()
+	}()
+
 	grpcServer.Serve(lis)
 }

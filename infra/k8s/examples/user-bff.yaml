@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-bff
+  labels:
+    app: user-bff
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-bff
+  template:
+    metadata:
+      labels:
+        app: user-bff
+    spec:
+      containers:
+        - name: user-bff
+          image: user-bff:latest
+          ports:
+            - name: http
+              containerPort: 3002
+          env:
+            - name: USER_BFF_PORT
+              value: "3002"
+            - name: NODE_ENV
+              value: "production"
+            - name: USER_BFF_USER_SERVICE_URL
+              value: "http://user-service:50052"
+            - name: USER_BFF_PAYMENT_SERVICE_URL
+              value: "http://payment-service:50053"
+            - name: USER_BFF_STRIPE_SERVICE_URL
+              value: "http://stripe-service:50054"
+            - name: USER_BFF_OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: USER_BFF_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: user-bff-config
+                  key: base-url
+            - name: USER_BFF_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-bff-secrets
+                  key: jwt-secret
+            - name: USER_BFF_REDIS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: user-bff-secrets
+                  key: redis-connection-string
+            - name: USER_BFF_STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: user-bff-secrets
+                  key: stripe-secret-key
+            - name: USER_BFF_STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-bff-secrets
+                  key: stripe-webhook-secret
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Startup probe - allows up to 150s for initial startup
+          # User BFF uses the same HTTP port for health checks
+          startupProbe:
+            httpGet:
+              path: /api/health/startup
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          # Liveness probe - restarts container if it becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /api/health/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness probe - removes from service if dependencies are unhealthy
+          readinessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-bff
+spec:
+  selector:
+    app: user-bff
+  ports:
+    - name: http
+      port: 3002
+      targetPort: http

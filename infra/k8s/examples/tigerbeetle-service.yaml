@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tigerbeetle-service
+  labels:
+    app: tigerbeetle-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tigerbeetle-service
+  template:
+    metadata:
+      labels:
+        app: tigerbeetle-service
+    spec:
+      containers:
+        - name: tigerbeetle-service
+          image: tigerbeetle-service:latest
+          ports:
+            - name: grpc
+              containerPort: 50051
+            - name: health
+              containerPort: 8081
+          env:
+            - name: TIGERBEETLE_SERVICE_PORT
+              value: "50051"
+            - name: TIGERBEETLE_SERVICE_HEALTH_PORT
+              value: "8081"
+            - name: TIGERBEETLE_ADDRESS
+              value: "tigerbeetle:3001"
+            - name: TIGERBEETLE_SERVICE_OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "otel-collector:4317"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          # Startup probe - allows up to 150s for initial startup
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          # Liveness probe - restarts container if it becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: health
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness probe - removes from service if dependencies are unhealthy
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: health
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            # Required for TigerBeetle client
+            seccompProfile:
+              type: Unconfined
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tigerbeetle-service
+spec:
+  selector:
+    app: tigerbeetle-service
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: grpc
+    - name: health
+      port: 8081
+      targetPort: health

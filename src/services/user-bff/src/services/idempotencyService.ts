@@ -12,7 +12,7 @@ const TransactionSchema = z.object({
 type Transaction = z.infer<typeof TransactionSchema>;
 
 console.log("Connecting to redis...");
-const redisClient = new RedisClient(env.USER_BFF_REDIS_CONNECTION_STRING);
+export const redisClient = new RedisClient(env.USER_BFF_REDIS_CONNECTION_STRING);
 await redisClient.connect();
 console.log("Connected to redis");
 
