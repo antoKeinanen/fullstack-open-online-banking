@@ -25,7 +25,7 @@ services:
     volumes:
       - ./docker-data/redis:/data
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.68.0
     ports:
       - "16686:16686"
       - "4317:4317"
